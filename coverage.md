@@ -3,29 +3,29 @@
 
 |||
 |:---|:---|
-| Generated on: | 10/25/2026 - 07:10:23 |
+| Generated on: | 10/25/2026 - 13:45:04 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
-| Classes: | 1561 |
-| Files: | 1100 |
-| **Line coverage:** | 87.2% (41837 of 47974) |
-| Covered lines: | 41837 |
-| Uncovered lines: | 6137 |
-| Coverable lines: | 47974 |
-| Total lines: | 70331 |
-| **Branch coverage:** | 79.6% (15730 of 19744) |
-| Covered branches: | 15730 |
-| Total branches: | 19744 |
+| Classes: | 1572 |
+| Files: | 1111 |
+| **Line coverage:** | 87.5% (42329 of 48321) |
+| Covered lines: | 42329 |
+| Uncovered lines: | 5992 |
+| Coverable lines: | 48321 |
+| Total lines: | 70934 |
+| **Branch coverage:** | 80% (15912 of 19881) |
+| Covered branches: | 15912 |
+| Total branches: | 19881 |
 | **Method coverage:** | [Feature is only available for sponsors](https://reportgenerator.io/pro) |
 
 </details>
 
 ## Coverage
-<details><summary>API - 91.8%</summary>
+<details><summary>API - 92.8%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**API**|**91.8%**|**81.8%**|
+|**API**|**92.8%**|**82.6%**|
 |API.AniList.AniListAnswerException|100%||
 |API.AniList.AniListClient|91.6%|77.7%|
 |API.AniList.AniListClient<TData>|91.6%|77.7%|
@@ -71,16 +71,16 @@
 |API.Anime.Types.AnimeListsTypes.TmdbIds|100%||
 |API.ApiModule|100%||
 |API.Arr.ArrAddition|100%||
-|API.Arr.ArrApi|93%|80.4%|
+|API.Arr.ArrApi|93.1%|80.4%|
 |API.Arr.ArrApi.ArrAnswer|100%||
-|API.Arr.ArrApi<T>|93%|80.4%|
+|API.Arr.ArrApi<T>|93.1%|80.4%|
 |API.Arr.ArrApis|100%||
 |API.Arr.ArrConnection|100%||
 |API.Arr.ArrConnectionTester|100%|75%|
 |API.Arr.ArrFound|100%|100%|
 |API.Arr.ArrModule|100%||
 |API.Arr.ArrSearch|100%|94.4%|
-|API.Arr.ArrSession|100%|96.4%|
+|API.Arr.ArrSession|100%|100%|
 |API.Arr.ArrSink|100%|97.2%|
 |API.Arr.ArrSink.Held|100%||
 |API.Arr.ArrSink.Known|100%|100%|
@@ -162,7 +162,7 @@
 |API.Mal.MalClient|100%||
 |API.Mal.MalClientIdCheck|100%||
 |API.Mal.MalEnricher|94.2%|62.5%|
-|API.Mal.MalFeedService|96.9%|88.6%|
+|API.Mal.MalFeedService|96.9%|90.9%|
 |API.Mal.MalModule|100%|100%|
 |API.Mal.MalPages|100%|97.2%|
 |API.Mal.Types.MalTypes.AlternativeTitles|100%||
@@ -173,7 +173,7 @@
 |API.Mal.Types.MalTypes.Paging|100%||
 |API.Mal.Types.MalTypes.Picture|100%||
 |API.Mdblist.MdblistAnswerCheck|100%|94.4%|
-|API.Mdblist.MdblistBudget|100%|96.9%|
+|API.Mdblist.MdblistBudget|100%|96.7%|
 |API.Mdblist.MdblistBudget.Allowance|100%|100%|
 |API.Mdblist.MdblistBudget.Reading|100%|100%|
 |API.Mdblist.MdblistBudgetHandler|100%|100%|
@@ -218,15 +218,15 @@
 |API.Observability.InstrumentationModule|100%|100%|
 |API.Pictures.PictureGrids|100%|90%|
 |API.Pictures.PicturesModule|100%||
-|API.Plex|86.8%|70.3%|
+|API.Plex|94.5%|78.8%|
 |API.Plex.PlexApi|97.8%|82.6%|
 |API.Plex.PlexArtwork|100%|100%|
 |API.Plex.PlexClient|100%|100%|
 |API.Plex.PlexIdConverter|96.5%|75%|
 |API.Plex.PlexModule|100%|75%|
-|API.Plex.PlexOAuthProvider|46%|7.6%|
+|API.Plex.PlexOAuthProvider|91.1%|67.6%|
 |API.Plex.PlexSink|86.1%|80.5%|
-|API.Plex.PlexUrls|97.6%||
+|API.Plex.PlexUrls|100%||
 |API.Plex.Types.PlexTypes.Auth.Root|100%||
 |API.Plex.Types.PlexTypes.ById.Genre|100%||
 |API.Plex.Types.PlexTypes.ById.Guid|100%||
@@ -241,7 +241,7 @@
 |API.Plex.Types.PlexTypes.Search.NestedSearchResult|100%||
 |API.Plex.Types.PlexTypes.Search.Root|100%||
 |API.Plex.Types.PlexTypes.Search.SearchResult|100%||
-|API.Plex.Types.PlexTypes.User.Root|0%||
+|API.Plex.Types.PlexTypes.User.Root|100%||
 |API.Plex.Types.PlexTypes.User.Subscription|0%||
 |API.Plex.Types.PlexTypes.Watchlist.MediaContainer|100%||
 |API.Plex.Types.PlexTypes.Watchlist.Metadata|100%||
@@ -313,6 +313,7 @@
 |Contracts.Auth.AccountLinkPreview|100%||
 |Contracts.Auth.ExternalLogin|100%||
 |Contracts.Auth.OAuthTokenGrant|100%||
+|Contracts.Auth.PendingAdmin|100%||
 |Contracts.Auth.StoredCredential|100%||
 |Contracts.Datasets.AnimeIdMapping|100%||
 |Contracts.Datasets.DatasetCheck|100%||
@@ -402,7 +403,7 @@
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Core**|**97%**|**88.2%**|
+|**Core**|**97%**|**88.1%**|
 |Core.Announcing.Announcer|100%||
 |Core.Announcing.AnnouncingModule|100%||
 |Core.Announcing.EventPublisher|100%|100%|
@@ -414,10 +415,11 @@
 |Core.Auth.CredentialService|100%|100%|
 |Core.Auth.LocalAccountService|95%|100%|
 |Core.Auth.Passwords|100%|100%|
+|Core.Auth.PendingLogin|100%||
 |Core.Auth.SecretCache<TProvider, TSecret>|100%|88.8%|
 |Core.Auth.SecretCache<TProvider, TSecret>|100%|100%|
 |Core.Auth.SignInCredential|100%||
-|Core.Auth.SignInService|98.4%|92.8%|
+|Core.Auth.SignInService|98.4%|90%|
 |Core.Auth.StoredApiKey|100%||
 |Core.Blocklist.BlocklistModule|100%||
 |Core.Blocklist.BlocklistService|100%|100%|
@@ -471,15 +473,15 @@
 |Core.Identity.IdentityModule|100%||
 |Core.Identity.SessionValidator|100%|100%|
 |Core.Identity.SignedInUser|66.6%||
-|Core.Identity.UserManagementService|96.9%|96.6%|
+|Core.Identity.UserManagementService|96.9%|96.4%|
 |Core.Identity.UserScope|100%||
 |Core.Identity.UserScope.Restore|100%||
 |Core.Jobs.DetailsFillJobHandler|100%||
 |Core.Jobs.FeedRunJobHandler|100%|100%|
 |Core.Jobs.JobAlarm|90.2%|83.3%|
 |Core.Jobs.JobQueue|98.4%|88.8%|
-|Core.Jobs.JobRunner|76.1%|83.3%|
-|Core.Jobs.JobRunner<TRequest>|76.1%|83.3%|
+|Core.Jobs.JobRunner|79.5%|83.3%|
+|Core.Jobs.JobRunner<TRequest>|79.5%|83.3%|
 |Core.Jobs.JobRunnerStatus|100%||
 |Core.Jobs.JobRunnerStatus.Session|100%||
 |Core.Jobs.JobSignal|100%||
@@ -494,7 +496,7 @@
 |Core.Media.Confirmation|100%||
 |Core.Media.ConfirmationRequest|100%||
 |Core.Media.ConflictReview|98.4%|66.6%|
-|Core.Media.DetailsFetcher|99.6%|93.4%|
+|Core.Media.DetailsFetcher|99.6%|93.3%|
 |Core.Media.DetailsFetcher.Enrichment|100%||
 |Core.Media.DetailsFill|100%|100%|
 |Core.Media.DetailsRun|100%||
@@ -542,8 +544,8 @@
 |Core.Processing.QueryProcessor.RuleChecks<T>|100%|100%|
 |Core.Processing.QueryProcessor.SlotLine<T>|100%||
 |Core.Processing.QueryProcessor.SlotLine<T>|100%|100%|
-|Core.Processing.QueryProcessor<T>|100%|96.8%|
 |Core.Processing.QueryProcessor<T>|100%|92.3%|
+|Core.Processing.QueryProcessor<T>|100%|96.8%|
 |Core.Processing.ShuffleRank|100%||
 |Core.Providers.ProviderRateLimitReporter|100%|100%|
 |Core.Providers.ProvidersModule|100%||
@@ -553,7 +555,7 @@
 |Core.Settings.ArrSinkConfigService|100%|100%|
 |Core.Settings.ProviderConfigService|100%||
 |Core.Settings.SettingsModule|100%||
-|Core.Setup.OnboardingService|100%|91.6%|
+|Core.Setup.OnboardingService|100%|92.8%|
 |Core.Setup.SetupCodeAnnouncer|60%||
 |Core.Setup.SetupGate|100%|100%|
 |Core.Setup.SetupGate.Lease|100%||
@@ -561,7 +563,7 @@
 |Core.TickerFunctions.DatasetTicker|0%||
 |Core.TickerFunctions.FeedRunTicker|0%||
 |Core.TickerFunctions.HousekeepingTicker|0%||
-|Core.TickerQInstanceFactoryExtensions|74.2%|100%|
+|Core.TickerQInstanceFactoryExtensions|54.2%|100%|
 |Core.Usage.FeedRunUsage|100%|100%|
 |Core.Usage.FeedRunUsage.Running|100%|100%|
 |Core.Usage.Medians|100%|100%|
@@ -656,10 +658,10 @@
 |DB.Data.Identity.IdentityDataModule|100%|100%|
 |DB.Data.Identity.IdentityExtensions|91.3%|83.3%|
 |DB.Data.Identity.IdentityExtensions<T>|91.3%|83.3%|
-|DB.Data.Identity.LocalAccountRepository|100%|94%|
+|DB.Data.Identity.LocalAccountRepository|100%|96%|
 |DB.Data.Identity.Members|100%||
-|DB.Data.Identity.UserRepository|99.3%|96.4%|
-|DB.Data.Identity.UserRepository<T>|99.3%|96.4%|
+|DB.Data.Identity.UserRepository|99.4%|96.6%|
+|DB.Data.Identity.UserRepository<T>|99.4%|96.6%|
 |DB.Data.Jobs.JobModule|100%||
 |DB.Data.Jobs.JobQueueView|100%||
 |DB.Data.Jobs.JobRepository|92.1%|83.3%|
@@ -694,7 +696,7 @@
 |DB.Data.Notifications.NotificationDataModule|100%||
 |DB.Data.Notifications.NotificationDeliveryOutcomeRepository|100%|81.8%|
 |DB.Data.Notifications.NotificationModelConfiguration|100%|100%|
-|DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|83.3%|
+|DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|66.6%|
 |DB.Data.Notifications.NotificationTargetRepository|96.4%|81.2%|
 |DB.Data.Notifications.NotificationTargetRow|100%||
 |DB.Data.QueryableResultExtensions|100%||
@@ -899,6 +901,7 @@
 |Domain.Wantlist.Arr.ArrApps|100%|75%|
 |Domain.Wantlist.Arr.ArrAppsUnreachableException|100%||
 |Domain.Wantlist.Arr.ArrInstanceConfig|100%|85.7%|
+|Domain.Wantlist.Arr.ArrKeyRefusedException|100%||
 |Domain.Wantlist.Arr.ArrSearchTerm|100%||
 |Domain.Wantlist.Arr.ArrSinkConfig|100%|85.7%|
 |Domain.Wantlist.Arr.ArrTagFeed|100%||
@@ -959,7 +962,7 @@
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Observability**|**77.7%**|**70.4%**|
+|**Observability**|**77.7%**|**70.7%**|
 |Observability.Diagnostics.DiagnosticsLogEntry|100%||
 |Observability.Diagnostics.DiagnosticsModule|0%||
 |Observability.Diagnostics.DiagnosticsSpanEntry|100%||
@@ -990,7 +993,7 @@
 |Observability.Tracing.TracingProxy<T, TItem>|79.5%|100%|
 |Observability.Tracing.TracingProxy<T, TResult>|79.5%|100%|
 |Observability.Tracing.TracingProxy<T>|79.5%|100%|
-|Observability.Tracing.TracingProxy<T>|81.3%|78.5%|
+|Observability.Tracing.TracingProxy<T>|83.7%|85.7%|
 |Observability.Tracing.TracingRegistration|100%|100%|
 |Observability.Tracing.TracingRegistration<TInterface, TImplementation>|100%|100%|
 |Observability.Tracing.TracingRegistration<TInterface>|100%|100%|
@@ -1023,8 +1026,8 @@
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Shared**|**86.4%**|**78.1%**|
-|Shared|85.5%|78.2%|
+|**Shared**|**86.4%**|**78.4%**|
+|Shared|85.5%|78.5%|
 |Shared.AsyncEnumerableOptionalExtensions<T>|100%|100%|
 |Shared.AsyncEnumerableResultExtensions<T, TCompanion>|100%|100%|
 |Shared.AsyncEnumerableResultExtensions<T>|100%|100%|
@@ -1045,9 +1048,9 @@
 |Shared.Extensions.TypeExtensions|0%|0%|
 |Shared.Optional|100%|100%|
 |Shared.Optional<T>|100%|100%|
-|Shared.OptionalExtensions|71%|80.6%|
-|Shared.OptionalExtensions<T, TResult>|71%|80.6%|
-|Shared.OptionalExtensions<T>|71%|80.6%|
+|Shared.OptionalExtensions|71%|80.3%|
+|Shared.OptionalExtensions<T, TResult>|71%|80.3%|
+|Shared.OptionalExtensions<T>|71%|80.3%|
 |Shared.OptionalJsonConverterFactory|100%|100%|
 |Shared.OptionalJsonConverterFactory.OptionalJsonConverter<T>|100%||
 |Shared.OptionalJsonConverterFactory.OptionalJsonConverter<T>|100%|100%|
@@ -1086,9 +1089,9 @@
 |Shared.Options.WikidataOptions|66.6%||
 |Shared.Result|100%|100%|
 |Shared.Result<T>|100%|100%|
-|Shared.ResultExtensions|84%|74.1%|
-|Shared.ResultExtensions<T, TResult>|84%|74.1%|
-|Shared.ResultExtensions<T>|84%|74.1%|
+|Shared.ResultExtensions|84.7%|75.8%|
+|Shared.ResultExtensions<T, TResult>|84.7%|75.8%|
+|Shared.ResultExtensions<T>|84.7%|75.8%|
 |Shared.Secret|100%||
 |Shared.SharedModule|100%||
 |Shared.Some|100%||
@@ -1099,11 +1102,11 @@
 |Shared.SuppliedByAttribute<TSupplier>|100%||
 
 </details>
-<details><summary>UI - 79.7%</summary>
+<details><summary>UI - 80%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**UI**|**79.7%**|**75.3%**|
+|**UI**|**80%**|**75.6%**|
 |System.Text.RegularExpressions.Generated|76.7%|54.7%|
 |System.Text.RegularExpressions.Generated.RunnerFactory|||
 |System.Text.RegularExpressions.Generated.RunnerFactory.Runner|||
@@ -1231,13 +1234,17 @@
 |UI.Features.Home.Pages.Index|0%|0%|
 |UI.Features.Onboarding.Components.AdminForm|100%|100%|
 |UI.Features.Onboarding.Components.ChoiceCard<TValue>|100%|100%|
+|UI.Features.Onboarding.Components.PlexAdminCard|40%|50%|
+|UI.Features.Onboarding.Components.PlexConfirm|100%|93.3%|
+|UI.Features.Onboarding.Components.PlexSwitch|100%|100%|
+|UI.Features.Onboarding.Components.SetupContextLine|100%|100%|
 |UI.Features.Onboarding.Components.SetupRedirect|100%|80%|
 |UI.Features.Onboarding.Components.SetupSummary|100%|100%|
-|UI.Features.Onboarding.Components.SetupWizard|83.1%|83.3%|
+|UI.Features.Onboarding.Components.SetupWizard|86.2%|86.6%|
 |UI.Features.Onboarding.Components.SinkCards|100%|100%|
 |UI.Features.Onboarding.Components.SinkCards.SinkCard|100%||
 |UI.Features.Onboarding.Components.SummaryRow|100%||
-|UI.Features.Onboarding.Pages.Setup|93.3%|81.2%|
+|UI.Features.Onboarding.Pages.Setup|95%|86.3%|
 |UI.Features.Onboarding.Pages.Welcome|92.8%|83.3%|
 |UI.Features.Settings.Components.About.AboutModule|0%||
 |UI.Features.Settings.Components.About.AboutSection|0%|0%|
@@ -1290,7 +1297,7 @@
 |UI.Features.Settings.Components.Notifications.Webhook.WebhookClientFields|100%|100%|
 |UI.Features.Settings.Components.Notifications.Webhook.WebhookSecret|100%||
 |UI.Features.Settings.Components.Notifications.WebUi.WebUiClientEditor|0%||
-|UI.Features.Settings.Components.Providers.Accounts.AccountRow|40.7%|43.7%|
+|UI.Features.Settings.Components.Providers.Accounts.AccountRow|66.3%|84.6%|
 |UI.Features.Settings.Components.Providers.Accounts.AccountsAndKeys|78.5%|83.3%|
 |UI.Features.Settings.Components.Providers.Accounts.ApiKeyField|62.5%|87.5%|
 |UI.Features.Settings.Components.Providers.Accounts.ApiKeyRow|100%|100%|
@@ -1303,7 +1310,7 @@
 |UI.Features.Settings.Components.Providers.Accounts.SetupValue|100%|100%|
 |UI.Features.Settings.Components.Providers.ProviderRow|100%|100%|
 |UI.Features.Settings.Components.Providers.ProviderRows|100%||
-|UI.Features.Settings.Components.Providers.ProvidersSection|91.9%|84.1%|
+|UI.Features.Settings.Components.Providers.ProvidersSection|92.3%|84.8%|
 |UI.Features.Settings.Components.Providers.Roles.BehindTheScenes|100%|100%|
 |UI.Features.Settings.Components.Providers.Roles.BehindTheScenesStatus|100%||
 |UI.Features.Settings.Components.Providers.Roles.MapPicker|100%||
@@ -1318,12 +1325,12 @@
 |UI.Features.Settings.Components.Providers.Roles.ServicesMap|95.9%|89.2%|
 |UI.Features.Settings.Components.Providers.Roles.ServicesMapModel|99.1%|95.8%|
 |UI.Features.Settings.Components.Providers.Roles.TracePath|100%|100%|
-|UI.Features.Settings.Components.Providers.Sinks.ArrAppSection|98.1%|91%|
+|UI.Features.Settings.Components.Providers.Sinks.ArrAppSection|98.1%|91.6%|
 |UI.Features.Settings.Components.Providers.Sinks.ArrSettingsLink|100%|100%|
-|UI.Features.Settings.Components.Providers.Sinks.ArrSinkRow|97.1%|93.1%|
+|UI.Features.Settings.Components.Providers.Sinks.ArrSinkRow|98.7%|95.4%|
 |UI.Features.Settings.Components.Providers.Sinks.ArrSinkRow.AppStatus|100%||
 |UI.Features.Settings.Components.Providers.Sinks.ArrTagsSection|96.4%|78.5%|
-|UI.Features.Settings.Components.Providers.Sinks.SinkSwitchDialog|100%|95%|
+|UI.Features.Settings.Components.Providers.Sinks.SinkSwitchDialog|100%|95.8%|
 |UI.Features.Settings.Components.Ratings.PipelineTile|100%||
 |UI.Features.Settings.Components.Ratings.PipelineTrace|100%||
 |UI.Features.Settings.Components.Ratings.RatingPipelineCard|97.1%|95%|
@@ -1431,7 +1438,7 @@
 |UI.Features.Settings.Components.Users.SignUpsCard|46.1%|25%|
 |UI.Features.Settings.Components.Users.TypedName|100%|75%|
 |UI.Features.Settings.Components.Users.UsersSection|100%|91.6%|
-|UI.Features.Settings.Components.Users.YouCard|89.4%|87.5%|
+|UI.Features.Settings.Components.Users.YouCard|100%|100%|
 |UI.Features.Settings.Pages.Settings|91.1%|87.5%|
 |UI.Features.Settings.Pages.Settings.SettingsSection|100%||
 |UI.Features.Settings.SettingsModule|0%||
@@ -1517,6 +1524,7 @@
 |UI.Shared.Identity.CurrentUserAccessor.ClaimsUser|90%|65%|
 |UI.Shared.Identity.IdentityModule|0%|0%|
 |UI.Shared.Identity.SessionInvalidationListener|0%|0%|
+|UI.Shared.Identity.UserAvatar|71.4%|50%|
 |UI.Shared.Layout.AppFooter|100%|100%|
 |UI.Shared.Layout.AuthLayout|57.1%|50%|
 |UI.Shared.Layout.MainLayout|96.6%|100%|
@@ -1614,18 +1622,21 @@
 |UI.UiModule|0%||
 
 </details>
-<details><summary>Web - 56.1%</summary>
+<details><summary>Web - 61.8%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Web**|**56.1%**|**51.4%**|
+|**Web**|**61.8%**|**58%**|
 |JasperFx.Generated.DiscoveredEventModels|0%||
 |Program|0%|0%|
-|Web.Auth.AuthEndpoints|17.7%|1.9%|
+|Web.Auth.AdminSwapClaim|50%||
+|Web.Auth.AuthCookie|100%|100%|
+|Web.Auth.AuthEndpoints|44.4%|35.4%|
 |Web.Auth.AuthenticationModule|95.2%|100%|
-|Web.Auth.OAuthState|100%|83.3%|
+|Web.Auth.OAuthState|100%|75%|
+|Web.Auth.PendingAdminCookie|100%|100%|
 |Web.Auth.PublicOrigin|100%|100%|
-|Web.Auth.SetupClaim|0%|0%|
+|Web.Auth.SetupClaim|100%||
 |Web.Auth.SetupRedirect|100%||
 |Web.Health.ContainerHealthProbe|91.6%|83.3%|
 |Web.Health.HealthEndpoints|0%|0%|
