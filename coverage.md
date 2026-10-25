@@ -3,18 +3,18 @@
 
 |||
 |:---|:---|
-| Generated on: | 10/24/2026 - 22:22:51 |
+| Generated on: | 10/25/2026 - 07:10:23 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
 | Classes: | 1561 |
 | Files: | 1100 |
-| **Line coverage:** | 87.2% (41840 of 47974) |
-| Covered lines: | 41840 |
-| Uncovered lines: | 6134 |
+| **Line coverage:** | 87.2% (41837 of 47974) |
+| Covered lines: | 41837 |
+| Uncovered lines: | 6137 |
 | Coverable lines: | 47974 |
 | Total lines: | 70331 |
-| **Branch coverage:** | 79.6% (15734 of 19744) |
-| Covered branches: | 15734 |
+| **Branch coverage:** | 79.6% (15730 of 19744) |
+| Covered branches: | 15730 |
 | Total branches: | 19744 |
 | **Method coverage:** | [Feature is only available for sponsors](https://reportgenerator.io/pro) |
 
@@ -431,7 +431,7 @@
 |Core.Datasets.DatasetRequest|100%||
 |Core.Datasets.DatasetSchedule|80%|83.3%|
 |Core.Datasets.DatasetsModule|100%||
-|Core.Datasets.DatasetTicker|95.4%|100%|
+|Core.Datasets.DatasetTicker|90.9%|100%|
 |Core.DI.DiModule|100%||
 |Core.DI.KeyedServiceIndex<TKey, TService>|100%||
 |Core.DI.KeyedServiceSet<TKey, TService>|100%||
@@ -588,7 +588,7 @@
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**DB**|**96%**|**85.9%**|
+|**DB**|**96%**|**85.7%**|
 |DB.AnonymousCurrentUser|0%||
 |DB.Conversion.ConversionModule|100%||
 |DB.Conversion.Encryption.DataProtectionKeyRing|100%|100%|
@@ -656,10 +656,10 @@
 |DB.Data.Identity.IdentityDataModule|100%|100%|
 |DB.Data.Identity.IdentityExtensions|91.3%|83.3%|
 |DB.Data.Identity.IdentityExtensions<T>|91.3%|83.3%|
-|DB.Data.Identity.LocalAccountRepository|100%|96%|
+|DB.Data.Identity.LocalAccountRepository|100%|94%|
 |DB.Data.Identity.Members|100%||
-|DB.Data.Identity.UserRepository|99.3%|100%|
-|DB.Data.Identity.UserRepository<T>|99.3%|100%|
+|DB.Data.Identity.UserRepository|99.3%|96.4%|
+|DB.Data.Identity.UserRepository<T>|99.3%|96.4%|
 |DB.Data.Jobs.JobModule|100%||
 |DB.Data.Jobs.JobQueueView|100%||
 |DB.Data.Jobs.JobRepository|92.1%|83.3%|
@@ -955,11 +955,11 @@
 |Messaging.WolverineMessagePublisher<TMessage>|100%||
 
 </details>
-<details><summary>Observability - 77.8%</summary>
+<details><summary>Observability - 77.7%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Observability**|**77.8%**|**70.7%**|
+|**Observability**|**77.7%**|**70.4%**|
 |Observability.Diagnostics.DiagnosticsLogEntry|100%||
 |Observability.Diagnostics.DiagnosticsModule|0%||
 |Observability.Diagnostics.DiagnosticsSpanEntry|100%||
@@ -990,7 +990,7 @@
 |Observability.Tracing.TracingProxy<T, TItem>|79.5%|100%|
 |Observability.Tracing.TracingProxy<T, TResult>|79.5%|100%|
 |Observability.Tracing.TracingProxy<T>|79.5%|100%|
-|Observability.Tracing.TracingProxy<T>|86%|85.7%|
+|Observability.Tracing.TracingProxy<T>|81.3%|78.5%|
 |Observability.Tracing.TracingRegistration|100%|100%|
 |Observability.Tracing.TracingRegistration<TInterface, TImplementation>|100%|100%|
 |Observability.Tracing.TracingRegistration<TInterface>|100%|100%|
