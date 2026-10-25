@@ -171,7 +171,7 @@ public class LocalSignInTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task LinkAsync_OnAPlexInstall_SignsInAsThePlexAccount()
+	public async Task LinkAsync_OnAPlexInstall_ForAPlexAccountThatIsNotTheirs_RefusesAndStoresNothing()
 	{
 		var guest = await host.SeedLocalUser("guest", Password, UserRole.Member);
 		var config = host.Resolve<IProviderConfigService>();
@@ -180,7 +180,7 @@ public class LocalSignInTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var result = await Testee.LinkAsync(AuthProvider.Plex, "callback", guest);
 
-		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That(user.DisplayName).IsEqualTo("Someone on Plex"));
+		await Assert.That(result).IsError();
 		await Assert.That(await host.HasStoredCredential(AuthProvider.Plex, guest)).IsFalse();
 	}
 

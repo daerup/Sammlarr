@@ -1,5 +1,6 @@
 @using Contracts.Auth
 @using Contracts.Identity
+@using System.Web
 @using UI.Shared.Services.Branding
 @inject ICredentialService Credentials
 @inject MediaProviderBrandingService MediaProviderBrandingService
@@ -18,61 +19,59 @@
         }
     </Status>
     <ChildContent>
-        <BbField>
-            <BbFieldLabel>Access token</BbFieldLabel>
-            <BbFieldContent>
-                <SensitiveInput @bind-Value="Token" Compact="true" Placeholder="Paste an access token" Label="access token" Class="@(_state == CredentialState.Failed ? "border-destructive" : string.Empty)"/>
-                <BbFieldDescription>
-                    @if (_savedState == CredentialState.Saved)
-                    {
-                        @if (SignsIn)
-                        {
-                            <span>Signed in as <span class="font-medium text-foreground">@CurrentUser.DisplayName</span>. Paste a @Branding.NickName access token to replace it, or connect through @Branding.NickName.</span>
-                        }
-                        else
+        @if (SignsIn)
+        {
+            <div class="flex items-center gap-3" data-signed-in>
+                <UserAvatar Name="@CurrentUser.DisplayName" Url="@CurrentUser.AvatarUrl" Size="AvatarSize.Small"/>
+                <span class="flex min-w-0 flex-col">
+                    <span class="text-xs text-muted-foreground">Signed in as</span>
+                    <span class="truncate text-sm font-medium">@CurrentUser.DisplayName</span>
+                </span>
+            </div>
+            <p class="text-sm text-muted-foreground">
+                @(_savedState == CredentialState.Saved
+                    ? $"Sammlarr syncs your wantlist with the {Branding.NickName} account you signed in with."
+                    : $"Connect with {Branding.NickName} to sync your wantlist with the account you signed in with.")
+            </p>
+            <div class="flex items-center gap-3">
+                @ConnectButton
+                @if (_savedState == CredentialState.Saved)
+                {
+                    <div class="ml-auto">@DisconnectDialog</div>
+                }
+            </div>
+        }
+        else
+        {
+            <BbField>
+                <BbFieldLabel>Access token</BbFieldLabel>
+                <BbFieldContent>
+                    <SensitiveInput @bind-Value="Token" Compact="true" Placeholder="Paste an access token" Label="access token" Class="@(_state == CredentialState.Failed ? "border-destructive" : string.Empty)"/>
+                    <BbFieldDescription>
+                        @if (_savedState == CredentialState.Saved)
                         {
                             <span>Connected. Paste a @Branding.NickName access token to replace it, or connect through @Branding.NickName.</span>
                         }
-                    }
-                    else
-                    {
-                        <span>Paste a @Branding.NickName access token, or connect through @Branding.NickName.</span>
-                    }
-                </BbFieldDescription>
-            </BbFieldContent>
-        </BbField>
+                        else
+                        {
+                            <span>Paste a @Branding.NickName access token, or connect through @Branding.NickName.</span>
+                        }
+                    </BbFieldDescription>
+                </BbFieldContent>
+            </BbField>
 
-        <CredentialActions State="_state" HasChange="HasChange" OnTest="TestAsync" OnSave="SaveAsync" OnCancel="Cancel">
-            <ChildContent>
-                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="Connect">
-                    <LucideIcon Name="log-in" Size="14" Class="mr-2"/>
-                    <span>@(_savedState == CredentialState.Saved ? "Reconnect" : "Connect") with @Branding.NickName</span>
-                </BbButton>
-            </ChildContent>
-            <Remove>
-                <BbAlertDialog>
-                    <BbAlertDialogTrigger>
-                        <HoverButton Preset="HoverButtonPreset.Destructive" Size="ButtonSize.Small" Icon="unplug" Text="Disconnect"/>
-                    </BbAlertDialogTrigger>
-                    <BbAlertDialogContent>
-                        <BbAlertDialogHeader>
-                            <BbAlertDialogTitle>Disconnect @Branding.DisplayName?</BbAlertDialogTitle>
-                            <BbAlertDialogDescription>
-                                This removes the stored @Branding.NickName credential. You will need to reconnect to use @Branding.NickName again.
-                            </BbAlertDialogDescription>
-                        </BbAlertDialogHeader>
-                        <BbAlertDialogFooter>
-                            <BbAlertDialogCancel>
-                                <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
-                            </BbAlertDialogCancel>
-                            <BbAlertDialogAction>
-                                <HoverButton Preset="HoverButtonPreset.Destructive" Icon="unplug" Text="Disconnect" OnClick="DisconnectAsync"/>
-                            </BbAlertDialogAction>
-                        </BbAlertDialogFooter>
-                    </BbAlertDialogContent>
-                </BbAlertDialog>
-            </Remove>
-        </CredentialActions>
+            <CredentialActions State="_state" HasChange="HasChange" OnTest="TestAsync" OnSave="SaveAsync" OnCancel="Cancel">
+                <ChildContent>@ConnectButton</ChildContent>
+                <Remove>@DisconnectDialog</Remove>
+            </CredentialActions>
+        }
+        @if (_linkError is { } linkError)
+        {
+            <p class="flex items-start gap-2 text-sm text-destructive" role="alert" data-link-error>
+                <LucideIcon Name="circle-alert" Size="15" Class="mt-0.5 shrink-0"/>
+                <span>@linkError</span>
+            </p>
+        }
     </ChildContent>
 </ProviderRow>
 
@@ -89,6 +88,7 @@
 
     [Parameter] public string ReturnUrl { get; set; } = SettingsLinks.Providers;
 
+
     private BrandingInfo Branding => MediaProviderBrandingService.Brands(Provider.Service).Single();
 
     private Service Key => Provider.Service;
@@ -101,7 +101,38 @@
     private CredentialState _savedState = CredentialState.Idle;
     private Guid _clientId;
 
+    private const string LinkErrorKey = "linkError";
+
+    private string? _linkError;
+
     private bool HasChange => !string.IsNullOrWhiteSpace(_tokenInput) && _tokenInput != _savedToken;
+
+    private RenderFragment ConnectButton => @<BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="Connect">
+        <LucideIcon Name="log-in" Size="14" Class="mr-2"/>
+        <span>@(_savedState == CredentialState.Saved ? "Reconnect" : "Connect") with @Branding.NickName</span>
+    </BbButton>;
+
+    private RenderFragment DisconnectDialog => @<BbAlertDialog>
+        <BbAlertDialogTrigger>
+            <HoverButton Preset="HoverButtonPreset.Destructive" Size="ButtonSize.Small" Icon="unplug" Text="Disconnect"/>
+        </BbAlertDialogTrigger>
+        <BbAlertDialogContent>
+            <BbAlertDialogHeader>
+                <BbAlertDialogTitle>Disconnect @Branding.DisplayName?</BbAlertDialogTitle>
+                <BbAlertDialogDescription>
+                    This removes the stored @Branding.NickName credential. You will need to reconnect to use @Branding.NickName again.
+                </BbAlertDialogDescription>
+            </BbAlertDialogHeader>
+            <BbAlertDialogFooter>
+                <BbAlertDialogCancel>
+                    <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                </BbAlertDialogCancel>
+                <BbAlertDialogAction>
+                    <HoverButton Preset="HoverButtonPreset.Destructive" Icon="unplug" Text="Disconnect" OnClick="DisconnectAsync"/>
+                </BbAlertDialogAction>
+            </BbAlertDialogFooter>
+        </BbAlertDialogContent>
+    </BbAlertDialog>;
 
     private string Token
     {
@@ -135,6 +166,19 @@
             .Match(CredentialState.Saved, CredentialState.Idle);
         _state = _savedState;
         _loaded = true;
+        await ShowLinkErrorAsync();
+    }
+
+    private async Task ShowLinkErrorAsync()
+    {
+        _linkError = HttpUtility.ParseQueryString(NavigationManager.ToAbsoluteUri(NavigationManager.Uri).Query)[LinkErrorKey];
+        if (_linkError is null)
+        {
+            return;
+        }
+
+        await OpenChanged.InvokeAsync(true);
+        NavigationManager.NavigateTo(NavigationManager.GetUriWithQueryParameter(LinkErrorKey, (string?)null), replace: true);
     }
 
     private async Task TestAsync()

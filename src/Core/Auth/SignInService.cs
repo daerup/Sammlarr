@@ -60,15 +60,27 @@ internal sealed class SignInService(
 	public async Task<Result<User>> LinkAsync(AuthProvider provider, string callbackQuery, UserId signedIn, CancellationToken cancellationToken = default)
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
+		var login = await providers[provider].CompleteLoginAsync(callbackQuery, cancellationToken).ApplyError(error => LogFailed(provider, error));
 		if (config.AuthProvider == provider)
 		{
-			return await CompleteAsync(provider, callbackQuery, cancellationToken);
+			return await login.Map(found => ReconnectAsync(provider, found, signedIn, cancellationToken));
 		}
 
-		return await providers[provider]
-			.CompleteLoginAsync(callbackQuery, cancellationToken)
-			.ApplyError(error => LogFailed(provider, error))
-			.Map(login => StoreLinkAsync(provider, login, signedIn, cancellationToken));
+		return await login.Map(found => StoreLinkAsync(provider, found, signedIn, cancellationToken));
+	}
+
+	private async Task<Result<User>> ReconnectAsync(AuthProvider provider, ExternalLogin login, UserId signedIn, CancellationToken cancellationToken)
+	{
+		var user = await users.GetAsync(signedIn, cancellationToken);
+		var owner = await users.FindByLoginAsync(provider, login.ExternalUserId, cancellationToken);
+		var refused = Error.From(
+			$"{SignInName(provider)} returned {login.DisplayName} instead of {user.DisplayName}. Switch to {user.DisplayName} in {SignInName(provider)}, then reconnect."
+		);
+		return await owner
+			.When(found => found.Id == signedIn)
+			.ToResult(refused)
+			.ApplyError(_ => logger.LogWarning("Reconnect refused: {Provider} returned another account for user {UserId}", provider, signedIn))
+			.Map(found => CompleteSignInAsync(provider, login, found, isInitialAdmin: false, cancellationToken));
 	}
 
 	private async Task<Result<User>> StoreLinkAsync(AuthProvider provider, ExternalLogin login, UserId signedIn, CancellationToken cancellationToken)

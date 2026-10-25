@@ -69,15 +69,16 @@ internal static class AuthEndpoints
 				var query = context.Request.QueryString.Value ?? string.Empty;
 				return await SignedIn(context.User)
 					.Match(
-						user => signIn.LinkAsync(authProvider, query, user, cancellationToken),
-						() =>
-							setupCode.Match(
-								code => signIn.CompleteSetupAsync(authProvider, query, new Secret(code), cancellationToken),
-								() => signIn.CompleteAsync(authProvider, query, cancellationToken)
-							)
-					)
-					.Map(user => SignInAndRedirectAsync(context, user, returnUrl))
-					.GetValueOr(error => Results.Redirect(Failed(error, authProvider, setupCode, returnUrl)));
+						user => LinkAsync(context, signIn, authProvider, query, user, returnUrl),
+						async () =>
+							await setupCode
+								.Match(
+									code => signIn.CompleteSetupAsync(authProvider, query, new Secret(code), cancellationToken),
+									() => signIn.CompleteAsync(authProvider, query, cancellationToken)
+								)
+								.Map(user => SignInAndRedirectAsync(context, user, returnUrl))
+								.GetValueOr(error => Results.Redirect(Failed(error, authProvider, setupCode, returnUrl)))
+					);
 			}
 		);
 
@@ -139,6 +140,14 @@ internal static class AuthEndpoints
 			)
 			.RequireRateLimiting(RateLimitingModule.SignInForms);
 		endpoints.MapPost("/auth/logout", SignOutAsync);
+	}
+
+	private static async Task<IResult> LinkAsync(HttpContext context, ISignInService signIn, AuthProvider provider, string query, UserId user, string? returnUrl)
+	{
+		return await signIn
+			.LinkAsync(provider, query, user, context.RequestAborted)
+			.Map(linked => SignInAndRedirectAsync(context, linked, returnUrl))
+			.GetValueOr(error => Results.Redirect(QueryHelpers.AddQueryString(ReturnUrls.Target(returnUrl), "linkError", error.Reason)));
 	}
 
 	internal static async Task<IResult> SignOutAsync([FromForm] string returnUrl, ISignInCookie cookie)

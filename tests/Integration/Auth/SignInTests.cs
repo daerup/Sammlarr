@@ -152,4 +152,44 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That(await host.HasStoredCredential(AuthProvider.Plex, user.Id)).IsTrue());
 	}
+
+	[Test]
+	public async Task LinkAsync_OnAPlexInstall_ForTheSignedInPlexAccount_RefreshesItsToken()
+	{
+		var existing = await host.SeedExistingUser("plex-uuid", UserRole.Admin, "Daerup");
+		host.OAuthReturns("plex-uuid", "Daerup");
+
+		var result = await Testee.LinkAsync(AuthProvider.Plex, "callback", existing);
+
+		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That(user.Id).IsEqualTo(existing));
+		await Assert.That(await host.HasStoredCredential(AuthProvider.Plex, existing)).IsTrue();
+	}
+
+	[Test]
+	public async Task LinkAsync_OnAPlexInstall_ForAnotherPlexAccount_RefusesNamingBothAndAddsNobody()
+	{
+		var existing = await host.SeedExistingUser("plex-uuid", UserRole.Admin, "Daerup");
+		var before = await host.ScopedDbContext.Users.CountAsync();
+		host.OAuthReturns("plex-mia", "Mia");
+
+		var result = await Testee.LinkAsync(AuthProvider.Plex, "callback", existing);
+
+		await Assert
+			.That(result)
+			.IsError()
+			.And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("Plex returned Mia instead of Daerup. Switch to Daerup in Plex, then reconnect."));
+		await Assert.That(await host.ScopedDbContext.Users.CountAsync()).IsEqualTo(before);
+	}
+
+	[Test]
+	public async Task LinkAsync_OnAPlexInstall_ForAnotherUsersPlexAccount_Refuses()
+	{
+		var existing = await host.SeedExistingUser("plex-uuid", UserRole.Admin, "Daerup");
+		await host.SeedExistingUser("plex-lena", UserRole.Member, "Lena");
+		host.OAuthReturns("plex-lena", "Lena");
+
+		var result = await Testee.LinkAsync(AuthProvider.Plex, "callback", existing);
+
+		await Assert.That(result).IsError();
+	}
 }
