@@ -153,25 +153,19 @@ internal static partial class TmdbPages
 		return page.Values("discover_preset")
 			.FirstOrNone()
 			.Map(preset => $"Sammlarr cannot follow TMDB's {preset} preset, since the API has no list for it. Paste the discover link its filters give.")
-			.Or(() => Optional.When(!known, () => $"Sammlarr cannot follow TMDB's {page.Path} page. Paste a list, a movie or TV page, or a discover link."))
-			.Or(() =>
-				Optional.When(
-					page.Values("with_watch_providers").Count > 0 && page.Values("watch_region").Count == 0,
-					() => "TMDB counts streaming services within one country only, so a link with with_watch_providers needs its watch_region."
-				)
+			.Or(!known, () => $"Sammlarr cannot follow TMDB's {page.Path} page. Paste a list, a movie or TV page, or a discover link.")
+			.Or(
+				page.Values("with_watch_providers").Count > 0 && page.Values("watch_region").Count == 0,
+				() => "TMDB counts streaming services within one country only, so a link with with_watch_providers needs its watch_region."
 			)
-			.Or(() =>
-				Optional.When(
-					page.Values("with_watch_monetization_types").Count > 0 && page.Values("watch_region").Count == 0,
-					() => "TMDB counts how a title streams within one country only, so a link with with_watch_monetization_types needs its watch_region."
-				)
+			.Or(
+				page.Values("with_watch_monetization_types").Count > 0 && page.Values("watch_region").Count == 0,
+				() => "TMDB counts how a title streams within one country only, so a link with with_watch_monetization_types needs its watch_region."
 			)
-			.Or(() =>
-				Optional.When(
-					page.Query.Any(pair => pair.Key.StartsWith("certification", StringComparison.Ordinal) && pair.Key != "certification_country")
-						&& page.Values("certification_country").Count == 0,
-					() => "TMDB rates certifications per country, so a link with a certification needs its certification_country."
-				)
+			.Or(
+				page.Query.Any(pair => pair.Key.StartsWith("certification", StringComparison.Ordinal) && pair.Key != "certification_country")
+					&& page.Values("certification_country").Count == 0,
+				() => "TMDB rates certifications per country, so a link with a certification needs its certification_country."
 			);
 	}
 

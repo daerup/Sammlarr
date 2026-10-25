@@ -44,7 +44,6 @@ internal static class SelfHostedSetup
 		await page.Locator("#sink-Arr").ClickAsync();
 		await ArrSections.ConnectAsync(page, "Radarr", stack.Radarr.Url);
 		await ArrSections.ConnectAsync(page, "Sonarr", stack.Sonarr.Url);
-		await page.ButtonContaining("Switch the wantlist to Radarr + Sonarr").ClickAsync();
 		await Expect(page.Button("Next")).ToBeEnabledAsync(Wait.Settle);
 	}
 

@@ -1,0 +1,34 @@
+@using Contracts.Identity
+@inject ICurrentUser CurrentUser
+
+<div class="flex w-full flex-col gap-4">
+    @if (!string.IsNullOrWhiteSpace(Error))
+    {
+        <div class="alert-soft-destructive flex items-start gap-3 rounded-lg border px-4 py-3 text-left text-sm" role="alert" data-admin-error>
+            <LucideIcon Name="circle-alert" Size="18" Class="shrink-0 mt-0.5"/>
+            <span class="leading-relaxed">@Error</span>
+        </div>
+    }
+    <div class="flex flex-col gap-4 rounded-[10px] border bg-card px-5 py-[18px]" data-admin>
+        <div class="flex items-center gap-3.5">
+            <UserAvatar Name="@CurrentUser.DisplayName" Url="@CurrentUser.AvatarUrl" Size="AvatarSize.Large"/>
+            <span class="flex min-w-0 flex-col items-start gap-1">
+                <span class="text-base font-semibold [overflow-wrap:anywhere]" data-admin-name>@CurrentUser.DisplayName</span>
+                <span class="text-[13px] text-muted-foreground">Signs in with Plex</span>
+            </span>
+        </div>
+        <div class="flex flex-wrap gap-2.5">
+            <BbButton Variant="ButtonVariant.Outline" Class="gap-2" OnClick="SwapRequested" data-swap>
+                <LucideIcon Name="repeat" Size="15"/>
+                <span>Use a different Plex account</span>
+            </BbButton>
+        </div>
+    </div>
+    <SetupFinalNote/>
+</div>
+
+@code {
+    [Parameter] public string? Error { get; set; }
+
+    [Parameter] public EventCallback SwapRequested { get; set; }
+}

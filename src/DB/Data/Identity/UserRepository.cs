@@ -37,7 +37,7 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		var row = new UserRow
 		{
 			Id = user.Id.Value,
-			UserName = $"{provider}-{externalUserId}".ToLowerInvariant(),
+			UserName = UserNameOf(provider, externalUserId),
 			DisplayName = user.DisplayName,
 			TagName = user.TagName,
 			AvatarUrl = user.AvatarUrl,
@@ -48,6 +48,25 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 			{
 				(await users.CreateAsync(row)).Ensure();
 				(await users.AddToRoleAsync(row, user.Role.ToString())).Ensure();
+				(await users.AddLoginAsync(row, new UserLoginInfo(provider.ToString(), externalUserId, provider.ToString()))).Ensure();
+			},
+			cancellationToken
+		);
+	}
+
+	public async Task ReplaceLoginAsync(UserId id, AuthProvider provider, string externalUserId, CancellationToken cancellationToken = default)
+	{
+		await using var scope = scopes.CreateAsyncScope();
+		await scope.InTransactionAsync(
+			async users =>
+			{
+				var row = await users.RequireAsync(id);
+				foreach (var login in (await users.GetLoginsAsync(row)).Where(login => login.LoginProvider == provider.ToString()))
+				{
+					(await users.RemoveLoginAsync(row, login.LoginProvider, login.ProviderKey)).Ensure();
+				}
+
+				(await users.SetUserNameAsync(row, UserNameOf(provider, externalUserId))).Ensure();
 				(await users.AddLoginAsync(row, new UserLoginInfo(provider.ToString(), externalUserId, provider.ToString()))).Ensure();
 			},
 			cancellationToken
@@ -186,6 +205,8 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 			.Select(owned => new { Owner = owned.Key, Count = owned.Count() })
 			.ToDictionaryAsync(owned => owned.Owner, owned => owned.Count, cancellationToken);
 	}
+
+	private static string UserNameOf(AuthProvider provider, string externalUserId) => $"{provider}-{externalUserId}".ToLowerInvariant();
 
 	private static Optional<PictureTone> Tone(double? hue, double? chroma)
 	{

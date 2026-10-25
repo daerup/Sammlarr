@@ -2,12 +2,15 @@ using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Notifications;
 using Contracts.Settings;
+using Contracts.Setup;
 using Core.Auth;
+using Core.Caching;
 using Core.Notifications;
 using Core.Setup;
 using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Time.Testing;
 using Shared.Options;
@@ -30,8 +33,13 @@ public class SignInServiceTests : IDisposable
 	private readonly Mock<IProviderConfigService> _config = IProviderConfigService.Mock();
 	private readonly Mock<ILogger<SignInService>> _logger = ILogger<SignInService>.Mock();
 	private readonly SetupGate _setup = new(new AccountsOptions());
+	private readonly MemoryCache _cache = new(new MemoryCacheOptions());
 
-	public void Dispose() => _setup.Dispose();
+	public void Dispose()
+	{
+		_setup.Dispose();
+		_cache.Dispose();
+	}
 
 	private SignInService Testee
 	{
@@ -46,7 +54,9 @@ public class SignInServiceTests : IDisposable
 				_config.Object,
 				new FakeTimeProvider(),
 				_setup,
+				ISetupStateRepository.Mock().Object,
 				new WebUiNotificationSeeder(INotificationTargetRepository.Mock().Object, INotificationSubscriptionRepository.Mock().Object),
+				new TypedMemoryCache<Guid, PendingLogin>(_cache),
 				_logger.Object
 			);
 		}
@@ -80,13 +90,15 @@ public class SignInServiceTests : IDisposable
 	}
 
 	[Test]
-	public async Task CompleteSetupAsync_WithAWrongSetupCode_RefusesTheFirstSignIn()
+	public async Task ConfirmAdminAsync_WithAWrongSetupCode_RefusesTheFirstSignIn()
 	{
 		_config.GetAsync(Any()).Returns(Config(RegistrationMode.Open));
 		_plex.CompleteLoginAsync(Any(), Any()).Returns(Success.Of(Login));
+		_plex.AsAdmin(Any()).Returns(Success.Of(Login));
 		_users.FindByLoginAsync(Any<AuthProvider>(), Any(), Any()).Returns(new None());
+		var pending = await Testee.PendAdminAsync(AuthProvider.Plex, "callback");
 
-		var result = await Testee.CompleteSetupAsync(AuthProvider.Plex, "callback", new Secret("AAAA-AAAA"));
+		var result = await pending.Map(found => Testee.ConfirmAdminAsync(found.Id, new Secret("AAAA-AAAA")));
 
 		await Assert.That(result).IsError();
 		_users.CreateAsync(Any<User>(), Any<AuthProvider>(), Any(), Any()).WasCalled(Times.Never);

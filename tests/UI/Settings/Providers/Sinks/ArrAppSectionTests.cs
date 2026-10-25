@@ -48,6 +48,25 @@ public class ArrAppSectionTests : BunitContext
 	}
 
 	[Test]
+	[Arguments(false, "Sonarr URL")]
+	[Arguments(true, "Show Sonarr API key")]
+	public async Task Section_WhenTheTestFailed_SaysWhyUnderTheFieldAtFault(bool keyRefused, string field)
+	{
+		var cut = Render<ArrAppSection>(parameters =>
+			parameters
+				.Add(section => section.App, ArrApp.Sonarr)
+				.Add(section => section.Instance, Stored)
+				.Add(section => section.State, ArrConnectionState.Failed)
+				.Add(section => section.Error, "It failed.")
+				.Add(section => section.KeyRefused, keyRefused)
+		);
+
+		var alert = cut.Find("[role=alert]");
+
+		await Assert.That(alert.ParentElement!.QuerySelector($"[aria-label='{field}']")).IsNotNull();
+	}
+
+	[Test]
 	public async Task Section_BeforeATest_OffersNoProfilesOrFolders()
 	{
 		var cut = RenderSection(Stored, ArrConnectionState.Untested);

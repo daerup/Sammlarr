@@ -24,16 +24,27 @@ public class SinkSwitchDialogTests : BunitContext
 	[Arguments(42, 0, "42 titles are ready.")]
 	public async Task Dialog_ForASwitch_SaysHowManyTitlesAreReadyAndHowManyStillNeedALookup(int ready, int toLookUp, string expected)
 	{
-		var cut = RenderDialog(SinkKind.Arr, new SinkSwitchPreview(ready, toLookUp), []);
+		var cut = RenderDialog(SinkKind.Arr, new SinkSwitchPreview(ready, toLookUp, 0), []);
 
 		await Assert.That(cut.WaitForElement("[data-testid=switch-readiness]").TextContent).IsEqualTo(expected);
 		await Assert.That(cut.FindAll("[data-testid=switch-without-plex]")).IsEmpty();
+		await Assert.That(cut.FindAll("[data-testid=switch-unsent]")).IsEmpty();
+	}
+
+	[Test]
+	[Arguments(SinkKind.Arr, 3, "3 changes still waiting for Plex are dropped.")]
+	[Arguments(SinkKind.Plex, 1, "1 change still waiting for Radarr + Sonarr is dropped.")]
+	public async Task Dialog_WithChangesStillWaitingForTheSinkInUse_SaysTheyAreDropped(SinkKind target, int unsent, string expected)
+	{
+		var cut = RenderDialog(target, new SinkSwitchPreview(0, 0, unsent), []);
+
+		await Assert.That(cut.WaitForElement("[data-testid=switch-unsent]").TextContent).IsEqualTo(expected);
 	}
 
 	[Test]
 	public async Task Dialog_ForASwitch_CountsEveryonesTitlesFromThePreview()
 	{
-		var cut = RenderDialog(SinkKind.Arr, new SinkSwitchPreview(30, 12), []);
+		var cut = RenderDialog(SinkKind.Arr, new SinkSwitchPreview(30, 12, 0), []);
 
 		await Assert.That(cut.WaitForElement("[role=dialog]").TextContent).Contains("(3 people, 42 titles)");
 	}
@@ -41,7 +52,7 @@ public class SinkSwitchDialogTests : BunitContext
 	[Test]
 	public async Task Dialog_ForAnEmptyWantlist_SaysNothingAboutReadiness()
 	{
-		var cut = RenderDialog(SinkKind.Arr, new SinkSwitchPreview(0, 0), []);
+		var cut = RenderDialog(SinkKind.Arr, new SinkSwitchPreview(0, 0, 0), []);
 
 		cut.WaitForElement("[data-testid=switch-preview]");
 		await Assert.That(cut.FindAll("[data-testid=switch-readiness]")).IsEmpty();
@@ -52,7 +63,7 @@ public class SinkSwitchDialogTests : BunitContext
 	[Arguments(new[] { "Ada" }, "Ada has no Plex connected, so their wantlist waits until they connect.")]
 	public async Task Dialog_ForASwitchToPlex_NamesThePeopleWithoutPlexWhoseWantlistsWait(string[] withoutPlex, string expected)
 	{
-		var cut = RenderDialog(SinkKind.Plex, new SinkSwitchPreview(1, 0), withoutPlex);
+		var cut = RenderDialog(SinkKind.Plex, new SinkSwitchPreview(1, 0, 0), withoutPlex);
 
 		await Assert.That(cut.WaitForElement("[data-testid=switch-without-plex]").TextContent).IsEqualTo(expected);
 	}

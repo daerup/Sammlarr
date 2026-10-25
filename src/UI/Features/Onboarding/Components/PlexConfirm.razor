@@ -1,0 +1,75 @@
+@using Contracts.Auth
+
+<form method="post" action="/auth/setup/confirm" class="flex w-full flex-col gap-4">
+    <AntiforgeryToken/>
+    <input type="hidden" name="pending" value="@Pending.Id"/>
+    <SetupContextLine Replacing="Replacing"/>
+    <div class="flex flex-col gap-4 rounded-[10px] border bg-card px-5 py-[18px]" data-pending>
+        <div class="flex items-center gap-3.5">
+            <UserAvatar Name="@Pending.DisplayName" Url="@Pending.AvatarUrl" Size="AvatarSize.Large"/>
+            <span class="flex min-w-0 flex-col items-start gap-1">
+                <span class="text-base font-semibold [overflow-wrap:anywhere]" data-pending-name>@Pending.DisplayName</span>
+                @if (Badge is { } badge)
+                {
+                    <BbBadge Variant="BadgeVariant.Outline" Class="@BadgeClass" data-home>
+                        <LucideIcon Name="@badge.Icon" Size="12"/>
+                        <span>@badge.Text</span>
+                    </BbBadge>
+                }
+            </span>
+        </div>
+        @if (Managed)
+        {
+            <BbAlert Variant="AlertVariant.Warning" data-managed>
+                <Icon>
+                    <LucideIcon Name="triangle-alert" Size="16"/>
+                </Icon>
+                <ChildContent>
+                    <BbAlertDescription><span class="font-medium">@Pending.DisplayName</span> is a managed Home profile, which can't be the admin. Sign in with your own Plex profile instead.</BbAlertDescription>
+                </ChildContent>
+            </BbAlert>
+        }
+        <div class="flex flex-wrap gap-2.5">
+            @if (!Managed)
+            {
+                <BbButton Type="ButtonType.Submit" Class="gap-1.5" data-confirm>
+                    <LucideIcon Name="shield-check" Size="15" Class="mr-0.5"/>
+                    <span>Make</span>
+                    <span class="max-w-[220px] truncate">@Pending.DisplayName</span>
+                    <span>the admin</span>
+                </BbButton>
+            }
+            <BbButton Href="/setup?switch=plex" Variant="@(Managed ? ButtonVariant.Default : ButtonVariant.Outline)" Class="gap-2" data-switch>
+                <LucideIcon Name="repeat" Size="15"/>
+                <span>Use a different Plex account</span>
+            </BbButton>
+        </div>
+    </div>
+    <SetupFinalNote/>
+</form>
+
+@code {
+    private const string WarnBadge = "gap-1 text-[var(--alert-warning)] border-[color-mix(in_oklab,var(--alert-warning)_55%,transparent)]";
+
+    [Parameter] [EditorRequired] public required PendingAdmin Pending { get; set; }
+
+    [Parameter] public bool Replacing { get; set; }
+
+    private bool Managed => Pending.Home == HomeRole.Managed;
+
+    private string BadgeClass => Managed ? WarnBadge : "gap-1 text-muted-foreground";
+
+    private (string Icon, string Text)? Badge
+    {
+        get
+        {
+            return Pending.Home switch
+            {
+                HomeRole.Admin => ("crown", "Plex Home admin"),
+                HomeRole.Member => ("users", "Plex Home member"),
+                HomeRole.Managed => ("user-round-cog", "Managed Home profile"),
+                HomeRole.None => null,
+            };
+        }
+    }
+}

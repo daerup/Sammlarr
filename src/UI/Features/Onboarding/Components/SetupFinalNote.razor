@@ -1,0 +1,8 @@
+<div id="@Id" class="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-[13px]" data-final>
+    <LucideIcon Name="lock" Size="14" Class="shrink-0 text-muted-foreground"/>
+    <span>You can't change this after setup.</span>
+</div>
+
+@code {
+    [Parameter] public string? Id { get; set; }
+}

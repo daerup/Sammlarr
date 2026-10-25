@@ -159,19 +159,20 @@ public class LocalSignInTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task CompleteSetupAsync_ForTheFirstPlexSignInOnAnEmptyInstall_MakesThemAdminAndSwitchesToPlex()
+	public async Task ConfirmAdminAsync_ForTheFirstPlexSignInOnAnEmptyInstall_MakesThemAdminAndSwitchesToPlex()
 	{
 		await host.NoUsers();
 		host.OAuthReturns("plex-uuid", "First");
 
-		var result = await Testee.CompleteSetupAsync(AuthProvider.Plex, "callback", host.Resolve<SetupGate>().Code);
+		var pending = await Testee.PendAdminAsync(AuthProvider.Plex, "callback");
+		var result = await pending.Map(found => Testee.ConfirmAdminAsync(found.Id, host.Resolve<SetupGate>().Code));
 
 		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That(user.Role).IsEqualTo(UserRole.Admin));
 		await Assert.That((await host.Resolve<IProviderConfigService>().GetAsync()).AuthProvider).IsEqualTo(AuthProvider.Plex);
 	}
 
 	[Test]
-	public async Task LinkAsync_OnAPlexInstall_SignsInAsThePlexAccount()
+	public async Task LinkAsync_OnAPlexInstall_ForAPlexAccountThatIsNotTheirs_RefusesAndStoresNothing()
 	{
 		var guest = await host.SeedLocalUser("guest", Password, UserRole.Member);
 		var config = host.Resolve<IProviderConfigService>();
@@ -180,7 +181,7 @@ public class LocalSignInTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var result = await Testee.LinkAsync(AuthProvider.Plex, "callback", guest);
 
-		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That(user.DisplayName).IsEqualTo("Someone on Plex"));
+		await Assert.That(result).IsError();
 		await Assert.That(await host.HasStoredCredential(AuthProvider.Plex, guest)).IsFalse();
 	}
 

@@ -2,10 +2,12 @@ using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using Bunit;
 using Bunit.TestDoubles;
+using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Settings;
 using Contracts.Setup;
 using Contracts.Wantlist;
+using Domain.Auth;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.AspNetCore.Components;
@@ -80,6 +82,80 @@ public class SetupWizardTests : BunitContext
 	}
 
 	[Test]
+	public async Task AccountStep_BeforePlexReturns_SaysTheStepCompletesWhenTheAdminExists()
+	{
+		var cut = Render<SetupWizard>(parameters => parameters.Add(wizard => wizard.NeedsAdmin, true));
+
+		await Assert.That(cut.Find("[data-account-hint]").TextContent).IsEqualTo("The step completes when the admin exists.");
+	}
+
+	[Test]
+	[Arguments(HomeRole.Admin, "The step completes when you make the account the admin.")]
+	[Arguments(HomeRole.Managed, "Sign in with your own Plex profile to continue.")]
+	public async Task AccountStep_WhenPlexReturned_AsksIsThisYouInsteadOfTheForm(HomeRole home, string hint)
+	{
+		var pending = new PendingAdmin(Guid.NewGuid(), "Daerup", string.Empty, home);
+
+		var cut = Render<SetupWizard>(parameters => parameters.Add(wizard => wizard.NeedsAdmin, true).Add(wizard => wizard.Pending, Some.Of(pending)));
+
+		await Assert.That(cut.Find("h4").TextContent).IsEqualTo("Is this you?");
+		await Assert.That(cut.FindComponent<PlexConfirm>().Instance.Pending).IsEqualTo(pending);
+		await Assert.That(cut.FindComponent<PlexConfirm>().Instance.Replacing).IsFalse();
+		await Assert.That(cut.FindComponents<Stub<AdminForm>>()).IsEmpty();
+		await Assert.That(cut.Find("[data-account-hint]").TextContent).IsEqualTo(hint);
+		await Assert.That(Buttons(cut, "Next")).IsEmpty();
+	}
+
+	[Test]
+	public async Task AccountStep_AfterUseADifferentPlexAccount_ShowsHowToSwitchInPlex()
+	{
+		var cut = Render<SetupWizard>(parameters => parameters.Add(wizard => wizard.NeedsAdmin, true).Add(wizard => wizard.SwitchingPlex, true));
+
+		await Assert.That(cut.Find("h4").TextContent).IsEqualTo("Sign in as someone else");
+		await Assert.That(cut.FindComponents<PlexSwitch>()).HasSingleItem();
+		await Assert.That(cut.Find("[data-account-hint]").TextContent).IsEqualTo("Sign in with your own Plex profile to continue.");
+	}
+
+	[Test]
+	public async Task ChangeUser_OnTheWantlistStep_OpensTheAccountStepWithTheAdminAndAWayToSwap()
+	{
+		_config.GetAsync(Any()).Returns(OnArr with { Sink = SinkKind.Plex, AuthProvider = AuthProvider.Plex });
+		var cut = RenderForAdmin();
+		var changeUser = Render(cut.FindComponent<Stub<AccountRow>>().Instance.Parameters.Get(row => row.Actions)!);
+
+		await changeUser.Find("[data-change-user]").ClickAsync(new());
+
+		await Assert.That(cut.Find("h4").TextContent).IsEqualTo("The admin account");
+		await Assert.That(cut.Find("[data-admin-name]").TextContent).IsEqualTo("guest");
+	}
+
+	[Test]
+	public async Task AccountStep_UseADifferentPlexAccountWhileTheAdminExists_ShowsTheSwitchStepsAsASwap()
+	{
+		_config.GetAsync(Any()).Returns(OnArr with { Sink = SinkKind.Plex, AuthProvider = AuthProvider.Plex });
+		var cut = RenderForAdmin();
+		await Buttons(cut, "Back").Single().ClickAsync(new());
+
+		await cut.Find("[data-swap]").ClickAsync(new());
+
+		await Assert.That(cut.Find("h4").TextContent).IsEqualTo("Sign in as someone else");
+		await Assert.That(cut.FindComponent<PlexSwitch>().Instance.Replacing).IsTrue();
+		await Assert.That(Buttons(cut, "Next")).HasSingleItem();
+	}
+
+	[Test]
+	public async Task Wizard_BackFromPlexDuringASwap_OpensOnIsThisYouAsASwap()
+	{
+		_config.GetAsync(Any()).Returns(OnArr with { AuthProvider = AuthProvider.Plex });
+		var pending = new PendingAdmin(Guid.NewGuid(), "Daerup", string.Empty, HomeRole.Admin);
+
+		var cut = Render<SetupWizard>(parameters => parameters.Add(wizard => wizard.NeedsAdmin, false).Add(wizard => wizard.Pending, Some.Of(pending)));
+
+		cut.WaitForState(() => cut.FindAll("h4").Count == 1 && cut.Find("h4").TextContent == "Is this you?");
+		await Assert.That(cut.FindComponent<PlexConfirm>().Instance.Replacing).IsTrue();
+	}
+
+	[Test]
 	public async Task Wizard_OnceTheAdminExists_StartsOnTheWantlistWithTheAccountDoneAndRadarrAndSonarrSyncing()
 	{
 		var cut = RenderForAdmin();
@@ -108,7 +184,14 @@ public class SetupWizardTests : BunitContext
 
 		await cut.InvokeAsync(() => cut.FindComponent<SinkCards>().Instance.PickedChanged.InvokeAsync(SinkKind.Arr));
 
-		await Assert.That(cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters.Get(row => row.SettingUp)).IsTrue();
+		var row = cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters;
+		await Assert.That(row.Get(arr => arr.SettingUp)).IsTrue();
+		await Assert.That(row.Get(arr => arr.NeedsConfirmation)).IsFalse();
+		await Assert.That(Next(cut).HasAttribute("disabled")).IsTrue();
+		await Assert.That(cut.Markup).DoesNotContain("Connect Radarr and Sonarr to continue");
+
+		await cut.InvokeAsync(() => row.Get(arr => arr.Checked).InvokeAsync());
+
 		await Assert.That(cut.Markup).Contains("Connect Radarr and Sonarr to continue");
 	}
 

@@ -1,3 +1,4 @@
+@using Contracts.Auth
 @using Contracts.Providers
 @using Contracts.Identity
 @using Contracts.Settings
@@ -19,10 +20,25 @@
         <BbFormWizard CurrentStep="_step" CurrentStepChanged="step => _step = step" ShowNavigation="false" IndicatorClass="px-11" NavigationClass="mt-6 border-t pt-5 pb-0">
             <ChildContent>
                 <BbWizardStep Title="Account" Icon="@Icon(AccountStep)">
-                    @if (NeedsAdmin)
+                    @if (Pending.ToNullable() is { } pending)
+                    {
+                        @Head("Is this you?", "Plex signed you in with the profile that is active in this browser. Check it is your own before it becomes the admin.")
+                        <PlexConfirm Pending="pending" Replacing="!NeedsAdmin"/>
+                    }
+                    else if (SwitchingPlex || _swappingAdmin)
+                    {
+                        @Head("Sign in as someone else", "Plex uses the profile that is active in this browser, so switch it in Plex first.")
+                        <PlexSwitch Replacing="!NeedsAdmin"/>
+                    }
+                    else if (NeedsAdmin)
                     {
                         @Head("Create the admin account", "Enter the setup code and choose how people sign in. You become the admin.")
                         <AdminForm Error="@Error" Picked="SignInWith"/>
+                    }
+                    else if (SignsInWithPlex)
+                    {
+                        @Head("The admin account", "Sammlarr has its admin. Whoever signs in this way manages this Sammlarr.")
+                        <PlexAdminCard Error="@Error" SwapRequested="() => _swappingAdmin = true"/>
                     }
                     else
                     {
@@ -41,12 +57,14 @@
                                 <ArrSinkRow Open="_arrOpen"
                                             OpenChanged="open => _arrOpen = open"
                                             SettingUp="_settingUp"
+                                            NeedsConfirmation="false"
                                             Syncs="config.Sink == SinkKind.Arr"
                                             Switching="_switching"
                                             SwitchRequested="() => SwitchAsync(SinkKind.Arr)"
                                             StayOnPlex="() => PickSinkAsync(SinkKind.Plex)"
                                             InstanceMoved="MoveAsync"
-                                            Changed="RefreshAsync"/>
+                                            Changed="RefreshAsync"
+                                            Checked="() => _arrChecking = false"/>
                             }
                             else
                             {
@@ -55,7 +73,14 @@
                                             Open="_plexOpen"
                                             OpenChanged="open => _plexOpen = open"
                                             Changed="RefreshAsync"
-                                            ReturnUrl="/setup"/>
+                                            ReturnUrl="/setup">
+                                    <Actions>
+                                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => _step = AccountStep" data-change-user>
+                                            <LucideIcon Name="repeat" Size="14" Class="mr-2"/>
+                                            <span>Change user</span>
+                                        </BbButton>
+                                    </Actions>
+                                </AccountRow>
                             }
                         </div>
                     }
@@ -89,7 +114,7 @@
             <NavigationTemplate>
                 @if (NeedsAdmin)
                 {
-                    <span class="text-xs text-muted-foreground">The step completes when the admin exists; the Plex sign-in comes back here, on the Wantlist step.</span>
+                    <span class="text-xs text-muted-foreground" data-account-hint>@AccountHint</span>
                 }
                 else
                 {
@@ -102,7 +127,7 @@
                             </BbButton>
                         }
                         <div class="ml-auto flex items-center gap-3">
-                            @if (Why is { } why)
+                            @if (Hint is { } why)
                             {
                                 <span class="text-xs text-muted-foreground">@why</span>
                             }
@@ -142,6 +167,7 @@
     private ProviderConfig? _config;
     private HashSet<RemoteService> _ready = [];
     private bool _settingUp;
+    private bool _arrChecking;
     private bool _switching;
     private bool _skipped;
     private bool _arrOpen = true;
@@ -154,6 +180,26 @@
     [Parameter] public string? Error { get; set; }
 
     [Parameter] public AuthProvider? SignInWith { get; set; }
+
+    [Parameter] public Optional<PendingAdmin> Pending { get; set; } = new None();
+
+    [Parameter] public bool SwitchingPlex { get; set; }
+
+    private bool _swappingAdmin;
+
+    private string AccountHint
+    {
+        get
+        {
+            return Pending.ToNullable() switch
+            {
+                { Home: HomeRole.Managed } => "Sign in with your own Plex profile to continue.",
+                { } => "The step completes when you make the account the admin.",
+                null when SwitchingPlex => "Sign in with your own Plex profile to continue.",
+                null => "The step completes when the admin exists.",
+            };
+        }
+    }
 
     private bool SignsInWithPlex => _config?.AuthProvider == AuthProvider.Plex;
 
@@ -177,10 +223,12 @@
         }
     }
 
+    private string? Hint => (_settingUp && _arrChecking) || _switching ? null : Why;
+
     protected override async Task OnInitializedAsync()
     {
         await Task.Yield();
-        _step = NeedsAdmin ? AccountStep : WantlistStep;
+        _step = NeedsAdmin || SwitchingPlex || Pending.IsSome() ? AccountStep : WantlistStep;
         if (!NeedsAdmin)
         {
             await RefreshAsync();
@@ -223,6 +271,7 @@
 
     private async Task NextAsync()
     {
+        _swappingAdmin = false;
         _step++;
         if (_step == PeopleStep)
         {
@@ -253,6 +302,7 @@
         {
             case SinkKind.Arr:
                 _settingUp = _config?.Sink != SinkKind.Arr;
+                _arrChecking = _settingUp;
                 _arrOpen = true;
                 break;
             case SinkKind.Plex when _settingUp:

@@ -24,6 +24,7 @@ using DB.Data.Feed;
 using DB.Data.Identity;
 using DB.Data.Media;
 using Domain.Announcing;
+using Domain.Auth;
 using Domain.Feed;
 using Domain.Identity;
 using Domain.Media;
@@ -594,12 +595,17 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		}
 	}
 
-	internal void OAuthReturns(string externalUserId, string displayName, string avatarUrl = "avatar") =>
+	internal void OAuthReturns(string externalUserId, string displayName, string avatarUrl = "avatar", HomeRole home = HomeRole.None) =>
 		_oauth.Returns(
 			new ExternalLogin(externalUserId, displayName, avatarUrl, new OAuthTokenGrant(new Secret("plex-token"), Clock.GetUtcNow().AddDays(30), Guid.NewGuid()))
+			{
+				Home = home,
+			}
 		);
 
 	internal void OAuthFails(string reason) => _oauth.Fails(reason);
+
+	internal void OAuthRefusesAdmin(string reason) => _oauth.RefusesAdmin(reason);
 
 	internal IReadOnlyList<UserId> InvalidatedSessions => _sessionInvalidator.Invalidated;
 

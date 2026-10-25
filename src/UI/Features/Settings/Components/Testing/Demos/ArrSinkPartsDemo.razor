@@ -14,7 +14,7 @@
             <ArrAppSection App="ArrApp.Sonarr" Instance="Connected with { AnimeRootFolderPath = Some.Of(Anime) }" State="ArrConnectionState.Connected" Choices="Choices"/>
         </div>
         <div class="px-5 py-4">
-            <ArrAppSection App="ArrApp.Radarr" Instance="Connected with { Url = Some.Of(Radarr) }" State="ArrConnectionState.Failed"
+            <ArrAppSection App="ArrApp.Radarr" Instance="Connected with { Url = Some.Of(Radarr) }" State="ArrConnectionState.Failed" KeyRefused="true"
                            Error="@($"Radarr answered 401 Unauthorized at {Radarr}. Check the API key under Settings › General in Radarr.")"/>
         </div>
         <div class="px-5 py-4">

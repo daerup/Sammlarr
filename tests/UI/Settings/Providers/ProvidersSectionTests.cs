@@ -69,7 +69,7 @@ public class ProvidersSectionTests : BunitContext
 		ComponentFactories.AddStub<SinkSwitchDialog>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 		_config.GetAsync(Any()).Returns(ProviderBranding.OnPlexSearchingPlex);
-		_switch.PreviewAsync(Any(), Any()).Returns(new SinkSwitchPreview(0, 0));
+		_switch.PreviewAsync(Any(), Any()).Returns(new SinkSwitchPreview(0, 0, 0));
 	}
 
 	[Test]
@@ -107,6 +107,47 @@ public class ProvidersSectionTests : BunitContext
 	}
 
 	[Test]
+	[Arguments(0, 0, 0, false)]
+	[Arguments(1, 0, 0, true)]
+	[Arguments(0, 1, 0, true)]
+	[Arguments(0, 0, 1, true)]
+	public async Task PickingRadarrAndSonarr_OnPlex_NeedsConfirmationOnlyWhenTheSwitchMovesSomething(int ready, int toLookUp, int unsent, bool expected)
+	{
+		_switch.PreviewAsync(SinkKind.Arr, Any()).Returns(new SinkSwitchPreview(ready, toLookUp, unsent));
+		var cut = RenderSection();
+
+		await cut.InvokeAsync(() => Map(cut).Get(map => map.SinkPicked).InvokeAsync(SinkKind.Arr));
+
+		await Assert.That(cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters.Get(arr => arr.NeedsConfirmation)).IsEqualTo(expected);
+	}
+
+	[Test]
+	public async Task SwitchRequested_WithNothingToMove_SwitchesWithoutAsking()
+	{
+		_switch.SwitchAsync(SinkKind.Arr, Any()).Returns(Success.Of(new SinkSwitched(0, 0)));
+		var cut = RenderSection();
+		await cut.InvokeAsync(() => Map(cut).Get(map => map.SinkPicked).InvokeAsync(SinkKind.Arr));
+
+		await cut.InvokeAsync(() => cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters.Get(arr => arr.SwitchRequested).InvokeAsync());
+
+		await Assert.That(cut.FindComponents<Stub<SinkSwitchDialog>>()).IsEmpty();
+		_switch.SwitchAsync(SinkKind.Arr, Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task PickingPlex_OnRadarrAndSonarrWithNothingToMove_SwitchesBackWithoutAsking()
+	{
+		_config.GetAsync(Any()).Returns(ProviderBranding.OnPlexSearchingPlex with { Sink = SinkKind.Arr });
+		_switch.SwitchAsync(SinkKind.Plex, Any()).Returns(Success.Of(new SinkSwitched(0, 0)));
+		var cut = RenderSection();
+
+		await cut.InvokeAsync(() => Map(cut).Get(map => map.SinkPicked).InvokeAsync(SinkKind.Plex));
+
+		await Assert.That(cut.FindComponents<Stub<SinkSwitchDialog>>()).IsEmpty();
+		_switch.SwitchAsync(SinkKind.Plex, Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
 	public async Task StayOnPlex_DuringSetup_PutsItAway()
 	{
 		var cut = RenderSection();
@@ -122,7 +163,7 @@ public class ProvidersSectionTests : BunitContext
 	public async Task SwitchRequested_DuringSetup_AsksWithEveryonesTitlesThenSwitches()
 	{
 		_switch.SwitchAsync(SinkKind.Arr, Any()).Returns(Success.Of(new SinkSwitched(12, 0)));
-		_switch.PreviewAsync(SinkKind.Arr, Any()).Returns(new SinkSwitchPreview(30, 12));
+		_switch.PreviewAsync(SinkKind.Arr, Any()).Returns(new SinkSwitchPreview(30, 12, 0));
 		var cut = RenderSection();
 		await cut.InvokeAsync(() => Map(cut).Get(map => map.SinkPicked).InvokeAsync(SinkKind.Arr));
 		_config.GetAsync(Any()).Returns(ProviderBranding.OnPlexSearchingPlex with { Sink = SinkKind.Arr });
@@ -131,7 +172,7 @@ public class ProvidersSectionTests : BunitContext
 		var dialog = cut.FindComponent<Stub<SinkSwitchDialog>>().Instance.Parameters;
 		await Assert.That(dialog.Get(asked => asked.Target)).IsEqualTo(SinkKind.Arr);
 		await Assert.That(dialog.Get(asked => asked.People)).IsEqualTo(2);
-		await Assert.That(dialog.Get(asked => asked.Preview)).IsEqualTo(new SinkSwitchPreview(30, 12));
+		await Assert.That(dialog.Get(asked => asked.Preview)).IsEqualTo(new SinkSwitchPreview(30, 12, 0));
 		await Assert.That(dialog.Get(asked => asked.WithoutPlex)).IsEmpty();
 		_switch.SwitchAsync(Any<SinkKind>(), Any()).WasCalled(Times.Never);
 
@@ -146,6 +187,7 @@ public class ProvidersSectionTests : BunitContext
 	public async Task SwitchRequested_WhenRefused_KeepsTheSetupOpen()
 	{
 		_switch.SwitchAsync(SinkKind.Arr, Any()).Returns(Error.From("A wantlist sync is running right now. Switch again once it has finished."));
+		_switch.PreviewAsync(SinkKind.Arr, Any()).Returns(new SinkSwitchPreview(1, 0, 0));
 		var cut = RenderSection();
 		await cut.InvokeAsync(() => Map(cut).Get(map => map.SinkPicked).InvokeAsync(SinkKind.Arr));
 
@@ -172,14 +214,14 @@ public class ProvidersSectionTests : BunitContext
 	{
 		_config.GetAsync(Any()).Returns(ProviderBranding.OnPlexSearchingPlex with { Sink = SinkKind.Arr });
 		_switch.SwitchAsync(SinkKind.Plex, Any()).Returns(Success.Of(new SinkSwitched(12, 0)));
-		_switch.PreviewAsync(SinkKind.Plex, Any()).Returns(new SinkSwitchPreview(20, 7));
+		_switch.PreviewAsync(SinkKind.Plex, Any()).Returns(new SinkSwitchPreview(20, 7, 0));
 		var cut = RenderSection();
 
 		await cut.InvokeAsync(() => Map(cut).Get(map => map.SinkPicked).InvokeAsync(SinkKind.Plex));
 		var dialog = cut.FindComponent<Stub<SinkSwitchDialog>>().Instance.Parameters;
 		await Assert.That(dialog.Get(asked => asked.Target)).IsEqualTo(SinkKind.Plex);
 		await Assert.That(dialog.Get(asked => asked.WithoutPlex)).IsEquivalentTo(["Bob"]);
-		await Assert.That(dialog.Get(asked => asked.Preview)).IsEqualTo(new SinkSwitchPreview(20, 7));
+		await Assert.That(dialog.Get(asked => asked.Preview)).IsEqualTo(new SinkSwitchPreview(20, 7, 0));
 		_switch.SwitchAsync(Any<SinkKind>(), Any()).WasCalled(Times.Never);
 
 		await cut.InvokeAsync(() => dialog.Get(asked => asked.Confirmed).InvokeAsync());

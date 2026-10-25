@@ -220,6 +220,36 @@ public class OptionalExtensionsTests
 	}
 
 	[Test]
+	public async Task Or_WhenNoneAndConditionHolds_ReturnsValue()
+	{
+		Optional<int> optional = new None();
+
+		var result = optional.Or(true, () => 9);
+
+		await Assert.That(result).IsSome().And.IsEqualTo(9);
+	}
+
+	[Test]
+	public async Task Or_WhenNoneAndConditionFails_StaysNone()
+	{
+		Optional<int> optional = new None();
+
+		var result = optional.Or(false, () => 9);
+
+		await Assert.That(result).IsNone();
+	}
+
+	[Test]
+	public async Task Or_WhenSomeAndConditionHolds_KeepsOriginal()
+	{
+		Optional<int> optional = Some.Of(1);
+
+		var result = optional.Or(true, () => 9);
+
+		await Assert.That(result).IsSome().And.IsEqualTo(1);
+	}
+
+	[Test]
 	public async Task Apply_WhenSome_InvokesActionAndReturnsSelf()
 	{
 		Optional<int> optional = Some.Of(7);

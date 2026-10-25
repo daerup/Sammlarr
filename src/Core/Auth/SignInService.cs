@@ -1,7 +1,9 @@
 using Contracts.Auth;
+using Contracts.Caching;
 using Contracts.DI;
 using Contracts.Identity;
 using Contracts.Settings;
+using Contracts.Setup;
 using Core.Notifications;
 using Core.Setup;
 using Domain.Identity;
@@ -20,30 +22,30 @@ internal sealed class SignInService(
 	IProviderConfigService providerConfig,
 	TimeProvider clock,
 	SetupGate setupGate,
+	ISetupStateRepository setupState,
 	WebUiNotificationSeeder webUiNotifications,
+	ITypedMemoryCache<Guid, PendingLogin> pending,
 	ILogger<SignInService> logger
 ) : ISignInService
 {
+	private static readonly TimeSpan PendingFor = TimeSpan.FromMinutes(15);
+
 	private static readonly Error WrongPassword = Error.From("Wrong username or password.");
 
 	private static readonly Error Locked = Error.From(Lockout.Message);
 
 	private static readonly Error NoAdminYet = Error.From("This Sammlarr has no admin yet. Open /setup and enter the setup code from the server log.");
 
+	private static readonly Error PendingGone = Error.From(SignInTimeout.Message);
+
+	private static readonly Error AdminTaken = Error.From("This Sammlarr already has an admin. Sign in instead.");
+
+	private static readonly Error SetupOver = Error.From("Only the admin can change the admin, and only during setup.");
+
 	public Task<Result<string>> BeginAsync(AuthProvider provider, string callbackUrl, CancellationToken cancellationToken = default) =>
 		providers[provider].BeginLoginAsync(callbackUrl, cancellationToken);
 
-	public Task<Result<User>> CompleteAsync(AuthProvider provider, string callbackQuery, CancellationToken cancellationToken = default)
-	{
-		return CompleteAsync(provider, callbackQuery, new None(), cancellationToken);
-	}
-
-	public Task<Result<User>> CompleteSetupAsync(AuthProvider provider, string callbackQuery, Secret setupCode, CancellationToken cancellationToken = default)
-	{
-		return CompleteAsync(provider, callbackQuery, Some.Of(setupCode), cancellationToken);
-	}
-
-	private async Task<Result<User>> CompleteAsync(AuthProvider provider, string callbackQuery, Optional<Secret> setupCode, CancellationToken cancellationToken)
+	public async Task<Result<User>> CompleteAsync(AuthProvider provider, string callbackQuery, CancellationToken cancellationToken = default)
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
 		if (config.AuthProvider != provider && await users.CountAsync(cancellationToken) > 0)
@@ -54,21 +56,102 @@ internal sealed class SignInService(
 		return await providers[provider]
 			.CompleteLoginAsync(callbackQuery, cancellationToken)
 			.ApplyError(error => LogFailed(provider, error))
-			.Map(login => ProvisionAsync(provider, login, setupCode, cancellationToken));
+			.Map(login => ProvisionAsync(provider, login, new None(), cancellationToken));
+	}
+
+	public async Task<Result<PendingAdmin>> PendAdminAsync(AuthProvider provider, string callbackQuery, CancellationToken cancellationToken = default)
+	{
+		return await providers[provider]
+			.CompleteLoginAsync(callbackQuery, cancellationToken)
+			.ApplyError(error => LogFailed(provider, error))
+			.Map(login => Pend(new PendingLogin(provider, login)));
+	}
+
+	public Optional<PendingAdmin> Pending(Guid id) => pending.GetValueOrNone(id).Map(found => Shown(id, found.Login));
+
+	public async Task<Result<User>> ConfirmAdminAsync(Guid id, Secret setupCode, CancellationToken cancellationToken = default)
+	{
+		var nobodyYet = await users.CountAsync(cancellationToken) == 0;
+		var confirmed = await Admissible(id)
+			.Map(found => Optional.When(nobodyYet, () => found).ToResult(AdminTaken))
+			.Map(found => RegisterAsync(found.Provider, found.Login, Some.Of(setupCode), cancellationToken));
+		return confirmed.Apply(_ => pending.Remove(id));
+	}
+
+	public async Task<Result<User>> SwapAdminAsync(Guid id, UserId signedIn, CancellationToken cancellationToken = default)
+	{
+		var isAdmin = (await users.FindRoleAsync(signedIn, cancellationToken)).When(role => role == UserRole.Admin).IsSome();
+		var duringSetup = (await setupState.CompletedAtAsync(cancellationToken)).IsNone();
+		var swapped = await Admissible(id)
+			.Map(found => Optional.When(isAdmin && duringSetup, () => found).ToResult(SetupOver))
+			.Map(found => SwapLoginAsync(found.Provider, found.Login, signedIn, cancellationToken));
+		return swapped.Apply(_ => pending.Remove(id));
 	}
 
 	public async Task<Result<User>> LinkAsync(AuthProvider provider, string callbackQuery, UserId signedIn, CancellationToken cancellationToken = default)
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
+		var login = await providers[provider].CompleteLoginAsync(callbackQuery, cancellationToken).ApplyError(error => LogFailed(provider, error));
 		if (config.AuthProvider == provider)
 		{
-			return await CompleteAsync(provider, callbackQuery, cancellationToken);
+			return await login.Map(found => ReconnectAsync(provider, found, signedIn, cancellationToken));
 		}
 
-		return await providers[provider]
-			.CompleteLoginAsync(callbackQuery, cancellationToken)
-			.ApplyError(error => LogFailed(provider, error))
-			.Map(login => StoreLinkAsync(provider, login, signedIn, cancellationToken));
+		return await login.Map(found => StoreLinkAsync(provider, found, signedIn, cancellationToken));
+	}
+
+	private PendingAdmin Pend(PendingLogin login)
+	{
+		var id = Guid.NewGuid();
+		pending.Set(id, login, PendingFor);
+		logger.LogInformation("Waiting for the {Provider} sign-in to be confirmed as the admin", login.Provider);
+		return Shown(id, login.Login);
+	}
+
+	private static PendingAdmin Shown(Guid id, ExternalLogin login) => new(id, login.DisplayName, login.AvatarUrl, login.Home);
+
+	private Result<PendingLogin> Admissible(Guid id)
+	{
+		return pending
+			.GetValueOrNone(id)
+			.ToResult(PendingGone)
+			.Map(found => providers[found.Provider].AsAdmin(found.Login).Map(login => found with { Login = login }));
+	}
+
+	private async Task<Result<User>> SwapLoginAsync(AuthProvider provider, ExternalLogin login, UserId signedIn, CancellationToken cancellationToken)
+	{
+		return await users
+			.FindByLoginAsync(provider, login.ExternalUserId, cancellationToken)
+			.Match(
+				owner => owner.Id == signedIn ? CompleteSignInAsync(provider, login, owner, isInitialAdmin: false, cancellationToken) : Taken(login),
+				() => MoveLoginAsync(provider, login, signedIn, cancellationToken)
+			);
+	}
+
+	private static Task<Result<User>> Taken(ExternalLogin login)
+	{
+		return Task.FromResult<Result<User>>(Error.From($"{login.DisplayName} already has a Sammlarr account."));
+	}
+
+	private async Task<Result<User>> MoveLoginAsync(AuthProvider provider, ExternalLogin login, UserId signedIn, CancellationToken cancellationToken)
+	{
+		await users.ReplaceLoginAsync(signedIn, provider, login.ExternalUserId, cancellationToken);
+		logger.LogInformation("Setup moved the admin {UserId} to another {Provider} account", signedIn, provider);
+		return await CompleteSignInAsync(provider, login, await users.GetAsync(signedIn, cancellationToken), isInitialAdmin: false, cancellationToken);
+	}
+
+	private async Task<Result<User>> ReconnectAsync(AuthProvider provider, ExternalLogin login, UserId signedIn, CancellationToken cancellationToken)
+	{
+		var user = await users.GetAsync(signedIn, cancellationToken);
+		var owner = await users.FindByLoginAsync(provider, login.ExternalUserId, cancellationToken);
+		var refused = Error.From(
+			$"{SignInName(provider)} returned {login.DisplayName} instead of {user.DisplayName}. Switch to {user.DisplayName} in {SignInName(provider)}, then reconnect."
+		);
+		return await owner
+			.When(found => found.Id == signedIn)
+			.ToResult(refused)
+			.ApplyError(_ => logger.LogWarning("Reconnect refused: {Provider} returned another account for user {UserId}", provider, signedIn))
+			.Map(found => CompleteSignInAsync(provider, login, found, isInitialAdmin: false, cancellationToken));
 	}
 
 	private async Task<Result<User>> StoreLinkAsync(AuthProvider provider, ExternalLogin login, UserId signedIn, CancellationToken cancellationToken)

@@ -197,9 +197,24 @@ public class SinkSwitchTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var preview = await Testee.PreviewAsync(SinkKind.Arr);
 
-		await Assert.That(preview).IsEqualTo(new SinkSwitchPreview(2, 1));
+		await Assert.That(preview).IsEqualTo(new SinkSwitchPreview(2, 1, 0));
 		await Assert.That(await host.Resolve<IMediaService>().GetSinkIdsAsync([convertible], SinkKind.Arr)).IsEmpty();
 		await Assert.That((await host.Resolve<IProviderConfigService>().GetAsync()).Sink).IsEqualTo(SinkKind.Plex);
+	}
+
+	[Test]
+	public async Task PreviewAsync_CountsEveryonesChangesStillWaitingForTheSinkInUse()
+	{
+		var mine = await host.Movie(new MediaSpec("Fight Club", MediaType.Movie, [Tmdb("550")])).SeedAsync();
+		await host.Resolve<IWantlistOutbox>().EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Remove, [mine]);
+		host.CurrentUser.Id = await host.SeedExistingUser("daerup", UserRole.Member, "Daerup");
+		var theirs = await host.Movie(new MediaSpec("The Matrix", MediaType.Movie, [Tmdb("603")])).SeedAsync();
+		await host.Resolve<IWantlistOutbox>().EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Remove, [theirs]);
+		host.CurrentUser.Id = TestCurrentUser.DefaultId;
+
+		var preview = await Testee.PreviewAsync(SinkKind.Arr);
+
+		await Assert.That(preview).IsEqualTo(new SinkSwitchPreview(0, 0, 2));
 	}
 
 	[Test]

@@ -1,11 +1,13 @@
 @page "/setup"
 @layout AuthLayout
 @attribute [AllowAnonymous]
+@using Contracts.Auth
 @using Contracts.Identity
 @using Contracts.Setup
 @using Domain.Identity
 @using UI.Features.Onboarding.Components
 @inject IOnboardingService Onboarding
+@inject ISignInService SignIns
 @inject ICurrentUser CurrentUser
 @inject NavigationManager Navigation
 
@@ -13,7 +15,7 @@
 
 @if (_needsAdmin is { } needsAdmin)
 {
-    <SetupWizard NeedsAdmin="needsAdmin" Error="@Error" SignInWith="SignInWith"/>
+    <SetupWizard NeedsAdmin="needsAdmin" Error="@ShownError" SignInWith="ShownSignInWith" Pending="_pending" SwitchingPlex="@(Switch == "plex")"/>
 }
 else
 {
@@ -27,7 +29,21 @@ else
     [SupplyParameterFromQuery(Name = "with")]
     public string? With { get; set; }
 
+    [SupplyParameterFromQuery(Name = "pending")]
+    public Guid? PendingId { get; set; }
+
+    [SupplyParameterFromQuery(Name = "switch")]
+    public string? Switch { get; set; }
+
     private AuthProvider? SignInWith => Enum.TryParse<AuthProvider>(With, ignoreCase: true, out var picked) && Enum.IsDefined(picked) ? picked : null;
+
+    private bool PendingLost => PendingId is not null && _pending.IsNone();
+
+    private string? ShownError => PendingLost ? SignInTimeout.Message : Error;
+
+    private AuthProvider? ShownSignInWith => PendingLost ? AuthProvider.Plex : SignInWith;
+
+    private Optional<PendingAdmin> _pending = new None();
 
     private bool? _needsAdmin;
 
@@ -44,4 +60,6 @@ else
 
         Navigation.NavigateTo(CurrentUser.IsAuthenticated ? "/" : SignInPage, forceLoad: !CurrentUser.IsAuthenticated);
     }
+
+    protected override void OnParametersSet() => _pending = Optional.Of(PendingId).Map(SignIns.Pending);
 }

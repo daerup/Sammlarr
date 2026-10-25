@@ -6,7 +6,11 @@
         <BbFieldLabel>URL</BbFieldLabel>
         <BbFieldContent>
             <BbInput Value="@_url" ValueChanged="UrlChangedAsync" Placeholder="@Placeholder" AriaLabel="@($"{App.Name} URL")"
-                     Class="h-9 bg-accent text-sm" UpdateTiming="UpdateTiming.Immediate"/>
+                     Class="@($"h-9 bg-accent text-sm {(AddressFailed ? "border-destructive" : string.Empty)}")" UpdateTiming="UpdateTiming.Immediate"/>
+            @if (AddressFailed)
+            {
+                @Problem
+            }
             @if (ShowsExternalUrl)
             {
                 <div class="arr-app-external">
@@ -39,7 +43,7 @@
                 <div class="min-w-0 flex-1">
                     <SensitiveInput Value="@_key" ValueChanged="KeyChangedAsync" Compact="true" Label="@($"{App.Name} API key")"
                                     Placeholder="Enter API key"
-                                    Class="@(State == ArrConnectionState.Failed ? "border-destructive" : string.Empty)"/>
+                                    Class="@(KeyFailed ? "border-destructive" : string.Empty)"/>
                 </div>
                 @switch (State)
                 {
@@ -80,12 +84,9 @@
                     <span>@App.Name › Settings › General</span>
                 }.
             </BbFieldDescription>
-            @if (State == ArrConnectionState.Failed)
+            @if (KeyFailed)
             {
-                <p class="arr-app-line text-destructive" role="alert">
-                    <LucideIcon Name="circle-alert" Size="13" Class="mt-px shrink-0"/>
-                    <span>@Error</span>
-                </p>
+                @Problem
             }
         </BbFieldContent>
     </BbField>
@@ -206,6 +207,8 @@
 
     [Parameter] public string Error { get; set; } = string.Empty;
 
+    [Parameter] public bool KeyRefused { get; set; }
+
     [Parameter] public ArrInstanceChoices Choices { get; set; } = new([], []);
 
     [Parameter] public EventCallback<ArrInstanceConfig> Edited { get; set; }
@@ -223,6 +226,15 @@
     private string Placeholder => $"http://{App.Name.ToLowerInvariant()}:{App.DefaultPort}";
 
     private ArrInstanceConfig Typed => Instance with { Url = Text(_url), ApiKey = Text(_key).Map(key => new Secret(key)) };
+
+    private bool AddressFailed => State == ArrConnectionState.Failed && !KeyRefused;
+
+    private bool KeyFailed => State == ArrConnectionState.Failed && KeyRefused;
+
+    private RenderFragment Problem => @<p class="arr-app-line text-destructive" role="alert">
+        <LucideIcon Name="circle-alert" Size="13" Class="mt-px shrink-0"/>
+        <span>@Error</span>
+    </p>;
 
     private IEnumerable<SelectOption<int?>> ProfileOptions => Choices.Profiles.Select(profile => new SelectOption<int?>(profile.Id, profile.Name));
 

@@ -2,6 +2,7 @@ using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Settings;
 using Core.Setup;
+using Domain.Auth;
 using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
@@ -26,7 +27,7 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.NoUsers();
 		host.OAuthReturns("plex-uuid", "John");
 
-		var result = await Testee.CompleteSetupAsync(AuthProvider.Plex, "callback", SetupCode);
+		var result = await SetUpAsync();
 
 		await Assert
 			.That(result)
@@ -67,7 +68,7 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.RegistrationClosed();
 		host.OAuthReturns("plex-uuid", "Ada");
 
-		var result = await Testee.CompleteSetupAsync(AuthProvider.Plex, "callback", SetupCode);
+		var result = await SetUpAsync();
 
 		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That(user.Role).IsEqualTo(UserRole.Admin));
 	}
@@ -78,7 +79,7 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.NoUsers();
 		host.OAuthReturns("plex-uuid", "Ada");
 
-		await Testee.CompleteSetupAsync(AuthProvider.Plex, "callback", SetupCode);
+		await SetUpAsync();
 
 		await Assert.That((await host.Resolve<IProviderConfigService>().GetAsync()).RegistrationMode).IsEqualTo(RegistrationMode.Closed);
 	}
@@ -148,8 +149,169 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.NoUsers();
 		host.OAuthReturns("plex-uuid", "John");
 
-		var result = await Testee.CompleteSetupAsync(AuthProvider.Plex, "callback", SetupCode);
+		var result = await SetUpAsync();
 
 		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That(await host.HasStoredCredential(AuthProvider.Plex, user.Id)).IsTrue());
+	}
+
+	[Test]
+	public async Task PendAdminAsync_ForTheFirstSignIn_ShowsWhoPlexReturnedAndCreatesNobody()
+	{
+		await host.NoUsers();
+		host.OAuthReturns("plex-uuid", "Mia", home: HomeRole.Managed);
+
+		var pending = await Testee.PendAdminAsync(AuthProvider.Plex, "callback");
+
+		await Assert.That(pending).IsSuccess().And.Multiple(async found => await Assert.That((found.DisplayName, found.Home)).IsEqualTo(("Mia", HomeRole.Managed)));
+		await Assert.That(await host.ScopedDbContext.Users.CountAsync()).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task ConfirmAdminAsync_WhenTheProviderRefusesTheAccountAsAdmin_SaysWhyAndCreatesNobody()
+	{
+		await host.NoUsers();
+		host.OAuthReturns("plex-uuid", "Mia");
+		host.OAuthRefusesAdmin("Not an admin account.");
+
+		var result = await SetUpAsync();
+
+		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("Not an admin account."));
+		await Assert.That(await host.ScopedDbContext.Users.CountAsync()).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task ConfirmAdminAsync_OnceSomeoneExists_RefusesWithoutSigningAnyoneIn()
+	{
+		var daerup = await host.SeedExistingUser("plex-uuid", UserRole.Member, "Daerup");
+		host.OAuthReturns("plex-uuid", "Daerup");
+		var id = await PendAsync();
+
+		var result = await Testee.ConfirmAdminAsync(id, SetupCode);
+
+		await Assert
+			.That(result)
+			.IsError()
+			.And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("This Sammlarr already has an admin. Sign in instead."));
+		await Assert.That(await host.HasStoredCredential(AuthProvider.Plex, daerup)).IsFalse();
+	}
+
+	[Test]
+	public async Task ConfirmAdminAsync_OnceConfirmed_ForgetsThePendingLogin()
+	{
+		await host.NoUsers();
+		host.OAuthReturns("plex-uuid", "Daerup", home: HomeRole.Admin);
+		var id = await PendAsync();
+
+		await Testee.ConfirmAdminAsync(id, SetupCode);
+
+		await Assert.That(Testee.Pending(id)).IsNone();
+	}
+
+	[Test]
+	public async Task SwapAdminAsync_DuringSetup_MovesTheSameUserToTheOtherPlexAccount()
+	{
+		var lena = await host.SeedExistingUser("plex-lena", UserRole.Admin, "Lena");
+		await host.SetupUnfinished();
+		host.OAuthReturns("plex-daerup", "Daerup");
+		var id = await PendAsync();
+
+		var result = await Testee.SwapAdminAsync(id, lena);
+
+		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That((user.Id, user.DisplayName)).IsEqualTo((lena, "Daerup")));
+		var users = host.Resolve<IUserRepository>();
+		await Assert.That((await users.FindByLoginAsync(AuthProvider.Plex, "plex-daerup")).Map(found => found.Id)).IsSome().And.IsEqualTo(lena);
+		await Assert.That(await users.FindByLoginAsync(AuthProvider.Plex, "plex-lena")).IsNone();
+		await Assert.That(await host.HasStoredCredential(AuthProvider.Plex, lena)).IsTrue();
+		await Assert.That(Testee.Pending(id)).IsNone();
+	}
+
+	[Test]
+	public async Task SwapAdminAsync_ToAPlexAccountThatAlreadyHasAUser_RefusesAndKeepsTheAdmin()
+	{
+		var lena = await host.SeedExistingUser("plex-lena", UserRole.Admin, "Lena");
+		await host.SeedExistingUser("plex-sam", UserRole.Member, "Sam");
+		await host.SetupUnfinished();
+		host.OAuthReturns("plex-sam", "Sam");
+		var id = await PendAsync();
+
+		var result = await Testee.SwapAdminAsync(id, lena);
+
+		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("Sam already has a Sammlarr account."));
+		await Assert.That(await host.Resolve<IUserRepository>().FindByLoginAsync(AuthProvider.Plex, "plex-lena")).IsSome();
+	}
+
+	[Test]
+	[Arguments(UserRole.Admin, true)]
+	[Arguments(UserRole.Member, false)]
+	public async Task SwapAdminAsync_AfterSetupOrForAMember_Refuses(UserRole role, bool setupFinished)
+	{
+		var user = await host.SeedExistingUser("plex-lena", role, "Lena");
+		if (!setupFinished)
+		{
+			await host.SetupUnfinished();
+		}
+
+		host.OAuthReturns("plex-daerup", "Daerup");
+		var id = await PendAsync();
+
+		var result = await Testee.SwapAdminAsync(id, user);
+
+		await Assert
+			.That(result)
+			.IsError()
+			.And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("Only the admin can change the admin, and only during setup."));
+		await Assert.That(await host.Resolve<IUserRepository>().FindByLoginAsync(AuthProvider.Plex, "plex-lena")).IsSome();
+	}
+
+	[Test]
+	public async Task LinkAsync_OnAPlexInstall_ForTheSignedInPlexAccount_RefreshesItsToken()
+	{
+		var existing = await host.SeedExistingUser("plex-uuid", UserRole.Admin, "Daerup");
+		host.OAuthReturns("plex-uuid", "Daerup");
+
+		var result = await Testee.LinkAsync(AuthProvider.Plex, "callback", existing);
+
+		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That(user.Id).IsEqualTo(existing));
+		await Assert.That(await host.HasStoredCredential(AuthProvider.Plex, existing)).IsTrue();
+	}
+
+	[Test]
+	public async Task LinkAsync_OnAPlexInstall_ForAnotherPlexAccount_RefusesNamingBothAndAddsNobody()
+	{
+		var existing = await host.SeedExistingUser("plex-uuid", UserRole.Admin, "Daerup");
+		var before = await host.ScopedDbContext.Users.CountAsync();
+		host.OAuthReturns("plex-mia", "Mia", home: HomeRole.Managed);
+
+		var result = await Testee.LinkAsync(AuthProvider.Plex, "callback", existing);
+
+		await Assert
+			.That(result)
+			.IsError()
+			.And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("Plex returned Mia instead of Daerup. Switch to Daerup in Plex, then reconnect."));
+		await Assert.That(await host.ScopedDbContext.Users.CountAsync()).IsEqualTo(before);
+	}
+
+	[Test]
+	public async Task LinkAsync_OnAPlexInstall_ForAnotherUsersPlexAccount_Refuses()
+	{
+		var existing = await host.SeedExistingUser("plex-uuid", UserRole.Admin, "Daerup");
+		await host.SeedExistingUser("plex-lena", UserRole.Member, "Lena");
+		host.OAuthReturns("plex-lena", "Lena");
+
+		var result = await Testee.LinkAsync(AuthProvider.Plex, "callback", existing);
+
+		await Assert.That(result).IsError();
+	}
+
+	private async Task<Result<User>> SetUpAsync()
+	{
+		var pending = await Testee.PendAdminAsync(AuthProvider.Plex, "callback");
+		return await pending.Map(found => Testee.ConfirmAdminAsync(found.Id, SetupCode));
+	}
+
+	private async Task<Guid> PendAsync()
+	{
+		var pending = await Assert.That(await Testee.PendAdminAsync(AuthProvider.Plex, "callback")).IsSuccess();
+		return pending!.Id;
 	}
 }

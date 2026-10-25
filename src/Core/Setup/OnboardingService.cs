@@ -48,7 +48,7 @@ internal sealed class OnboardingService(
 	public async Task<Optional<Error>> CodeProblemAsync(Secret setupCode, CancellationToken cancellationToken = default)
 	{
 		var needsAdmin = await NeedsAdminAsync(cancellationToken);
-		return Optional.When(!needsAdmin, () => Taken).Or(() => Optional.When(!gate.Accepts(setupCode), () => WrongCode));
+		return Optional.When(!needsAdmin, () => Taken).Or(!gate.Accepts(setupCode), () => WrongCode);
 	}
 
 	public async Task<Result<User>> ClaimAsync(AdminClaim claim, CancellationToken cancellationToken = default)

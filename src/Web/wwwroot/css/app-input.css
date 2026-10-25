@@ -450,6 +450,18 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
     z-index: 10000 !important;
 }
 
+.signin .signin-button {
+    background: var(--card);
+    border-color: var(--border);
+    color: var(--foreground);
+}
+
+.signin .signin-button:hover,
+.signin .signin-button:focus-visible {
+    background: color-mix(in oklch, var(--brand) 14%, var(--card));
+    border-color: var(--brand);
+}
+
 @layer components {
     .popover-band {
         background: oklch(from var(--muted) calc(l - 0.08) c h);

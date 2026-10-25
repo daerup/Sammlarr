@@ -11,6 +11,8 @@ namespace API.Plex;
 
 internal sealed class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptions options, PlexUrls urls) : IOAuthProvider, ICredentialValidator
 {
+	private static readonly Error ManagedAdmin = Error.From("A managed Home profile can't be the admin. Sign in with your own Plex profile instead.");
+
 	public async Task<Result<string>> BeginLoginAsync(string callbackUrl, CancellationToken cancellationToken = default)
 	{
 		var clientId = Guid.NewGuid();
@@ -70,6 +72,8 @@ internal sealed class PlexOAuthProvider(IHttpClientFactory httpClientFactory, Pl
 		return await FetchAccountAsync(new Secret(authToken), clientId, pin.ExpiresAt, cancellationToken);
 	}
 
+	public Result<ExternalLogin> AsAdmin(ExternalLogin login) => Optional.When(login.Home != HomeRole.Managed, () => login).ToResult(ManagedAdmin);
+
 	public async Task<AccessCheck> CheckAsync(Guid clientId, Secret accessToken, CancellationToken cancellationToken = default)
 	{
 		using var request = UserRequest(accessToken, clientId);
@@ -99,7 +103,21 @@ internal sealed class PlexOAuthProvider(IHttpClientFactory httpClientFactory, Pl
 
 		return Success.Of(
 			new ExternalLogin(user.Uuid ?? user.Username, displayName, user.Thumb ?? string.Empty, new OAuthTokenGrant(accessToken, expiresAt, clientId))
+			{
+				Home = HomeRoleOf(user),
+			}
 		);
+	}
+
+	private static HomeRole HomeRoleOf(PlexTypes.User.Root user)
+	{
+		return user switch
+		{
+			{ Restricted: true } => HomeRole.Managed,
+			{ HomeAdmin: true } => HomeRole.Admin,
+			{ Home: true } => HomeRole.Member,
+			_ => HomeRole.None,
+		};
 	}
 
 	private HttpRequestMessage UserRequest(Secret accessToken, Guid clientId)

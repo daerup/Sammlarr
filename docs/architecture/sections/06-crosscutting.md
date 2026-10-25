@@ -31,7 +31,9 @@ A value that can be missing is an `Optional<T>` wherever our own code hands it o
   and `ApplyNone` quietly see neither case.
 - Across System.Text.Json it needs `OptionalJsonConverterFactory` (Wolverine's serializer registers it; any other must
   add it); an untyped hand-over (`RenderTreeBuilder.AddAttribute`) needs `Optional.Of(x)`. It is never a sort key or
-  inside an operator EF translates. `GetValueOr(value)` is eager: pass a `Func` for a costly fallback.
+  inside an operator EF translates. `GetValueOr(value)` is eager: pass a `Func` for a costly fallback. A chain of
+  checks is `Optional.When(a, …).Or(b, …)`; `b` is evaluated even after `a` held, so a costly check goes in
+  `Or(() => …)`.
 - Side effects go in `Apply`, `ApplyNone` and `ApplyError`, one step each (a step that needs more than one statement
   is a named method); a `ValueTask` step is `async x => await StepAsync(x)`, or it binds the `Action` overload unawaited.
 - A `bool` read (`IsSome`, `Match(p, () => false)`) answers a question; outside a loop guard it never routes control

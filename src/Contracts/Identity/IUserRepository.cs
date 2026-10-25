@@ -11,6 +11,8 @@ public interface IUserRepository
 
 	Task CreateAsync(User user, AuthProvider provider, string externalUserId, CancellationToken cancellationToken = default);
 
+	Task ReplaceLoginAsync(UserId id, AuthProvider provider, string externalUserId, CancellationToken cancellationToken = default);
+
 	Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default);
 
 	Task<int> CountAsync(CancellationToken cancellationToken = default);

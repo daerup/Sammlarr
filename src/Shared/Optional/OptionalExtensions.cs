@@ -110,6 +110,14 @@ public static partial class OptionalExtensions
 			};
 
 		[SuppressArchTest]
+		public Optional<T> Or(bool condition, Func<T> value) =>
+			optional switch
+			{
+				Some<T> => optional,
+				None => Optional.When(condition, value),
+			};
+
+		[SuppressArchTest]
 		public Optional<T> When(bool condition) => condition ? optional : new None();
 
 		[GenerateAsync]
