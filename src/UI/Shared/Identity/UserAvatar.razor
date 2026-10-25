@@ -1,0 +1,19 @@
+<BbAvatar Size="Size" Class="@Class">
+    @if (Url.Length > 0)
+    {
+        <BbAvatarImage Source="@Url" Alt="@Name"/>
+    }
+    <BbAvatarFallback>@Initial</BbAvatarFallback>
+</BbAvatar>
+
+@code {
+    [Parameter] [EditorRequired] public required string Name { get; set; }
+
+    [Parameter] public string Url { get; set; } = string.Empty;
+
+    [Parameter] public AvatarSize Size { get; set; } = AvatarSize.Default;
+
+    [Parameter] public string? Class { get; set; }
+
+    private string Initial => string.Concat(Name.Trim().Take(1)).ToUpperInvariant();
+}

@@ -1,15 +1,3 @@
-.signin ::deep .signin-button {
-    background: var(--card);
-    border-color: var(--border);
-    color: var(--foreground);
-}
-
-.signin ::deep .signin-button:hover,
-.signin ::deep .signin-button:focus-visible {
-    background: color-mix(in oklch, var(--brand) 14%, var(--card));
-    border-color: var(--brand);
-}
-
 .signin-busy {
     display: none;
     align-items: center;

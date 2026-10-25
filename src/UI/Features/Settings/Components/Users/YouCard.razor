@@ -8,13 +8,7 @@
     <div class="overflow-hidden rounded-lg border bg-card" data-you>
         <BbCollapsible @bind-Open="_open">
             <div class="flex items-center gap-3.5 bg-foreground/5 py-3 pl-5 pr-4">
-                <BbAvatar Size="AvatarSize.Small">
-                    @if (CurrentUser.AvatarUrl.Length > 0)
-                    {
-                        <BbAvatarImage Source="@CurrentUser.AvatarUrl" Alt="@CurrentUser.DisplayName"/>
-                    }
-                    <BbAvatarFallback>@Initial</BbAvatarFallback>
-                </BbAvatar>
+                <UserAvatar Name="@CurrentUser.DisplayName" Url="@CurrentUser.AvatarUrl" Size="AvatarSize.Small"/>
                 <span class="flex min-w-0 flex-col">
                     <span class="truncate text-sm font-medium">@CurrentUser.DisplayName</span>
                     <span class="truncate text-xs text-muted-foreground" data-signs-in>@CurrentUser.Role · @PersonRow.SignsIn(signIn)</span>
@@ -46,8 +40,6 @@ else
     private AuthProvider? _signIn;
 
     private bool _open;
-
-    private string Initial => CurrentUser.DisplayName[..1].ToUpperInvariant();
 
     protected override async Task OnInitializedAsync()
     {
