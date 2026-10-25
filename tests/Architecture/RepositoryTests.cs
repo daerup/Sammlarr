@@ -106,7 +106,11 @@ public class RepositoryTests
 					"Core.Setup.OnboardingService",
 				]
 			);
-		yield return () => (typeof(ISetupStateRepository), ["DB.Data.Config.SetupStateRepository", "DB.Data.Config.ConfigModule", "Core.Setup.OnboardingService"]);
+		yield return () =>
+			(
+				typeof(ISetupStateRepository),
+				["DB.Data.Config.SetupStateRepository", "DB.Data.Config.ConfigModule", "Core.Setup.OnboardingService", "Core.Auth.SignInService"]
+			);
 	}
 
 	[Test]

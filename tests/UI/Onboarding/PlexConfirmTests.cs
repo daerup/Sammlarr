@@ -1,7 +1,10 @@
 using BlazorBlueprint.Components;
 using Bunit;
 using Contracts.Auth;
+using Contracts.Identity;
 using Domain.Auth;
+using Microsoft.Extensions.DependencyInjection;
+using TestInfrastructure;
 using UI.Features.Onboarding.Components;
 
 namespace UI.Tests.Onboarding;
@@ -13,7 +16,7 @@ public class PlexConfirmTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddProviderBranding();
-
+		Services.AddSingleton<ICurrentUser>(new TestCurrentUser { DisplayName = "Lena" });
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
@@ -61,8 +64,20 @@ public class PlexConfirmTests : BunitContext
 		var cut = RenderConfirm(new PendingAdmin(Guid.NewGuid(), "Daerup", string.Empty, HomeRole.Admin));
 
 		await Assert.That(cut.Find("[data-chosen]").TextContent.Words()).IsEqualTo("Setup code accepted · people sign in with Plex");
+		await Assert.That(cut.FindAll("[data-replacing]")).IsEmpty();
 	}
 
-	private IRenderedComponent<PlexConfirm> RenderConfirm(PendingAdmin pending) =>
-		Render<PlexConfirm>(parameters => parameters.Add(confirm => confirm.Pending, pending));
+	[Test]
+	public async Task Confirm_WhenSwappingTheAdmin_SaysWhichAdminItReplaces()
+	{
+		var cut = RenderConfirm(new PendingAdmin(Guid.NewGuid(), "Daerup", string.Empty, HomeRole.Admin), replacing: true);
+
+		await Assert.That(cut.Find("[data-replacing]").TextContent.Words()).IsEqualTo("Replacing L Lena as the admin");
+		await Assert.That(cut.FindAll("[data-chosen]")).IsEmpty();
+	}
+
+	private IRenderedComponent<PlexConfirm> RenderConfirm(PendingAdmin pending, bool replacing = false)
+	{
+		return Render<PlexConfirm>(parameters => parameters.Add(confirm => confirm.Pending, pending).Add(confirm => confirm.Replacing, replacing));
+	}
 }

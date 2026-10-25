@@ -3,12 +3,7 @@
 <form method="post" action="/auth/setup/confirm" class="flex w-full flex-col gap-4">
     <AntiforgeryToken/>
     <input type="hidden" name="pending" value="@Pending.Id"/>
-    <div class="flex items-center gap-2 text-[13px] text-muted-foreground" data-chosen>
-        <LucideIcon Name="check" Size="15" Class="shrink-0"/>
-        <span>Setup code accepted · people sign in with</span>
-        <ProviderLogo Provider="MediaProvider.Plex" Form="ProviderLogoForm.Mark" Size="15" Decorative="true"/>
-        <span class="font-medium text-foreground">Plex</span>
-    </div>
+    <SetupContextLine Replacing="Replacing"/>
     <div class="flex flex-col gap-4 rounded-[10px] border bg-card px-5 py-[18px]" data-pending>
         <div class="flex items-center gap-3.5">
             <UserAvatar Name="@Pending.DisplayName" Url="@Pending.AvatarUrl" Size="AvatarSize.Large"/>
@@ -57,6 +52,8 @@
     private const string WarnBadge = "gap-1 text-[var(--alert-warning)] border-[color-mix(in_oklab,var(--alert-warning)_55%,transparent)]";
 
     [Parameter] [EditorRequired] public required PendingAdmin Pending { get; set; }
+
+    [Parameter] public bool Replacing { get; set; }
 
     private bool Managed => Pending.Home == HomeRole.Managed;
 

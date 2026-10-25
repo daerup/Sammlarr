@@ -34,10 +34,17 @@
                     : $"Connect with {Branding.NickName} to sync your wantlist with the account you signed in with.")
             </p>
             <div class="flex items-center gap-3">
-                @ConnectButton
-                @if (_savedState == CredentialState.Saved)
+                @if (Actions is { } actions)
                 {
-                    <div class="ml-auto">@DisconnectDialog</div>
+                    @actions
+                }
+                else
+                {
+                    @ConnectButton
+                    @if (_savedState == CredentialState.Saved)
+                    {
+                        <div class="ml-auto">@DisconnectDialog</div>
+                    }
                 }
             </div>
         }
@@ -88,6 +95,7 @@
 
     [Parameter] public string ReturnUrl { get; set; } = SettingsLinks.Providers;
 
+    [Parameter] public RenderFragment? Actions { get; set; }
 
     private BrandingInfo Branding => MediaProviderBrandingService.Brands(Provider.Service).Single();
 

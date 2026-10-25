@@ -2,12 +2,7 @@
 @inject MediaProviderBrandingService BrandingService
 
 <div class="flex w-full flex-col gap-4">
-    <div class="flex items-center gap-2 text-[13px] text-muted-foreground" data-chosen>
-        <LucideIcon Name="check" Size="15" Class="shrink-0"/>
-        <span>Setup code accepted · people sign in with</span>
-        <ProviderLogo Provider="MediaProvider.Plex" Form="ProviderLogoForm.Mark" Size="15" Decorative="true"/>
-        <span class="font-medium text-foreground">Plex</span>
-    </div>
+    <SetupContextLine Replacing="Replacing"/>
     <div class="flex flex-col gap-4 rounded-[10px] border bg-card px-5 py-[18px]" data-switch-steps>
         <ol class="flex list-decimal flex-col gap-2 pl-5 text-sm marker:text-muted-foreground">
             <li>Open <AppLink Href="https://app.plex.tv" External="true">plex.tv</AppLink> in this browser.</li>
@@ -16,7 +11,10 @@
         </ol>
         <form method="get" action="/auth/plex/login" class="signin w-full max-w-80" style="--brand: @Plex.BrandColor">
             <input type="hidden" name="returnUrl" value="/setup"/>
-
+            @if (Replacing)
+            {
+                <input type="hidden" name="swap" value="true"/>
+            }
             <BbButton Type="ButtonType.Submit" Variant="ButtonVariant.Outline" Class="signin-button w-full gap-2 font-medium">
                 <span>Sign in with</span>
                 <ProviderLogo Provider="MediaProvider.Plex" Form="ProviderLogoForm.Logo" Size="16"/>
@@ -27,6 +25,7 @@
 </div>
 
 @code {
+    [Parameter] public bool Replacing { get; set; }
 
     private BrandingInfo Plex => BrandingService.GetBrandingInfo(MediaProvider.Plex);
 }

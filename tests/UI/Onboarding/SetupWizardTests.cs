@@ -100,7 +100,7 @@ public class SetupWizardTests : BunitContext
 
 		await Assert.That(cut.Find("h4").TextContent).IsEqualTo("Is this you?");
 		await Assert.That(cut.FindComponent<PlexConfirm>().Instance.Pending).IsEqualTo(pending);
-
+		await Assert.That(cut.FindComponent<PlexConfirm>().Instance.Replacing).IsFalse();
 		await Assert.That(cut.FindComponents<Stub<AdminForm>>()).IsEmpty();
 		await Assert.That(cut.Find("[data-account-hint]").TextContent).IsEqualTo(hint);
 		await Assert.That(Buttons(cut, "Next")).IsEmpty();
@@ -114,6 +114,45 @@ public class SetupWizardTests : BunitContext
 		await Assert.That(cut.Find("h4").TextContent).IsEqualTo("Sign in as someone else");
 		await Assert.That(cut.FindComponents<PlexSwitch>()).HasSingleItem();
 		await Assert.That(cut.Find("[data-account-hint]").TextContent).IsEqualTo("Sign in with your own Plex profile to continue.");
+	}
+
+	[Test]
+	public async Task ChangeUser_OnTheWantlistStep_OpensTheAccountStepWithTheAdminAndAWayToSwap()
+	{
+		_config.GetAsync(Any()).Returns(OnArr with { Sink = SinkKind.Plex, AuthProvider = AuthProvider.Plex });
+		var cut = RenderForAdmin();
+		var changeUser = Render(cut.FindComponent<Stub<AccountRow>>().Instance.Parameters.Get(row => row.Actions)!);
+
+		await changeUser.Find("[data-change-user]").ClickAsync(new());
+
+		await Assert.That(cut.Find("h4").TextContent).IsEqualTo("The admin account");
+		await Assert.That(cut.Find("[data-admin-name]").TextContent).IsEqualTo("guest");
+	}
+
+	[Test]
+	public async Task AccountStep_UseADifferentPlexAccountWhileTheAdminExists_ShowsTheSwitchStepsAsASwap()
+	{
+		_config.GetAsync(Any()).Returns(OnArr with { Sink = SinkKind.Plex, AuthProvider = AuthProvider.Plex });
+		var cut = RenderForAdmin();
+		await Buttons(cut, "Back").Single().ClickAsync(new());
+
+		await cut.Find("[data-swap]").ClickAsync(new());
+
+		await Assert.That(cut.Find("h4").TextContent).IsEqualTo("Sign in as someone else");
+		await Assert.That(cut.FindComponent<PlexSwitch>().Instance.Replacing).IsTrue();
+		await Assert.That(Buttons(cut, "Next")).HasSingleItem();
+	}
+
+	[Test]
+	public async Task Wizard_BackFromPlexDuringASwap_OpensOnIsThisYouAsASwap()
+	{
+		_config.GetAsync(Any()).Returns(OnArr with { AuthProvider = AuthProvider.Plex });
+		var pending = new PendingAdmin(Guid.NewGuid(), "Daerup", string.Empty, HomeRole.Admin);
+
+		var cut = Render<SetupWizard>(parameters => parameters.Add(wizard => wizard.NeedsAdmin, false).Add(wizard => wizard.Pending, Some.Of(pending)));
+
+		cut.WaitForState(() => cut.FindAll("h4").Count == 1 && cut.Find("h4").TextContent == "Is this you?");
+		await Assert.That(cut.FindComponent<PlexConfirm>().Instance.Replacing).IsTrue();
 	}
 
 	[Test]

@@ -1,0 +1,26 @@
+@using Contracts.Identity
+@inject ICurrentUser CurrentUser
+
+@if (Replacing)
+{
+    <div class="flex items-center gap-2 text-[13px] text-muted-foreground" data-replacing>
+        <LucideIcon Name="repeat" Size="15" Class="shrink-0"/>
+        <span>Replacing</span>
+        <UserAvatar Name="@CurrentUser.DisplayName" Url="@CurrentUser.AvatarUrl" Size="AvatarSize.Small" Class="h-5 w-5 text-[11px]"/>
+        <span class="max-w-[260px] truncate font-medium text-foreground">@CurrentUser.DisplayName</span>
+        <span>as the admin</span>
+    </div>
+}
+else
+{
+    <div class="flex items-center gap-2 text-[13px] text-muted-foreground" data-chosen>
+        <LucideIcon Name="check" Size="15" Class="shrink-0"/>
+        <span>Setup code accepted · people sign in with</span>
+        <ProviderLogo Provider="MediaProvider.Plex" Form="ProviderLogoForm.Mark" Size="15" Decorative="true"/>
+        <span class="font-medium text-foreground">Plex</span>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Replacing { get; set; }
+}

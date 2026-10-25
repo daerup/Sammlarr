@@ -3,6 +3,7 @@ using Contracts.Caching;
 using Contracts.DI;
 using Contracts.Identity;
 using Contracts.Settings;
+using Contracts.Setup;
 using Core.Notifications;
 using Core.Setup;
 using Domain.Identity;
@@ -21,6 +22,7 @@ internal sealed class SignInService(
 	IProviderConfigService providerConfig,
 	TimeProvider clock,
 	SetupGate setupGate,
+	ISetupStateRepository setupState,
 	WebUiNotificationSeeder webUiNotifications,
 	ITypedMemoryCache<Guid, PendingLogin> pending,
 	ILogger<SignInService> logger
@@ -37,6 +39,8 @@ internal sealed class SignInService(
 	private static readonly Error PendingGone = Error.From(SignInTimeout.Message);
 
 	private static readonly Error AdminTaken = Error.From("This Sammlarr already has an admin. Sign in instead.");
+
+	private static readonly Error SetupOver = Error.From("Only the admin can change the admin, and only during setup.");
 
 	public Task<Result<string>> BeginAsync(AuthProvider provider, string callbackUrl, CancellationToken cancellationToken = default) =>
 		providers[provider].BeginLoginAsync(callbackUrl, cancellationToken);
@@ -74,6 +78,16 @@ internal sealed class SignInService(
 		return confirmed.Apply(_ => pending.Remove(id));
 	}
 
+	public async Task<Result<User>> SwapAdminAsync(Guid id, UserId signedIn, CancellationToken cancellationToken = default)
+	{
+		var isAdmin = (await users.FindRoleAsync(signedIn, cancellationToken)).When(role => role == UserRole.Admin).IsSome();
+		var duringSetup = (await setupState.CompletedAtAsync(cancellationToken)).IsNone();
+		var swapped = await Admissible(id)
+			.Map(found => Optional.When(isAdmin && duringSetup, () => found).ToResult(SetupOver))
+			.Map(found => SwapLoginAsync(found.Provider, found.Login, signedIn, cancellationToken));
+		return swapped.Apply(_ => pending.Remove(id));
+	}
+
 	public async Task<Result<User>> LinkAsync(AuthProvider provider, string callbackQuery, UserId signedIn, CancellationToken cancellationToken = default)
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
@@ -102,6 +116,28 @@ internal sealed class SignInService(
 			.GetValueOrNone(id)
 			.ToResult(PendingGone)
 			.Map(found => providers[found.Provider].AsAdmin(found.Login).Map(login => found with { Login = login }));
+	}
+
+	private async Task<Result<User>> SwapLoginAsync(AuthProvider provider, ExternalLogin login, UserId signedIn, CancellationToken cancellationToken)
+	{
+		return await users
+			.FindByLoginAsync(provider, login.ExternalUserId, cancellationToken)
+			.Match(
+				owner => owner.Id == signedIn ? CompleteSignInAsync(provider, login, owner, isInitialAdmin: false, cancellationToken) : Taken(login),
+				() => MoveLoginAsync(provider, login, signedIn, cancellationToken)
+			);
+	}
+
+	private static Task<Result<User>> Taken(ExternalLogin login)
+	{
+		return Task.FromResult<Result<User>>(Error.From($"{login.DisplayName} already has a Sammlarr account."));
+	}
+
+	private async Task<Result<User>> MoveLoginAsync(AuthProvider provider, ExternalLogin login, UserId signedIn, CancellationToken cancellationToken)
+	{
+		await users.ReplaceLoginAsync(signedIn, provider, login.ExternalUserId, cancellationToken);
+		logger.LogInformation("Setup moved the admin {UserId} to another {Provider} account", signedIn, provider);
+		return await CompleteSignInAsync(provider, login, await users.GetAsync(signedIn, cancellationToken), isInitialAdmin: false, cancellationToken);
 	}
 
 	private async Task<Result<User>> ReconnectAsync(AuthProvider provider, ExternalLogin login, UserId signedIn, CancellationToken cancellationToken)

@@ -2,6 +2,7 @@ using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Notifications;
 using Contracts.Settings;
+using Contracts.Setup;
 using Core.Auth;
 using Core.Caching;
 using Core.Notifications;
@@ -53,6 +54,7 @@ public class SignInServiceTests : IDisposable
 				_config.Object,
 				new FakeTimeProvider(),
 				_setup,
+				ISetupStateRepository.Mock().Object,
 				new WebUiNotificationSeeder(INotificationTargetRepository.Mock().Object, INotificationSubscriptionRepository.Mock().Object),
 				new TypedMemoryCache<Guid, PendingLogin>(_cache),
 				_logger.Object

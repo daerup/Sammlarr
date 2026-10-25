@@ -94,11 +94,23 @@ internal static class AuthEndpoints
 		endpoints.MapPost("/auth/logout", SignOutAsync);
 	}
 
-	private static async Task<IResult> LoginAsync(string provider, string? returnUrl, HttpContext context, ISignInService signIn, SammlarOptions options)
+	private static async Task<IResult> LoginAsync(
+		string provider,
+		string? returnUrl,
+		HttpContext context,
+		ISignInService signIn,
+		SammlarOptions options,
+		bool swap = false
+	)
 	{
 		if (!TryParseProvider(provider, out var authProvider))
 		{
 			return Results.NotFound();
+		}
+
+		if (swap)
+		{
+			AdminSwapClaim.Issue(context);
 		}
 
 		var callbackUrl = QueryHelpers.AddQueryString($"{PublicOrigin.Of(options, context.Request)}/auth/{provider}/callback", "state", OAuthState.Issue(context));
@@ -122,6 +134,7 @@ internal static class AuthEndpoints
 		}
 
 		var setupCode = SetupClaim.Read(context);
+		var swapping = AdminSwapClaim.Redeem(context);
 		if (!OAuthState.Redeem(context, state))
 		{
 			return Results.Redirect(Failed(StaleSignIn, authProvider, setupCode, returnUrl));
@@ -130,10 +143,10 @@ internal static class AuthEndpoints
 		var query = context.Request.QueryString.Value ?? string.Empty;
 		return await SignedIn(context.User)
 			.Match(
-				user => LinkAsync(context, signIn, authProvider, query, user, returnUrl),
+				user => swapping ? PendAdminAsync(context, signIn, authProvider, query, new None()) : LinkAsync(context, signIn, authProvider, query, user, returnUrl),
 				() =>
 					setupCode.Match(
-						code => PendAdminAsync(context, signIn, authProvider, query, code),
+						code => PendAdminAsync(context, signIn, authProvider, query, Some.Of(code)),
 						() => SignInAsync(context, signIn, authProvider, query, returnUrl)
 					)
 			);
@@ -153,18 +166,22 @@ internal static class AuthEndpoints
 
 	private static Task<Result<User>> ConfirmAsync(HttpContext context, ISignInService signIn, Guid id, Optional<string> setupCode)
 	{
-		return setupCode.ToResult(SetupTimedOut).Map(code => signIn.ConfirmAdminAsync(id, new Secret(code), context.RequestAborted));
+		return SignedIn(context.User)
+			.Match(
+				signedIn => signIn.SwapAdminAsync(id, signedIn, context.RequestAborted),
+				() => setupCode.ToResult(SetupTimedOut).Map(code => signIn.ConfirmAdminAsync(id, new Secret(code), context.RequestAborted))
+			);
 	}
 
-	private static async Task<IResult> PendAdminAsync(HttpContext context, ISignInService signIn, AuthProvider provider, string query, string setupCode)
+	private static async Task<IResult> PendAdminAsync(HttpContext context, ISignInService signIn, AuthProvider provider, string query, Optional<string> setupCode)
 	{
 		var pending = await signIn.PendAdminAsync(provider, query, context.RequestAborted);
 		return pending.Match(found => Pending(context, found, setupCode), error => Results.Redirect(SetupRedirect.For(error, provider)));
 	}
 
-	private static IResult Pending(HttpContext context, PendingAdmin pending, string setupCode)
+	private static IResult Pending(HttpContext context, PendingAdmin pending, Optional<string> setupCode)
 	{
-		SetupClaim.Issue(context, setupCode);
+		setupCode.Apply(code => SetupClaim.Issue(context, code));
 		PendingAdminCookie.Issue(context, pending.Id);
 		return Results.Redirect(QueryHelpers.AddQueryString(SetupPath, "pending", pending.Id.ToString()));
 	}

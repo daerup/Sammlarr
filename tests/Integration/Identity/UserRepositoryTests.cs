@@ -56,6 +56,19 @@ public class UserRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task ReplaceLoginAsync_PointsTheSameUserAtTheNewAccountAndForgetsTheOldOne()
+	{
+		var id = UserId.New();
+		await _testee.CreateAsync(new User(id, "Lena", "avatar", UserRole.Admin, DateTimeOffset.UnixEpoch), AuthProvider.Plex, "lena-external");
+
+		await _testee.ReplaceLoginAsync(id, AuthProvider.Plex, "daerup-external");
+
+		await Assert.That((await _testee.FindByLoginAsync(AuthProvider.Plex, "daerup-external")).Map(user => user.Id)).IsSome().And.IsEqualTo(id);
+		await Assert.That(await _testee.FindByLoginAsync(AuthProvider.Plex, "lena-external")).IsNone();
+		await Assert.That(await _testee.FindRoleAsync(id)).IsSome().And.IsEqualTo(UserRole.Admin);
+	}
+
+	[Test]
 	public async Task DeleteAsync_RemovesUserAndCascadesAllOwnedData()
 	{
 		var victimId = UserId.New();

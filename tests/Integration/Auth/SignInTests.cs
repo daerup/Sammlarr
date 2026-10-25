@@ -208,6 +208,62 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task SwapAdminAsync_DuringSetup_MovesTheSameUserToTheOtherPlexAccount()
+	{
+		var lena = await host.SeedExistingUser("plex-lena", UserRole.Admin, "Lena");
+		await host.SetupUnfinished();
+		host.OAuthReturns("plex-daerup", "Daerup");
+		var id = await PendAsync();
+
+		var result = await Testee.SwapAdminAsync(id, lena);
+
+		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That((user.Id, user.DisplayName)).IsEqualTo((lena, "Daerup")));
+		var users = host.Resolve<IUserRepository>();
+		await Assert.That((await users.FindByLoginAsync(AuthProvider.Plex, "plex-daerup")).Map(found => found.Id)).IsSome().And.IsEqualTo(lena);
+		await Assert.That(await users.FindByLoginAsync(AuthProvider.Plex, "plex-lena")).IsNone();
+		await Assert.That(await host.HasStoredCredential(AuthProvider.Plex, lena)).IsTrue();
+		await Assert.That(Testee.Pending(id)).IsNone();
+	}
+
+	[Test]
+	public async Task SwapAdminAsync_ToAPlexAccountThatAlreadyHasAUser_RefusesAndKeepsTheAdmin()
+	{
+		var lena = await host.SeedExistingUser("plex-lena", UserRole.Admin, "Lena");
+		await host.SeedExistingUser("plex-sam", UserRole.Member, "Sam");
+		await host.SetupUnfinished();
+		host.OAuthReturns("plex-sam", "Sam");
+		var id = await PendAsync();
+
+		var result = await Testee.SwapAdminAsync(id, lena);
+
+		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("Sam already has a Sammlarr account."));
+		await Assert.That(await host.Resolve<IUserRepository>().FindByLoginAsync(AuthProvider.Plex, "plex-lena")).IsSome();
+	}
+
+	[Test]
+	[Arguments(UserRole.Admin, true)]
+	[Arguments(UserRole.Member, false)]
+	public async Task SwapAdminAsync_AfterSetupOrForAMember_Refuses(UserRole role, bool setupFinished)
+	{
+		var user = await host.SeedExistingUser("plex-lena", role, "Lena");
+		if (!setupFinished)
+		{
+			await host.SetupUnfinished();
+		}
+
+		host.OAuthReturns("plex-daerup", "Daerup");
+		var id = await PendAsync();
+
+		var result = await Testee.SwapAdminAsync(id, user);
+
+		await Assert
+			.That(result)
+			.IsError()
+			.And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("Only the admin can change the admin, and only during setup."));
+		await Assert.That(await host.Resolve<IUserRepository>().FindByLoginAsync(AuthProvider.Plex, "plex-lena")).IsSome();
+	}
+
+	[Test]
 	public async Task LinkAsync_OnAPlexInstall_ForTheSignedInPlexAccount_RefreshesItsToken()
 	{
 		var existing = await host.SeedExistingUser("plex-uuid", UserRole.Admin, "Daerup");

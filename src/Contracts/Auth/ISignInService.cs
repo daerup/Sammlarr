@@ -15,6 +15,8 @@ public interface ISignInService
 
 	Task<Result<User>> ConfirmAdminAsync(Guid id, Secret setupCode, CancellationToken cancellationToken = default);
 
+	Task<Result<User>> SwapAdminAsync(Guid id, UserId signedIn, CancellationToken cancellationToken = default);
+
 	Task<Result<User>> SignInWithPasswordAsync(string username, Secret password, CancellationToken cancellationToken = default);
 
 	Task<Result<User>> LinkAsync(AuthProvider provider, string callbackQuery, UserId signedIn, CancellationToken cancellationToken = default);

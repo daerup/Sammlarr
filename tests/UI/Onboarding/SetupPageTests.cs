@@ -95,6 +95,21 @@ public class SetupPageTests : BunitContext
 	}
 
 	[Test]
+	public async Task Page_ForAnAdminBackFromPlexDuringASwap_HandsThePendingAdminToTheWizard()
+	{
+		AsAdmin(complete: false);
+		var pending = new PendingAdmin(Guid.NewGuid(), "Daerup", string.Empty, HomeRole.Admin);
+		_signIns.Pending(pending.Id).Returns(Some.Of(pending));
+		Services.GetRequiredService<NavigationManager>().NavigateTo($"/setup?pending={pending.Id}");
+
+		var cut = Render<Setup>();
+
+		var wizard = cut.WaitForComponent<Stub<SetupWizard>>().Instance.Parameters;
+		await Assert.That(wizard.Get(setup => setup.Pending)).IsSome().And.IsEqualTo(pending);
+		await Assert.That(wizard.Get(setup => setup.NeedsAdmin)).IsFalse();
+	}
+
+	[Test]
 	public async Task Page_ForAnAdminMidSetup_ShowsTheWizard()
 	{
 		AsAdmin(complete: false);

@@ -41,6 +41,23 @@ public class AccountRowTests : BunitContext
 	}
 
 	[Test]
+	public async Task Row_GivenItsOwnActions_ShowsThemInsteadOfReconnectAndDisconnect()
+	{
+		var cut = Render<AccountRow>(parameters =>
+			parameters
+				.Add(row => row.Provider, AuthProvider.Plex)
+				.Add(row => row.Open, true)
+				.Add(row => row.Actions, builder => builder.AddMarkupContent(0, "<button>Change user</button>"))
+		);
+
+		cut.WaitForState(() => cut.FindAll("[data-signed-in]").Count == 1);
+		var buttons = cut.FindAll("button").Select(button => button.TextContent.Trim()).ToList();
+		await Assert.That(buttons).Contains("Change user");
+		await Assert.That(buttons).DoesNotContain("Reconnect with Plex");
+		await Assert.That(cut.Markup).DoesNotContain("Disconnect");
+	}
+
+	[Test]
 	public async Task Row_WhenPlexIsOnlyTheWatchlistLink_KeepsTheTokenField()
 	{
 		var cut = RenderRow(signsIn: false);
