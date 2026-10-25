@@ -155,7 +155,10 @@ internal static class PlexTypes
 			[property: JsonPropertyName("friendlyName")] string? FriendlyName,
 			[property: JsonPropertyName("subscriptionDescription")] string? SubscriptionDescription,
 			[property: JsonPropertyName("subscription")] Subscription? Subscription,
-			[property: JsonPropertyName("joinedAt")] long? JoinedAt
+			[property: JsonPropertyName("joinedAt")] long? JoinedAt,
+			[property: JsonPropertyName("home")] bool Home = false,
+			[property: JsonPropertyName("homeAdmin")] bool HomeAdmin = false,
+			[property: JsonPropertyName("restricted")] bool Restricted = false
 		);
 
 		public sealed record Subscription(

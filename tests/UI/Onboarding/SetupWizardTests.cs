@@ -2,10 +2,12 @@ using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using Bunit;
 using Bunit.TestDoubles;
+using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Settings;
 using Contracts.Setup;
 using Contracts.Wantlist;
+using Domain.Auth;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.AspNetCore.Components;
@@ -77,6 +79,41 @@ public class SetupWizardTests : BunitContext
 
 		await Assert.That(cut.FindComponents<Stub<AdminForm>>()).Count().IsEqualTo(1);
 		await Assert.That(Buttons(cut, "Next")).IsEmpty();
+	}
+
+	[Test]
+	public async Task AccountStep_BeforePlexReturns_SaysTheStepCompletesWhenTheAdminExists()
+	{
+		var cut = Render<SetupWizard>(parameters => parameters.Add(wizard => wizard.NeedsAdmin, true));
+
+		await Assert.That(cut.Find("[data-account-hint]").TextContent).IsEqualTo("The step completes when the admin exists.");
+	}
+
+	[Test]
+	[Arguments(HomeRole.Admin, "The step completes when you make the account the admin.")]
+	[Arguments(HomeRole.Managed, "Sign in with your own Plex profile to continue.")]
+	public async Task AccountStep_WhenPlexReturned_AsksIsThisYouInsteadOfTheForm(HomeRole home, string hint)
+	{
+		var pending = new PendingAdmin(Guid.NewGuid(), "Daerup", string.Empty, home);
+
+		var cut = Render<SetupWizard>(parameters => parameters.Add(wizard => wizard.NeedsAdmin, true).Add(wizard => wizard.Pending, Some.Of(pending)));
+
+		await Assert.That(cut.Find("h4").TextContent).IsEqualTo("Is this you?");
+		await Assert.That(cut.FindComponent<PlexConfirm>().Instance.Pending).IsEqualTo(pending);
+
+		await Assert.That(cut.FindComponents<Stub<AdminForm>>()).IsEmpty();
+		await Assert.That(cut.Find("[data-account-hint]").TextContent).IsEqualTo(hint);
+		await Assert.That(Buttons(cut, "Next")).IsEmpty();
+	}
+
+	[Test]
+	public async Task AccountStep_AfterUseADifferentPlexAccount_ShowsHowToSwitchInPlex()
+	{
+		var cut = Render<SetupWizard>(parameters => parameters.Add(wizard => wizard.NeedsAdmin, true).Add(wizard => wizard.SwitchingPlex, true));
+
+		await Assert.That(cut.Find("h4").TextContent).IsEqualTo("Sign in as someone else");
+		await Assert.That(cut.FindComponents<PlexSwitch>()).HasSingleItem();
+		await Assert.That(cut.Find("[data-account-hint]").TextContent).IsEqualTo("Sign in with your own Plex profile to continue.");
 	}
 
 	[Test]

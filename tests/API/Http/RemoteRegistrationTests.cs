@@ -140,6 +140,8 @@ public class RemoteRegistrationTests
 		public Task<Result<ExternalLogin>> CompleteLoginAsync(string callbackQuery, CancellationToken cancellationToken = default) =>
 			Task.FromResult<Result<ExternalLogin>>(Error.From("none"));
 
+		public Result<ExternalLogin> AsAdmin(ExternalLogin login) => Success.Of(login);
+
 		public Task<AccessCheck> CheckAsync(Guid clientId, Secret accessToken, CancellationToken cancellationToken = default) => Task.FromResult(AccessCheck.Valid);
 	}
 }

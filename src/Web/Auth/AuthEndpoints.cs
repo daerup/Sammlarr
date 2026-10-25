@@ -4,6 +4,7 @@ using Contracts.Identity;
 using Contracts.Setup;
 using Domain.Identity;
 using Domain.Providers;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Shared.Options;
@@ -20,67 +21,14 @@ internal static class AuthEndpoints
 
 	private static readonly Error StaleSignIn = Error.From("The sign-in timed out or was started in another browser. Please try again.");
 
+	private static readonly Error SetupTimedOut = Error.From(SignInTimeout.Message);
+
 	public static void MapAuthEndpoints(this IEndpointRouteBuilder endpoints)
 	{
 		var group = endpoints.MapGroup("/auth/{provider}");
 
-		group.MapGet(
-			"/login",
-			async (string provider, string? returnUrl, HttpContext context, ISignInService signIn, SammlarOptions options, CancellationToken cancellationToken) =>
-			{
-				if (!TryParseProvider(provider, out var authProvider))
-				{
-					return Results.NotFound();
-				}
-
-				var callbackUrl = QueryHelpers.AddQueryString(
-					$"{PublicOrigin.Of(options, context.Request)}/auth/{provider}/callback",
-					"state",
-					OAuthState.Issue(context)
-				);
-				if (!string.IsNullOrEmpty(returnUrl))
-				{
-					callbackUrl = QueryHelpers.AddQueryString(callbackUrl, "returnUrl", returnUrl);
-				}
-
-				var started = await signIn.BeginAsync(authProvider, callbackUrl, cancellationToken);
-				return started.Match(
-					signInPage => Results.Redirect(signInPage),
-					error => Results.Redirect(Failed(error, authProvider, SetupClaim.Redeem(context), returnUrl))
-				);
-			}
-		);
-
-		group.MapGet(
-			"/callback",
-			async (string provider, string? state, string? returnUrl, HttpContext context, ISignInService signIn, CancellationToken cancellationToken) =>
-			{
-				if (!TryParseProvider(provider, out var authProvider))
-				{
-					return Results.NotFound();
-				}
-
-				var setupCode = SetupClaim.Redeem(context);
-				if (!OAuthState.Redeem(context, state))
-				{
-					return Results.Redirect(Failed(StaleSignIn, authProvider, setupCode, returnUrl));
-				}
-
-				var query = context.Request.QueryString.Value ?? string.Empty;
-				return await SignedIn(context.User)
-					.Match(
-						user => LinkAsync(context, signIn, authProvider, query, user, returnUrl),
-						async () =>
-							await setupCode
-								.Match(
-									code => signIn.CompleteSetupAsync(authProvider, query, new Secret(code), cancellationToken),
-									() => signIn.CompleteAsync(authProvider, query, cancellationToken)
-								)
-								.Map(user => SignInAndRedirectAsync(context, user, returnUrl))
-								.GetValueOr(error => Results.Redirect(Failed(error, authProvider, setupCode, returnUrl)))
-					);
-			}
-		);
+		group.MapGet("/login", LoginAsync);
+		group.MapGet("/callback", CallbackAsync);
 
 		endpoints
 			.MapPost(
@@ -139,7 +87,86 @@ internal static class AuthEndpoints
 				}
 			)
 			.RequireRateLimiting(RateLimitingModule.SignInForms);
+		endpoints
+			.MapPost("/auth/setup/confirm", ConfirmAdminAsync)
+			.WithMetadata(new RequireAntiforgeryTokenAttribute())
+			.RequireRateLimiting(RateLimitingModule.SignInForms);
 		endpoints.MapPost("/auth/logout", SignOutAsync);
+	}
+
+	private static async Task<IResult> LoginAsync(string provider, string? returnUrl, HttpContext context, ISignInService signIn, SammlarOptions options)
+	{
+		if (!TryParseProvider(provider, out var authProvider))
+		{
+			return Results.NotFound();
+		}
+
+		var callbackUrl = QueryHelpers.AddQueryString($"{PublicOrigin.Of(options, context.Request)}/auth/{provider}/callback", "state", OAuthState.Issue(context));
+		if (!string.IsNullOrEmpty(returnUrl))
+		{
+			callbackUrl = QueryHelpers.AddQueryString(callbackUrl, "returnUrl", returnUrl);
+		}
+
+		var started = await signIn.BeginAsync(authProvider, callbackUrl, context.RequestAborted);
+		return started.Match(
+			signInPage => Results.Redirect(signInPage),
+			error => Results.Redirect(Failed(error, authProvider, SetupClaim.Redeem(context), returnUrl))
+		);
+	}
+
+	internal static async Task<IResult> CallbackAsync(string provider, string? state, string? returnUrl, HttpContext context, ISignInService signIn)
+	{
+		if (!TryParseProvider(provider, out var authProvider))
+		{
+			return Results.NotFound();
+		}
+
+		var setupCode = SetupClaim.Read(context);
+		if (!OAuthState.Redeem(context, state))
+		{
+			return Results.Redirect(Failed(StaleSignIn, authProvider, setupCode, returnUrl));
+		}
+
+		var query = context.Request.QueryString.Value ?? string.Empty;
+		return await SignedIn(context.User)
+			.Match(
+				user => LinkAsync(context, signIn, authProvider, query, user, returnUrl),
+				() =>
+					setupCode.Match(
+						code => PendAdminAsync(context, signIn, authProvider, query, code),
+						() => SignInAsync(context, signIn, authProvider, query, returnUrl)
+					)
+			);
+	}
+
+	internal static async Task<IResult> ConfirmAdminAsync([FromForm] Guid pending, HttpContext context, ISignInService signIn)
+	{
+		var setupCode = SetupClaim.Redeem(context);
+		return await PendingAdminCookie
+			.Redeem(context)
+			.When(id => id == pending)
+			.ToResult(SetupTimedOut)
+			.Map(id => ConfirmAsync(context, signIn, id, setupCode))
+			.Map(user => SignInAndRedirectAsync(context, user, SetupPath))
+			.GetValueOr(error => Results.Redirect(SetupRedirect.For(error, AuthProvider.Plex)));
+	}
+
+	private static Task<Result<User>> ConfirmAsync(HttpContext context, ISignInService signIn, Guid id, Optional<string> setupCode)
+	{
+		return setupCode.ToResult(SetupTimedOut).Map(code => signIn.ConfirmAdminAsync(id, new Secret(code), context.RequestAborted));
+	}
+
+	private static async Task<IResult> PendAdminAsync(HttpContext context, ISignInService signIn, AuthProvider provider, string query, string setupCode)
+	{
+		var pending = await signIn.PendAdminAsync(provider, query, context.RequestAborted);
+		return pending.Match(found => Pending(context, found, setupCode), error => Results.Redirect(SetupRedirect.For(error, provider)));
+	}
+
+	private static IResult Pending(HttpContext context, PendingAdmin pending, string setupCode)
+	{
+		SetupClaim.Issue(context, setupCode);
+		PendingAdminCookie.Issue(context, pending.Id);
+		return Results.Redirect(QueryHelpers.AddQueryString(SetupPath, "pending", pending.Id.ToString()));
 	}
 
 	private static async Task<IResult> LinkAsync(HttpContext context, ISignInService signIn, AuthProvider provider, string query, UserId user, string? returnUrl)
@@ -148,6 +175,14 @@ internal static class AuthEndpoints
 			.LinkAsync(provider, query, user, context.RequestAborted)
 			.Map(linked => SignInAndRedirectAsync(context, linked, returnUrl))
 			.GetValueOr(error => Results.Redirect(QueryHelpers.AddQueryString(ReturnUrls.Target(returnUrl), "linkError", error.Reason)));
+	}
+
+	private static async Task<IResult> SignInAsync(HttpContext context, ISignInService signIn, AuthProvider provider, string query, string? returnUrl)
+	{
+		return await signIn
+			.CompleteAsync(provider, query, context.RequestAborted)
+			.Map(user => SignInAndRedirectAsync(context, user, returnUrl))
+			.GetValueOr(error => Results.Redirect(SignInPage(error, returnUrl)));
 	}
 
 	internal static async Task<IResult> SignOutAsync([FromForm] string returnUrl, ISignInCookie cookie)

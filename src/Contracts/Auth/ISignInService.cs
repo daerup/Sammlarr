@@ -9,7 +9,11 @@ public interface ISignInService
 
 	Task<Result<User>> CompleteAsync(AuthProvider provider, string callbackQuery, CancellationToken cancellationToken = default);
 
-	Task<Result<User>> CompleteSetupAsync(AuthProvider provider, string callbackQuery, Secret setupCode, CancellationToken cancellationToken = default);
+	Task<Result<PendingAdmin>> PendAdminAsync(AuthProvider provider, string callbackQuery, CancellationToken cancellationToken = default);
+
+	Optional<PendingAdmin> Pending(Guid id);
+
+	Task<Result<User>> ConfirmAdminAsync(Guid id, Secret setupCode, CancellationToken cancellationToken = default);
 
 	Task<Result<User>> SignInWithPasswordAsync(string username, Secret password, CancellationToken cancellationToken = default);
 
