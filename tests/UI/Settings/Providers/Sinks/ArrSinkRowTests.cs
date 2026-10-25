@@ -266,6 +266,19 @@ public class ArrSinkRowTests : BunitContext
 	}
 
 	[Test]
+	public async Task Section_WhenSonarrRefusesTheKey_SaysWhyUnderTheKey()
+	{
+		const string reason = "Sonarr answered 401 Unauthorized at http://sonarr:8989.";
+		_tester.TestAsync(ArrApp.Sonarr, Any<ArrInstanceConfig>(), Any()).Returns(Error.From(reason, new ArrKeyRefusedException(reason)));
+
+		var cut = RenderRow(settingUp: false);
+
+		cut.WaitForState(() => Badge(cut) == "Sonarr not answering");
+		var alert = cut.FindAll("[role=alert]").Single(found => found.TextContent.Contains(reason, StringComparison.Ordinal));
+		await Assert.That(alert.ParentElement!.QuerySelector("[aria-label='Show Sonarr API key']")).IsNotNull();
+	}
+
+	[Test]
 	public async Task Tabs_WhenTagsAreOpenedWhileTheAppsAreStillTested_StayOnTags()
 	{
 		var sonarr = new TaskCompletionSource<Result<ArrInstanceChoices>>();

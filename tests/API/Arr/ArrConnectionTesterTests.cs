@@ -62,6 +62,7 @@ public class ArrConnectionTesterTests
 
 		await Assert.That(tested).IsError();
 		await Assert.That(tested.Match(_ => string.Empty, error => error.Reason)).IsEqualTo("http://radarr:7878 answers as Sonarr, not Radarr. Check the URL.");
+		await Assert.That(tested).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<ArrKeyRefusedException>()).IsNone());
 		_radarr.Verify(request => request.Path("/api/v3/qualityprofile"), Times.Never);
 	}
 
@@ -75,6 +76,7 @@ public class ArrConnectionTesterTests
 		await Assert
 			.That(tested.Match(_ => string.Empty, error => error.Reason))
 			.IsEqualTo("Radarr answered 401 Unauthorized at http://radarr:7878. Check the API key under Settings › General in Radarr.");
+		await Assert.That(tested).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<ArrKeyRefusedException>()).IsSome());
 	}
 
 	[Test]
@@ -87,11 +89,16 @@ public class ArrConnectionTesterTests
 	}
 
 	[Test]
-	public async Task TestAsync_ForAnAddressWithoutAScheme_SaysHowItHasToStart()
+	[Arguments("192.168.1.5:7878", "Radarr's address is not a valid URL: it has to start with http:// or https://.")]
+	[Arguments("radarr:7878", "Radarr's address is not a valid URL: it has to start with http:// or https://.")]
+	[Arguments("ftp://radarr:7878", "Radarr's address is not a valid URL: it has to start with http:// or https://.")]
+	[Arguments("http://radarr:78789", "Radarr's address is not a valid URL.")]
+	public async Task TestAsync_ForAnInvalidAddress_SaysWhatIsWrongWithoutCallingRadarr(string url, string reason)
 	{
-		var tested = await Testee.TestAsync(ArrApp.Radarr, Radarr with { Url = Some.Of("192.168.1.5:7878") });
+		var tested = await Testee.TestAsync(ArrApp.Radarr, Radarr with { Url = Some.Of(url) });
 
-		await Assert.That(tested.Match(_ => string.Empty, error => error.Reason)).IsEqualTo("Radarr's address has to start with http:// or https://.");
+		await Assert.That(tested.Match(_ => string.Empty, error => error.Reason)).IsEqualTo(reason);
+		await Assert.That(_radarr.Requests).IsEmpty();
 	}
 
 	[Test]

@@ -20,18 +20,21 @@ internal sealed class ArrSession(ArrApi api, ArrConnection connection, ArrInstan
 
 	public static Result<ArrConnection> Connect(ArrApp app, ArrInstanceConfig settings)
 	{
-		var invalid = Error.From($"{app.Name}'s address has to start with http:// or https://.");
 		return settings
 			.Url.Map(url => settings.ApiKey.Map(key => (Url: url, Key: key)))
 			.Match(
-				given => Address(given.Url).Map(uri => new ArrConnection(app, uri, given.Key)).ToResult(invalid),
+				given => Address(app, given.Url).Map(uri => new ArrConnection(app, uri, given.Key)),
 				() => Error.From($"{app.Name} is not set up: it needs an address and an API key.")
 			);
 	}
 
-	private static Optional<Uri> Address(string url)
+	private static Result<Uri> Address(ArrApp app, string url)
 	{
-		return Optional.When(Uri.TryCreate($"{url.TrimEnd('/')}/", UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https", () => uri!);
+		var invalid = $"{app.Name}'s address is not a valid URL";
+		return Optional
+			.When(url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || url.StartsWith("https://", StringComparison.OrdinalIgnoreCase), () => url)
+			.ToResult($"{invalid}: it has to start with http:// or https://.")
+			.Map(schemed => Optional.When(Uri.TryCreate($"{schemed.TrimEnd('/')}/", UriKind.Absolute, out var uri), () => uri!).ToResult($"{invalid}."));
 	}
 
 	public ValueSet<int> Mine(ArrTagScheme scheme, ArrTagUser user)

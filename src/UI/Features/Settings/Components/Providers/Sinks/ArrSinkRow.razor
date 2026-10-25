@@ -81,7 +81,7 @@
                             var status = _apps[app];
                             <BbTabsContent Value="@app.Name" ForceMount="true">
                                 <div class="pt-2">
-                                    <ArrAppSection App="app" Instance="config.Of(app)" State="status.State" Error="@status.Error" Choices="status.Choices"
+                                    <ArrAppSection App="app" Instance="config.Of(app)" State="status.State" Error="@status.Error" KeyRefused="status.KeyRefused" Choices="status.Choices"
                                                    Edited="typed => Edited(app, typed)" Test="typed => TestAsync(app, typed)"
                                                    InstanceChanged="instance => StoreAsync(app, instance)"/>
                                 </div>
@@ -291,7 +291,7 @@
 
     private Task FailedAsync(ArrApp app, Error error)
     {
-        _apps[app] = new AppStatus(ArrConnectionState.Failed, error.Reason, new ArrInstanceChoices([], []));
+        _apps[app] = new AppStatus(ArrConnectionState.Failed, error.Reason, new ArrInstanceChoices([], [])) { KeyRefused = error.CausedBy<ArrKeyRefusedException>().IsSome() };
         return Task.CompletedTask;
     }
 
@@ -316,6 +316,8 @@
 
     private sealed record AppStatus(ArrConnectionState State, string Error, ArrInstanceChoices Choices)
     {
+        public bool KeyRefused { get; init; }
+
         public static AppStatus Of(ArrConnectionState state) => new(state, string.Empty, new ArrInstanceChoices([], []));
     }
 }

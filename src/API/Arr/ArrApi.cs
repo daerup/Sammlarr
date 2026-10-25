@@ -230,19 +230,21 @@ internal abstract class ArrApi(HttpClient http)
 
 	private Result<string> Accepted(ArrConnection connection, ArrAnswer answer)
 	{
-		return answer.Succeeded ? Success.Of(answer.Text) : Error.From(Refusal(connection, answer.Status, answer.Text));
+		return answer.Succeeded ? Success.Of(answer.Text) : Refusal(connection, answer.Status, answer.Text);
 	}
 
-	private string Refusal(ArrConnection connection, HttpStatusCode status, string body)
+	private Error Refusal(ArrConnection connection, HttpStatusCode status, string body)
 	{
 		var answer = $"{App.Name} answered {(int)status} {status} at {connection.Address}.";
 		return status switch
 		{
-			HttpStatusCode.Unauthorized => $"{answer} Check the API key under Settings › General in {App.Name}.",
-			HttpStatusCode.BadRequest => $"{answer} {Validation(body)}".TrimEnd(),
-			_ => answer,
+			HttpStatusCode.Unauthorized => KeyRefused($"{answer} Check the API key under Settings › General in {App.Name}."),
+			HttpStatusCode.BadRequest => Error.From($"{answer} {Validation(body)}".TrimEnd()),
+			_ => Error.From(answer),
 		};
 	}
+
+	private static Error KeyRefused(string reason) => Error.From(reason, new ArrKeyRefusedException(reason));
 
 	private static string Validation(string body) => string.Join(" ", Failures(body).Select(failure => failure.ErrorMessage).OfType<string>());
 
