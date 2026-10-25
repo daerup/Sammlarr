@@ -8,6 +8,7 @@
 		<File Path=".csharpierrc" />
 		<File Path=".editorconfig" />
 		<File Path=".gitignore" />
+		<File Path="compose.yaml" />
 		<File Path="Directory.Packages.props" />
 		<File Path="docs/adr/0000-template.md" />
 		<File Path="docs/adr/0001-drive-deployment-from-the-aspire-apphost.md" />
