@@ -36,6 +36,7 @@ public class StagingSmokeTests
 			await page.Labelled("Password").EnterAsync(admin.Password);
 			await page.Button("Sign in").ClickAsync();
 			await page.ShouldBeAtAsync(Routes.Home);
+			await ShowsTheVersionItWasBuiltWithAsync(page, app);
 			await page.VisitAsync(SettingsPage.Section("providers"));
 
 			await Expect(SettingsPage.MapService(page, "Radarr + Sonarr"))
@@ -48,6 +49,15 @@ public class StagingSmokeTests
 		{
 			root.Delete(recursive: true);
 		}
+	}
+
+	private static async Task ShowsTheVersionItWasBuiltWithAsync(IPage page, DistributedApplication app)
+	{
+		var sammlarr = app.Services.GetRequiredService<DistributedApplicationModel>().Resources.Single(resource => resource.Name == "sammlarr");
+		var version = $"{sammlarr.Annotations.OfType<DockerfileBuildAnnotation>().Single().BuildArguments["VERSION"]}";
+
+		await Assert.That(version).IsNotEqualTo("0.0.0-local");
+		await Expect(page.Locator("footer")).ToContainTextAsync(version);
 	}
 
 	private static async Task CatchesAWebhookAndAPushoverMessageAsync(Uri catcher, string session)

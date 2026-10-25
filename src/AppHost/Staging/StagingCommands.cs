@@ -106,10 +106,15 @@ internal static class StagingCommands
 	private static async Task<ExecuteCommandResult> RebuildAsync(CommandRun run, IResourceBuilder<ContainerResource> sammlarr)
 	{
 		sammlarr.Resource.TryGetContainerImageName(out var image);
+		var root = StagingEnvironment.RepositoryRoot(sammlarr.ApplicationBuilder);
+		var version = await StagingVersion.ReadAsync(root, run.Token);
 		using var build = Process.Start(
-			new ProcessStartInfo("docker", ["build", "--tag", image!, "--file", StagingEnvironment.Dockerfile, "."])
+			new ProcessStartInfo(
+				"docker",
+				["build", "--tag", image!, "--build-arg", $"{StagingVersion.BuildArgument}={version}", "--file", StagingEnvironment.Dockerfile, "."]
+			)
 			{
-				WorkingDirectory = StagingEnvironment.RepositoryRoot(sammlarr.ApplicationBuilder),
+				WorkingDirectory = root,
 				RedirectStandardError = true,
 				UseShellExecute = false,
 			}

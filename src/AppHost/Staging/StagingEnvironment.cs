@@ -17,8 +17,9 @@ internal static class StagingEnvironment
 		"CA1506:Avoid excessive class coupling",
 		Justification = "the staging composition root: it wires every staging container, project and command"
 	)]
-	internal static void AddStaging(this IDistributedApplicationBuilder builder)
+	internal static async Task AddStagingAsync(this IDistributedApplicationBuilder builder)
 	{
+		var version = await StagingVersion.ReadAsync(RepositoryRoot(builder), CancellationToken.None);
 		var config = StagingConfig.Load(builder);
 		var layout = StagingLayout.From(builder.Configuration["StagingRoot"]);
 		var scenario = new StagingScenarioChoice(builder.Configuration["StagingScenario"] ?? StagingScenarioChoice.Configured);
@@ -80,6 +81,7 @@ internal static class StagingEnvironment
 
 		var sammlarr = builder
 			.AddDockerfile("sammlarr", RepositoryRoot(builder), Dockerfile)
+			.WithBuildArg(StagingVersion.BuildArgument, version)
 			.WithHttpEndpoint(port: config.Ports.Sammlarr, targetPort: 6769, name: "http", isProxied: false)
 			.WithBindMount(layout.Sammlarr, "/data")
 			.WithAppSettings(builder.Configuration)
