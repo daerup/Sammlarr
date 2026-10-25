@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.1.3](https://github.com/daerup/Sammlarr/compare/v0.1.2...v0.1.3) (2026-10-25)
+
+
+### Features
+
+* distinguish invalid Arr URL errors from API key refusals ([4fee50f](https://github.com/daerup/Sammlarr/commit/4fee50fb0e4d57bbcf766a43a404c7fbc76bea25))
+* **setup:** let setup swap the admin to another Plex account ([4fee50f](https://github.com/daerup/Sammlarr/commit/4fee50fb0e4d57bbcf766a43a404c7fbc76bea25))
+
+
+### Bug Fixes
+
+* **auth:** reconnect only the Plex account that signed in ([4fee50f](https://github.com/daerup/Sammlarr/commit/4fee50fb0e4d57bbcf766a43a404c7fbc76bea25))
+* hide switch confirmation when not needed ([4fee50f](https://github.com/daerup/Sammlarr/commit/4fee50fb0e4d57bbcf766a43a404c7fbc76bea25))
+* **setup:** confirm the Plex account before it becomes the admin ([4fee50f](https://github.com/daerup/Sammlarr/commit/4fee50fb0e4d57bbcf766a43a404c7fbc76bea25))
+* **setup:** refuse a managed Plex Home profile as the admin ([4fee50f](https://github.com/daerup/Sammlarr/commit/4fee50fb0e4d57bbcf766a43a404c7fbc76bea25))
+* switch radarr and sonarr images from lscr.io to ghcr.io ([#20](https://github.com/daerup/Sammlarr/issues/20)) ([7782c56](https://github.com/daerup/Sammlarr/commit/7782c566f25aef27f17f65f7beb727cdc2a5ebbe))
+
 ## [0.1.2](https://github.com/daerup/Sammlarr/compare/v0.1.1...v0.1.2) (2026-10-23)
 
 
