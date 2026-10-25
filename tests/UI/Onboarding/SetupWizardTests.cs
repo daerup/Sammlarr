@@ -108,7 +108,14 @@ public class SetupWizardTests : BunitContext
 
 		await cut.InvokeAsync(() => cut.FindComponent<SinkCards>().Instance.PickedChanged.InvokeAsync(SinkKind.Arr));
 
-		await Assert.That(cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters.Get(row => row.SettingUp)).IsTrue();
+		var row = cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters;
+		await Assert.That(row.Get(arr => arr.SettingUp)).IsTrue();
+		await Assert.That(row.Get(arr => arr.NeedsConfirmation)).IsFalse();
+		await Assert.That(Next(cut).HasAttribute("disabled")).IsTrue();
+		await Assert.That(cut.Markup).DoesNotContain("Connect Radarr and Sonarr to continue");
+
+		await cut.InvokeAsync(() => row.Get(arr => arr.Checked).InvokeAsync());
+
 		await Assert.That(cut.Markup).Contains("Connect Radarr and Sonarr to continue");
 	}
 

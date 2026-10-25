@@ -17,6 +17,10 @@
             {
                 <p data-testid="switch-without-plex">@Waiting</p>
             }
+            @if (Preview.Unsent > 0)
+            {
+                <p data-testid="switch-unsent">@Unsent</p>
+            }
         </div>
         <BbDialogFooter>
             <BbDialogClose>
@@ -62,6 +66,8 @@
         $"{Names} {(WithoutPlex.Count == 1 ? "has" : "have")} no Plex connected, so {(WithoutPlex.Count == 1 ? "their wantlist waits" : "their wantlists wait")} until they connect.";
 
     private string Names => WithoutPlex.Humanize(Notation.Words);
+
+    private string Unsent => $"{Counted(Preview.Unsent, "change", "changes")} still waiting for {Branding.Name(From.Service)} {(Preview.Unsent == 1 ? "is" : "are")} dropped.";
 
     private string Keeps
     {

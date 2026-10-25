@@ -41,12 +41,14 @@
                                 <ArrSinkRow Open="_arrOpen"
                                             OpenChanged="open => _arrOpen = open"
                                             SettingUp="_settingUp"
+                                            NeedsConfirmation="false"
                                             Syncs="config.Sink == SinkKind.Arr"
                                             Switching="_switching"
                                             SwitchRequested="() => SwitchAsync(SinkKind.Arr)"
                                             StayOnPlex="() => PickSinkAsync(SinkKind.Plex)"
                                             InstanceMoved="MoveAsync"
-                                            Changed="RefreshAsync"/>
+                                            Changed="RefreshAsync"
+                                            Checked="() => _arrChecking = false"/>
                             }
                             else
                             {
@@ -102,7 +104,7 @@
                             </BbButton>
                         }
                         <div class="ml-auto flex items-center gap-3">
-                            @if (Why is { } why)
+                            @if (Hint is { } why)
                             {
                                 <span class="text-xs text-muted-foreground">@why</span>
                             }
@@ -142,6 +144,7 @@
     private ProviderConfig? _config;
     private HashSet<RemoteService> _ready = [];
     private bool _settingUp;
+    private bool _arrChecking;
     private bool _switching;
     private bool _skipped;
     private bool _arrOpen = true;
@@ -176,6 +179,8 @@
             };
         }
     }
+
+    private string? Hint => (_settingUp && _arrChecking) || _switching ? null : Why;
 
     protected override async Task OnInitializedAsync()
     {
@@ -253,6 +258,7 @@
         {
             case SinkKind.Arr:
                 _settingUp = _config?.Sink != SinkKind.Arr;
+                _arrChecking = _settingUp;
                 _arrOpen = true;
                 break;
             case SinkKind.Plex when _settingUp:

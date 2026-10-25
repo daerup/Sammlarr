@@ -98,7 +98,7 @@
                     </BbTabs>
                 </div>
 
-                @if (SettingUp)
+                @if (SettingUp && ShowsSetup)
                 {
                     <div class="arr-shared">
                         <p class="arr-shared-note">
@@ -109,21 +109,24 @@
                                     : "Test both apps to switch; each needs a quality profile and a root folder. Until then the wantlist keeps syncing to Plex; picking Plex again in the map puts this away.")
                             </span>
                         </p>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <BbButton Size="ButtonSize.Small" Disabled="@(!BothReady || Switching)" OnClick="SwitchRequested">
-                                @if (Switching)
-                                {
-                                    <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                                    <span>Switching…</span>
-                                }
-                                else
-                                {
-                                    <LucideIcon Name="arrow-right-left" Size="14" Class="mr-2"/>
-                                    <span>Switch the wantlist to Radarr + Sonarr</span>
-                                }
-                            </BbButton>
-                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Disabled="Switching" OnClick="StayOnPlex">Stay on Plex</BbButton>
-                        </div>
+                        @if (OffersSwitch)
+                        {
+                            <div class="flex flex-wrap items-center gap-2">
+                                <BbButton Size="ButtonSize.Small" Disabled="@(!BothReady || Switching)" OnClick="SwitchRequested">
+                                    @if (Switching)
+                                    {
+                                        <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                                        <span>Switching…</span>
+                                    }
+                                    else
+                                    {
+                                        <LucideIcon Name="arrow-right-left" Size="14" Class="mr-2"/>
+                                        <span>Switch the wantlist to Radarr + Sonarr</span>
+                                    }
+                                </BbButton>
+                                <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Disabled="Switching" OnClick="StayOnPlex">Stay on Plex</BbButton>
+                            </div>
+                        }
                     </div>
                 }
             }
@@ -145,6 +148,8 @@
 
     [Parameter] public bool SettingUp { get; set; }
 
+    [Parameter] public bool NeedsConfirmation { get; set; } = true;
+
     [Parameter] [EditorRequired] public required bool Syncs { get; set; }
 
     [Parameter] public bool Switching { get; set; }
@@ -156,11 +161,23 @@
     [Parameter] public EventCallback<ArrSinkConfig> InstanceMoved { get; set; }
     [Parameter] public EventCallback Changed { get; set; }
 
+    [Parameter] public EventCallback Checked { get; set; }
+
     private const string WarnBadge = "h-6 items-center gap-1.5 text-[var(--alert-warning)] border-[color-mix(in_oklab,var(--alert-warning)_55%,transparent)]";
 
     private static readonly ArrApp[] Apps = Enum.GetValues<ArrApp>();
 
     private ArrSinkConfig? _config;
+
+    private bool _triedAutomatically;
+
+    private bool _switchingAutomatically;
+
+    private bool _checking = true;
+
+    private bool OffersSwitch => NeedsConfirmation || (_triedAutomatically && !_switchingAutomatically);
+
+    private bool ShowsSetup => NeedsConfirmation || (!_checking && !_switchingAutomatically);
 
     private Dictionary<ArrApp, AppStatus> _apps = Apps.ToDictionary(app => app, _ => AppStatus.Of(ArrConnectionState.Empty));
 
@@ -202,7 +219,9 @@
             await TestAsync(app, config.Of(app));
         }
 
+        _checking = false;
         _tab = Apps.FirstOrNone(NeedsAttention).GetValueOr(ArrApp.Radarr).Name;
+        await Checked.InvokeAsync();
     }
 
     private bool NeedsAttention(ArrApp app) => _apps[app] is not { State: ArrConnectionState.Connected, Choices.Folders.Count: > 0 };
@@ -260,6 +279,20 @@
         StateHasChanged();
         var tested = await Tester.TestAsync(app, typed);
         await tested.Match(choices => ConnectedAsync(app, typed, choices), error => FailedAsync(app, error));
+        await SwitchWhenReadyAsync();
+    }
+
+    private async Task SwitchWhenReadyAsync()
+    {
+        if (!SettingUp || NeedsConfirmation || _triedAutomatically || Switching || !BothReady)
+        {
+            return;
+        }
+
+        _triedAutomatically = true;
+        _switchingAutomatically = true;
+        await SwitchRequested.InvokeAsync();
+        _switchingAutomatically = false;
     }
 
     private async Task ConnectedAsync(ArrApp app, ArrInstanceConfig typed, ArrInstanceChoices choices)

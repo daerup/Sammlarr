@@ -14,4 +14,4 @@ public interface ISinkSwitch
 
 public sealed record SinkSwitched(int Queued, int Unaddressable);
 
-public sealed record SinkSwitchPreview(int Ready, int ToLookUp);
+public sealed record SinkSwitchPreview(int Ready, int ToLookUp, int Unsent);

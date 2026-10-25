@@ -49,6 +49,8 @@ public class ArrSinkRowTests : BunitContext
 
 	private int _stayRequests;
 
+	private int _checks;
+
 	private readonly List<ArrSinkConfig> _moves = [];
 
 	[Before(Test)]
@@ -104,6 +106,67 @@ public class ArrSinkRowTests : BunitContext
 		await SwitchButton(cut).ClickAsync();
 
 		await Assert.That(_switchRequests).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task Switch_InSetupWithoutConfirmation_ShowsNoSetupWhileTheAppsAreChecked()
+	{
+		var sonarr = new TaskCompletionSource<Result<ArrInstanceChoices>>();
+		_tester.TestAsync(ArrApp.Sonarr, Any<ArrInstanceConfig>(), Any()).ReturnsAsync(sonarr.Task);
+
+		var cut = RenderRow(settingUp: true, needsConfirmation: false);
+
+		cut.WaitForState(() => Tab(cut, "Radarr").TextContent.Contains("Connected", StringComparison.Ordinal));
+		await Assert.That(cut.FindAll(".arr-shared")).IsEmpty();
+		await Assert.That(_switchRequests).IsEqualTo(0);
+		await Assert.That(_checks).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task Checked_OnceTheStoredAppsAreTested_IsRaised()
+	{
+		var cut = RenderRow(settingUp: false);
+
+		cut.WaitForState(() => Badge(cut) == "Connected");
+		await Assert.That(_checks).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task Switch_InSetupWithoutConfirmation_IsAskedForOnceBothAppsAnswerThenOfferedIfStillSettingUp()
+	{
+		var cut = RenderRow(settingUp: true, needsConfirmation: false);
+
+		cut.WaitForState(() => cut.FindAll("button").Any(button => button.TextContent.Contains("Switch the wantlist", StringComparison.Ordinal)));
+		await Assert.That(_switchRequests).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task Switch_InSetupWithoutConfirmation_ShowsNoSetupWhileTheAutomaticSwitchRuns()
+	{
+		_tester.TestAsync(ArrApp.Sonarr, Any<ArrInstanceConfig>(), Any()).Returns(Error.From("Sonarr could not be reached at http://sonarr:8989."));
+		var asked = new TaskCompletionSource();
+		var switching = new TaskCompletionSource();
+		var cut = Render<ArrSinkRow>(parameters =>
+			parameters
+				.Add(row => row.SettingUp, true)
+				.Add(row => row.NeedsConfirmation, false)
+				.Add(row => row.Syncs, true)
+				.Add(row => row.Open, true)
+				.Add(row => row.SwitchRequested, () => Asked(asked, switching.Task))
+		);
+		cut.WaitForState(() => cut.FindAll(".arr-shared").Count == 1);
+		Answers(ArrApp.Sonarr, "/tv");
+
+		var testing = cut.Find("[data-arr-app=Sonarr]")
+			.QuerySelectorAll("button")
+			.Single(button => button.TextContent.Contains("Test again", StringComparison.Ordinal))
+			.ClickAsync(new MouseEventArgs());
+		await asked.Task.WaitAsync(TimeSpan.FromSeconds(5));
+		cut.Render(parameters => parameters.Add(row => row.Switching, true));
+
+		await Assert.That(cut.FindAll(".arr-shared")).IsEmpty();
+		switching.SetResult();
+		await testing;
 	}
 
 	[Test]
@@ -338,6 +401,12 @@ public class ArrSinkRowTests : BunitContext
 			.Returns(Success.Of(new ArrInstanceChoices(profiles, [new ArrRootFolder("/tv", 1), new ArrRootFolder("/anime", 1)])));
 	}
 
+	private static Task Asked(TaskCompletionSource asked, Task switching)
+	{
+		asked.SetResult();
+		return switching;
+	}
+
 	private static string Badge(IRenderedComponent<ArrSinkRow> cut) => cut.Find(".arr-row-head > span:last-child").TextContent.Trim();
 
 	private static AngleSharp.Dom.IElement SwitchButton(IRenderedComponent<ArrSinkRow> cut)
@@ -350,15 +419,17 @@ public class ArrSinkRowTests : BunitContext
 		return cut.FindAll("button").Single(button => button.TextContent.Contains("Stay on Plex"));
 	}
 
-	private IRenderedComponent<ArrSinkRow> RenderRow(bool settingUp, bool syncs = true)
+	private IRenderedComponent<ArrSinkRow> RenderRow(bool settingUp, bool syncs = true, bool needsConfirmation = true)
 	{
 		return Render<ArrSinkRow>(parameters =>
 			parameters
 				.Add(row => row.SettingUp, settingUp)
+				.Add(row => row.NeedsConfirmation, needsConfirmation)
 				.Add(row => row.Syncs, syncs)
 				.Add(row => row.Open, true)
 				.Add(row => row.SwitchRequested, () => _switchRequests++)
 				.Add(row => row.StayOnPlex, () => _stayRequests++)
+				.Add(row => row.Checked, () => _checks++)
 				.Add(row => row.InstanceMoved, config => _moves.Add(config))
 		);
 	}

@@ -1,3 +1,4 @@
+using E2E.Tests.Browse;
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
@@ -8,7 +9,9 @@ public class WantlistSyncTests
 	[Test]
 	public async Task RadarrAndSonarr_OnceBothAnswer_TakeOverTheWantlistUntilPlexIsPickedAgain()
 	{
-		var page = await E2EApp.AdminAt(SettingsPage.Section("providers"));
+		var page = await E2EApp.AdminAt(Routes.Browse);
+		await WantAsync(page, TrendingTiles.Title);
+		await page.VisitAsync(SettingsPage.Section("providers"));
 		var wiremock = await E2EApp.WireMockUrlAsync();
 
 		await SettingsPage.MapChip(page, "Wantlist").ClickAsync();
@@ -31,6 +34,16 @@ public class WantlistSyncTests
 
 		await Expect(page.Locator(".arr-row")).ToHaveCountAsync(0);
 		await Expect(SettingsPage.MapService(page, "Radarr + Sonarr")).ToHaveCountAsync(0);
+	}
+
+	private static async Task WantAsync(IPage page, string title)
+	{
+		var tile = TrendingTiles.Resolved(page, title);
+		await Expect(tile).ToBeVisibleAsync(Wait.Settle);
+		await tile.ClickAsync();
+		var add = page.ButtonContaining("Add to Wantlist");
+		await add.ClickAsync();
+		await add.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Hidden });
 	}
 
 	private static ILocator TagsTab(IPage page) => page.GetByRole(AriaRole.Tab).Filter(new LocatorFilterOptions { HasText = "Tags" });

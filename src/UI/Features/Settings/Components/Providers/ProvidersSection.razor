@@ -47,6 +47,7 @@
                         <ArrSinkRow Open="IsOpen(new Arr())"
                                     OpenChanged="open => Toggle(new Arr(), open)"
                                     SettingUp="_settingUp"
+                                    NeedsConfirmation="_needsConfirmation"
                                     Syncs="_config.Sink == SinkKind.Arr"
                                     Switching="_switching"
                                     SwitchRequested="() => ConfirmAsync(SinkKind.Arr)"
@@ -183,13 +184,15 @@
 
     private bool _settingUp;
 
+    private bool _needsConfirmation = true;
+
     private bool _switching;
 
     private SinkKind? _confirming;
 
     private int _switchPeople;
 
-    private SinkSwitchPreview _switchPreview = new(0, 0);
+    private SinkSwitchPreview _switchPreview = new(0, 0, 0);
 
     private IReadOnlyList<string> _withoutPlex = [];
 
@@ -245,11 +248,15 @@
         _scrollTo = key;
     }
 
-    private Task SetUpArrAsync()
+    private async Task SetUpArrAsync()
     {
-        _settingUp = _config?.Sink != SinkKind.Arr;
+        if (_config?.Sink != SinkKind.Arr)
+        {
+            _needsConfirmation = Moves(await SinkSwitch.PreviewAsync(SinkKind.Arr));
+            _settingUp = true;
+        }
+
         OpenRow(new Arr());
-        return Task.CompletedTask;
     }
 
     private Task BackToPlexAsync()
@@ -265,13 +272,21 @@
 
     private async Task ConfirmAsync(SinkKind target)
     {
+        _switchPreview = await SinkSwitch.PreviewAsync(target);
+        if (!Moves(_switchPreview))
+        {
+            await SwitchToAsync(target);
+            return;
+        }
+
         var joined = (await UserManagement.GetPeopleAsync()).Joined.ToList();
         _switchPeople = joined.Count;
-        _switchPreview = await SinkSwitch.PreviewAsync(target);
         _withoutPlex = target == SinkKind.Plex ? [.. joined.Where(person => !person.Holdings.Keys.Contains(RemoteService.Plex)).Select(person => person.User.DisplayName)] : [];
         _confirming = target;
     }
 
+
+    private static bool Moves(SinkSwitchPreview preview) => preview.Ready + preview.ToLookUp + preview.Unsent > 0;
 
     private async Task SwitchConfirmedAsync(SinkKind target)
     {

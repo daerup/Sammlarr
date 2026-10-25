@@ -48,14 +48,16 @@ internal sealed class SinkSwitch(
 	{
 		currentUser.EnsureAdmin();
 		List<MediaId> wanted = [];
+		var unsent = 0;
 		foreach (var user in await users.GetAllAsync(cancellationToken))
 		{
 			wanted.AddRange(await WantedAsync(user.Id, cancellationToken));
+			unsent += await UnsentAsync(user.Id, cancellationToken);
 		}
 
 		var stored = await media.GetSinkIdsAsync(wanted, sink, cancellationToken);
 		var ready = wanted.Count(stored.ContainsKey);
-		return new SinkSwitchPreview(ready, wanted.Count - ready);
+		return new SinkSwitchPreview(ready, wanted.Count - ready, unsent);
 	}
 
 	private async Task<Result<SinkSwitched>> MoveAsync(SinkKind sink, bool ready, Func<Task> commit, CancellationToken cancellationToken)
@@ -131,6 +133,14 @@ internal sealed class SinkSwitch(
 		using var _ = await scope.ServiceProvider.GetRequiredService<IUserScope>().AsAsync(user, cancellationToken);
 		var titles = await scope.ServiceProvider.GetRequiredService<IWantlistService>().GetAsync(cancellationToken);
 		return [.. titles.Ids];
+	}
+
+	private async Task<int> UnsentAsync(UserId user, CancellationToken cancellationToken)
+	{
+		await using var scope = scopes.CreateAsyncScope();
+		using var _ = await scope.ServiceProvider.GetRequiredService<IUserScope>().AsAsync(user, cancellationToken);
+		var outbox = await scope.ServiceProvider.GetRequiredService<IWantlistService>().GetOutboxAsync(cancellationToken);
+		return outbox.Entries.Count;
 	}
 
 	private async Task<int> RequeueAsync(UserId user, SinkKind sink, CancellationToken cancellationToken)
