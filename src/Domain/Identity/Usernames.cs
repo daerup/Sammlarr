@@ -11,7 +11,7 @@ public static class Usernames
 		var trimmed = username.Trim();
 		return Optional
 			.When(trimmed.Length == 0, () => Error.From("A username cannot be empty."))
-			.Or(() => Optional.When(trimmed.Length > MaximumLength, () => Error.From($"A username has at most {MaximumLength} characters.")))
-			.Or(() => Optional.When(trimmed.Any(char.IsWhiteSpace), () => Error.From("A username cannot contain spaces.")));
+			.Or(trimmed.Length > MaximumLength, () => Error.From($"A username has at most {MaximumLength} characters."))
+			.Or(trimmed.Any(char.IsWhiteSpace), () => Error.From("A username cannot contain spaces."));
 	}
 }

@@ -61,6 +61,6 @@ internal sealed class MdblistAnswerCheck(ILogger<MdblistAnswerCheck> logger) : D
 		var error = Optional
 			.When(root.TryGetProperty("error", out var said) && said.ValueKind is not JsonValueKind.Null, () => said.ToString())
 			.When(text => text.Length > 0);
-		return error.Or(() => Optional.When(refused, () => "response false"));
+		return error.Or(refused, () => "response false");
 	}
 }

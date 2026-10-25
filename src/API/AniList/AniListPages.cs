@@ -68,7 +68,7 @@ internal static class AniListPages
 			.Where(pair => Numeric.Contains(pair.Key))
 			.FirstOrNone(pair => !int.TryParse(pair.Value, NumberStyles.None, CultureInfo.InvariantCulture, out _))
 			.Map(pair => $"AniList's {pair.Key} {pair.Value} is not a number Sammlarr can follow.")
-			.Or(() => Optional.When(range is not (0 or 2), () => "AniList's year range needs a first and a last year."));
+			.Or(range is not (0 or 2), () => "AniList's year range needs a first and a last year.");
 	}
 
 	private static JsonObject Build(List<KeyValuePair<string, string>> labels, IReadOnlySet<string> genres)

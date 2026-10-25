@@ -21,7 +21,7 @@ public sealed record IdentityConflict(
 		var shared = held.Select(key => key.Source).Intersect(other.Select(key => key.Source)).Order().FirstOrNone();
 		return shared
 			.Map(source => (DistinctReason)new Contradiction(source))
-			.Or(() => Optional.When(held.Concat(other).Select(key => key.Type).Distinct().Count() > 1, () => (DistinctReason)new TypesDiffer()));
+			.Or(held.Concat(other).Select(key => key.Type).Distinct().Count() > 1, () => new TypesDiffer());
 	}
 
 	private static TimeSpan Backoff(int attempts)

@@ -301,7 +301,7 @@ internal sealed class DetailsFetcher(
 				skipped |= next.Fills;
 			}
 
-			unavailable = unavailable.Or(() => Optional.When(!answer.IsDefinitive, () => next.Remote));
+			unavailable = unavailable.Or(!answer.IsDefinitive, () => next.Remote);
 			var fitting = answer.ToOptional().When(found => found.Fits(backup.Type));
 			fitting.Apply(found => known = known with { Keys = known.Keys + found.Externals.OfType<IIdentityKey>() });
 			var deferred = fitting.Map(found => Deferred(next.Remote, found.Details)).GetValueOr(MediaFields.None);

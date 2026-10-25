@@ -151,7 +151,7 @@ internal sealed class MdblistBudget(TimeProvider clock, MdblistOptions options, 
 				Highest = Highest.Map(highest => Math.Max(highest, seen.Remaining)),
 				Limit = seen.Limit.Or(Limit),
 				Answers = Answers + seen.Counted,
-				ReserveReachedAt = ReserveReachedAt.Or(() => Optional.When(crossed, () => now)),
+				ReserveReachedAt = ReserveReachedAt.Or(crossed, () => now),
 			};
 		}
 	}

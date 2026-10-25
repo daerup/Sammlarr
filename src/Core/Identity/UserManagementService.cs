@@ -156,7 +156,7 @@ internal sealed class UserManagementService(
 		return Optional
 			.When(config.AuthProvider != AuthProvider.Local, () => Error.From("Invites are for a Sammlarr that signs in with Sammlarr accounts."))
 			.Or(() => Usernames.Problem(name))
-			.Or(() => Optional.When(taken, () => Error.From($"{name} already has an account or an invite.")));
+			.Or(taken, () => Error.From($"{name} already has an account or an invite."));
 	}
 
 	private async Task<Optional<InvitedAccount>> FindInviteAsync(string username, CancellationToken cancellationToken)
