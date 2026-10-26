@@ -3,14 +3,14 @@
 
 |||
 |:---|:---|
-| Generated on: | 10/25/2026 - 14:03:09 |
+| Generated on: | 10/26/2026 - 01:45:42 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
 | Classes: | 1572 |
 | Files: | 1111 |
-| **Line coverage:** | 87.5% (42323 of 48321) |
-| Covered lines: | 42323 |
-| Uncovered lines: | 5998 |
+| **Line coverage:** | 87.6% (42332 of 48321) |
+| Covered lines: | 42332 |
+| Uncovered lines: | 5989 |
 | Coverable lines: | 48321 |
 | Total lines: | 70934 |
 | **Branch coverage:** | 80% (15914 of 19881) |
@@ -399,11 +399,11 @@
 |Contracts.Wantlist.WantlistAdded|100%||
 
 </details>
-<details><summary>Core - 96.9%</summary>
+<details><summary>Core - 97%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Core**|**96.9%**|**88.1%**|
+|**Core**|**97%**|**88.1%**|
 |Core.Announcing.Announcer|100%||
 |Core.Announcing.AnnouncingModule|100%||
 |Core.Announcing.EventPublisher|100%|100%|
@@ -563,7 +563,7 @@
 |Core.TickerFunctions.DatasetTicker|0%||
 |Core.TickerFunctions.FeedRunTicker|0%||
 |Core.TickerFunctions.HousekeepingTicker|0%||
-|Core.TickerQInstanceFactoryExtensions|54.2%|100%|
+|Core.TickerQInstanceFactoryExtensions|74.2%|100%|
 |Core.Usage.FeedRunUsage|100%|100%|
 |Core.Usage.FeedRunUsage.Running|100%|100%|
 |Core.Usage.Medians|100%|100%|
@@ -590,7 +590,7 @@
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**DB**|**96%**|**85.9%**|
+|**DB**|**96%**|**85.8%**|
 |DB.AnonymousCurrentUser|0%||
 |DB.Conversion.ConversionModule|100%||
 |DB.Conversion.Encryption.DataProtectionKeyRing|100%|100%|
@@ -660,8 +660,8 @@
 |DB.Data.Identity.IdentityExtensions<T>|91.3%|83.3%|
 |DB.Data.Identity.LocalAccountRepository|100%|96%|
 |DB.Data.Identity.Members|100%||
-|DB.Data.Identity.UserRepository|99.4%|100%|
-|DB.Data.Identity.UserRepository<T>|99.4%|100%|
+|DB.Data.Identity.UserRepository|99.4%|96.6%|
+|DB.Data.Identity.UserRepository<T>|99.4%|96.6%|
 |DB.Data.Jobs.JobModule|100%||
 |DB.Data.Jobs.JobQueueView|100%||
 |DB.Data.Jobs.JobRepository|92.1%|83.3%|
@@ -696,7 +696,7 @@
 |DB.Data.Notifications.NotificationDataModule|100%||
 |DB.Data.Notifications.NotificationDeliveryOutcomeRepository|100%|81.8%|
 |DB.Data.Notifications.NotificationModelConfiguration|100%|100%|
-|DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|66.6%|
+|DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|83.3%|
 |DB.Data.Notifications.NotificationTargetRepository|96.4%|81.2%|
 |DB.Data.Notifications.NotificationTargetRow|100%||
 |DB.Data.QueryableResultExtensions|100%||
@@ -958,11 +958,11 @@
 |Messaging.WolverineMessagePublisher<TMessage>|100%||
 
 </details>
-<details><summary>Observability - 77.7%</summary>
+<details><summary>Observability - 77.9%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Observability**|**77.7%**|**70.7%**|
+|**Observability**|**77.9%**|**71%**|
 |Observability.Diagnostics.DiagnosticsLogEntry|100%||
 |Observability.Diagnostics.DiagnosticsModule|0%||
 |Observability.Diagnostics.DiagnosticsSpanEntry|100%||
@@ -993,7 +993,7 @@
 |Observability.Tracing.TracingProxy<T, TItem>|79.5%|100%|
 |Observability.Tracing.TracingProxy<T, TResult>|79.5%|100%|
 |Observability.Tracing.TracingProxy<T>|79.5%|100%|
-|Observability.Tracing.TracingProxy<T>|83.7%|85.7%|
+|Observability.Tracing.TracingProxy<T>|88.3%|92.8%|
 |Observability.Tracing.TracingRegistration|100%|100%|
 |Observability.Tracing.TracingRegistration<TInterface, TImplementation>|100%|100%|
 |Observability.Tracing.TracingRegistration<TInterface>|100%|100%|
