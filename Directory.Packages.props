@@ -3,7 +3,7 @@
 		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageVersion Include="Aspire.Hosting.Testing" Version="13.6.2" />
+		<PackageVersion Include="Aspire.Hosting.Testing" Version="13.6.4" />
 		<PackageVersion Include="BlazorBlueprint.Components" Version="4.1.0" />
 		<PackageVersion Include="BlazorBlueprint.Icons.Lucide" Version="2.0.2" />
 		<PackageVersion Include="BlazorBlueprint.Primitives" Version="4.1.0" />
