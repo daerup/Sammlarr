@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/daerup/Sammlarr/compare/v0.1.3...v0.1.4) (2026-10-29)
+
+
+### Bug Fixes
+
+* **staging:** show the same version as a development build ([#24](https://github.com/daerup/Sammlarr/issues/24)) ([d998e8f](https://github.com/daerup/Sammlarr/commit/d998e8fad4ddf31e2c09139857ed08a8cab0381a))
+
 ## [0.1.3](https://github.com/daerup/Sammlarr/compare/v0.1.2...v0.1.3) (2026-10-25)
 
 
