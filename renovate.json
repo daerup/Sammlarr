@@ -29,6 +29,11 @@
       "enabled": false
     },
     {
+      "description": "TickerQ stays on 10.4, its last MIT/Apache line; 10.5.0 onwards is source-available under a commercial licence",
+      "matchPackageNames": ["TickerQ", "TickerQ.*"],
+      "allowedVersions": "<10.5.0"
+    },
+    {
       "description": "Radarr and Sonarr bumps come as their own PR",
       "matchPackageNames": ["ghcr.io/linuxserver/radarr", "ghcr.io/linuxserver/sonarr"],
       "groupName": null

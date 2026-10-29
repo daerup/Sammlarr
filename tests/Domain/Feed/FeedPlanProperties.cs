@@ -14,7 +14,7 @@ public class FeedPlanProperties
 	private sealed record Scenario(IFeedPlan Plan, IReadOnlySet<MediaId> Owned, FeedStrategy Strategy, IReadOnlyDictionary<MediaId, int> Absences);
 
 	private static readonly Gen<Scenario> Scenarios = Gen.Select(
-			Gen.OneOfConst(OutcomeCase.Qualified, OutcomeCase.Culled, OutcomeCase.Truncated),
+			Gen.OneOf(OutcomeCase.Qualified, OutcomeCase.Culled, OutcomeCase.Truncated),
 			Gen.Bool,
 			Gen.Bool,
 			Gen.Bool,
@@ -25,9 +25,9 @@ public class FeedPlanProperties
 		.Array[0, 6]
 		.SelectMany(situations =>
 			Gen.Select(
-				Gen.OneOfConst<FeedStrategy>(new Append(), new Mirror(Threshold), new Mirror(Threshold)),
-				Gen.OneOfConst(FeedLoadState.Finished, FeedLoadState.Finished, FeedLoadState.Finished, FeedLoadState.Unfinished),
-				Gen.Select(Gen.OneOfConst(UnmatchedReason.NotFound, UnmatchedReason.CouldNotLookUp, UnmatchedReason.Conflict), Gen.Int[0, 5]).Array[0, 3],
+				Gen.OneOf<FeedStrategy>(new Append(), new Mirror(Threshold), new Mirror(Threshold)),
+				Gen.OneOf(FeedLoadState.Finished, FeedLoadState.Finished, FeedLoadState.Finished, FeedLoadState.Unfinished),
+				Gen.Select(Gen.OneOf(UnmatchedReason.NotFound, UnmatchedReason.CouldNotLookUp, UnmatchedReason.Conflict), Gen.Int[0, 5]).Array[0, 3],
 				(strategy, state, unmatched) => Build(situations, strategy, state, unmatched)
 			)
 		);

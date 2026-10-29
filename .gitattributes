@@ -11,6 +11,8 @@
 *.db binary
 *.mkv binary
 
+**/packages.lock.json linguist-generated=true
+
 # Verify snapshots: never line-ending-convert (keeps CRLF/LF stable for the comparer)
 *.verified.txt -text
 *.received.txt -text

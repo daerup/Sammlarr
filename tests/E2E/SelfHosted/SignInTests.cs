@@ -53,10 +53,10 @@ public class SignInTests
 		var stack = await SelfHostedApp.StackAsync();
 		await SelfHostedSetup.CreateAdminAsync(await SelfHostedApp.OpenPageAsync(), stack);
 		var page = await SelfHostedApp.OpenPageAsync();
-		await page.RouteAsync("**/auth/local", route => route.FulfillAsync(new RouteFulfillOptions { Status = 204 }));
 		await page.VisitAsync(Routes.SignIn);
 		await page.Labelled("Username").EnterAsync(SelfHostedSetup.AdminName);
 		await page.Labelled("Password").EnterAsync(SelfHostedSetup.AdminPassword);
+		await page.Button("Sign in").EvaluateAsync("button => button.form.addEventListener('submit', event => event.preventDefault())");
 
 		await page.Button("Sign in").ClickAsync();
 

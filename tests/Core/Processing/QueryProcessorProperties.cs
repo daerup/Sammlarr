@@ -49,14 +49,14 @@ public class QueryProcessorProperties
 	private sealed record FilteredScenario(QueryFilter Filter, Pair[] Pairs);
 
 	private static readonly Gen<FilterPredicate> Rules = Gen.Select(
-		Gen.OneOfConst(nameof(Pair.A), nameof(Pair.B)),
-		Gen.OneOfConst(FilterPredicateOperator.GreaterThan, FilterPredicateOperator.LessThan, FilterPredicateOperator.Between),
+		Gen.OneOf(nameof(Pair.A), nameof(Pair.B)),
+		Gen.OneOf(FilterPredicateOperator.GreaterThan, FilterPredicateOperator.LessThan, FilterPredicateOperator.Between),
 		Gen.Int[0, 9],
 		(field, op, bound) => QueryFilterFactory.Number(field, op, bound)
 	);
 
 	private static readonly Gen<FilteredScenario> Filtered = Gen.Select(
-		Gen.OneOfConst(FilterOperator.And, FilterOperator.Or),
+		Gen.OneOf(FilterOperator.And, FilterOperator.Or),
 		Rules.Array[0, 3],
 		Rules.Array[0, 3],
 		Gen.Select(Gen.Int[0, 9], Gen.Int[0, 9]).Array[1, 10],
