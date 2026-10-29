@@ -45,24 +45,7 @@ else
 
 <PageContainer Heading="Your library">
     <DescriptionContent>
-        @if (_wantlistCount == 0)
-        {
-            <span>The local wantlist Sammlarr keeps in sync with your feeds.</span>
-        }
-        else
-        {
-            <AppLink Href="/wantlist" Arrow="false">@_wantlistCount.ToString("N0")</AppLink>
-
-            <span>@("title".ToQuantity(_wantlistCount, ShowQuantityAs.None)) on your wantlist, assembled by</span>
-            <AppLink Href="/feeds" Arrow="false">@_feeds.Count.ToString("N0")</AppLink>
-            <span>@("feed".ToQuantity(_feeds.Count, ShowQuantityAs.None)). </span>
-
-            @if (_blocklistCount > 0)
-            {
-                <AppLink Href="/blocklist" Arrow="false">@_blocklistCount.ToString("N0")</AppLink>
-                <span>blocklisted.</span>
-            }
-        }
+        <LibrarySummary Wanted="_wantlistCount" Feeds="_feeds.Count" Blocklisted="_blocklistCount"/>
     </DescriptionContent>
     <HeaderActions>
         <ProtectedSection GuardState="IsSignedIn" ShowFallback="false">
