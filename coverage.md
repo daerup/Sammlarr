@@ -3,18 +3,18 @@
 
 |||
 |:---|:---|
-| Generated on: | 10/29/2026 - 19:58:52 |
+| Generated on: | 10/29/2026 - 20:16:26 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
 | Classes: | 1572 |
 | Files: | 1111 |
-| **Line coverage:** | 87.5% (42329 of 48321) |
-| Covered lines: | 42329 |
-| Uncovered lines: | 5992 |
+| **Line coverage:** | 87.6% (42331 of 48321) |
+| Covered lines: | 42331 |
+| Uncovered lines: | 5990 |
 | Coverable lines: | 48321 |
 | Total lines: | 70934 |
-| **Branch coverage:** | 80% (15915 of 19881) |
-| Covered branches: | 15915 |
+| **Branch coverage:** | 80% (15914 of 19881) |
+| Covered branches: | 15914 |
 | Total branches: | 19881 |
 | **Method coverage:** | [Feature is only available for sponsors](https://reportgenerator.io/pro) |
 
@@ -399,11 +399,11 @@
 |Contracts.Wantlist.WantlistAdded|100%||
 
 </details>
-<details><summary>Core - 97%</summary>
+<details><summary>Core - 97.1%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Core**|**97%**|**88.1%**|
+|**Core**|**97.1%**|**88.1%**|
 |Core.Announcing.Announcer|100%||
 |Core.Announcing.AnnouncingModule|100%||
 |Core.Announcing.EventPublisher|100%|100%|
@@ -433,7 +433,7 @@
 |Core.Datasets.DatasetRequest|100%||
 |Core.Datasets.DatasetSchedule|80%|83.3%|
 |Core.Datasets.DatasetsModule|100%||
-|Core.Datasets.DatasetTicker|90.9%|100%|
+|Core.Datasets.DatasetTicker|95.4%|100%|
 |Core.DI.DiModule|100%||
 |Core.DI.KeyedServiceIndex<TKey, TService>|100%||
 |Core.DI.KeyedServiceSet<TKey, TService>|100%||
@@ -480,8 +480,8 @@
 |Core.Jobs.FeedRunJobHandler|100%|100%|
 |Core.Jobs.JobAlarm|90.2%|83.3%|
 |Core.Jobs.JobQueue|98.4%|88.8%|
-|Core.Jobs.JobRunner|79.5%|83.3%|
-|Core.Jobs.JobRunner<TRequest>|79.5%|83.3%|
+|Core.Jobs.JobRunner|76.1%|83.3%|
+|Core.Jobs.JobRunner<TRequest>|76.1%|83.3%|
 |Core.Jobs.JobRunnerStatus|100%||
 |Core.Jobs.JobRunnerStatus.Session|100%||
 |Core.Jobs.JobSignal|100%||
@@ -563,7 +563,7 @@
 |Core.TickerFunctions.DatasetTicker|0%||
 |Core.TickerFunctions.FeedRunTicker|0%||
 |Core.TickerFunctions.HousekeepingTicker|0%||
-|Core.TickerQInstanceFactoryExtensions|54.2%|100%|
+|Core.TickerQInstanceFactoryExtensions|74.2%|100%|
 |Core.Usage.FeedRunUsage|100%|100%|
 |Core.Usage.FeedRunUsage.Running|100%|100%|
 |Core.Usage.Medians|100%|100%|
@@ -696,7 +696,7 @@
 |DB.Data.Notifications.NotificationDataModule|100%||
 |DB.Data.Notifications.NotificationDeliveryOutcomeRepository|100%|81.8%|
 |DB.Data.Notifications.NotificationModelConfiguration|100%|100%|
-|DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|83.3%|
+|DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|66.6%|
 |DB.Data.Notifications.NotificationTargetRepository|96.4%|81.2%|
 |DB.Data.Notifications.NotificationTargetRow|100%||
 |DB.Data.QueryableResultExtensions|100%||
