@@ -20,7 +20,7 @@ public class WantlistSyncPlanProperties
 	private static readonly Gen<Scenario> Scenarios = Gen.Select(
 			Gen.Bool,
 			Gen.Bool,
-			Gen.OneOfConst(OutboxState.None, OutboxState.Add, OutboxState.Remove),
+			Gen.OneOf(OutboxState.None, OutboxState.Add, OutboxState.Remove),
 			(remote, local, outbox) => (Remote: remote, Local: local, Outbox: outbox)
 		)
 		.Array[0, 6]

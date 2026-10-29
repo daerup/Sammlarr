@@ -39,10 +39,10 @@ public class UsageFoldTests
 	public void Of_ForAnyDeltas_KeepsEveryCallAndOneRowPerKey()
 	{
 		Gen.Select(
-				Gen.OneOfConst(RemoteService.Tmdb, RemoteService.Plex),
+				Gen.OneOf(RemoteService.Tmdb, RemoteService.Plex),
 				Gen.Int[0, 2],
 				Gen.Enum<UsageOutcome>(),
-				Gen.OneOfConst<Optional<FeedId>>(Some.Of(Feed), new None()),
+				Gen.OneOf<Optional<FeedId>>(Some.Of(Feed), new None()),
 				Gen.Long[0, 20],
 				(service, hour, outcome, feed, calls) => new UsageCalls(service, Hour.AddHours(hour), UsageCause.FeedRun, outcome, feed, calls)
 			)
