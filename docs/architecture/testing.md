@@ -65,6 +65,11 @@ seeds a fresh admin or member into the stack's database, with the same keys and 
 person (`E2EApp.AdminAsync` and `MemberAsync` name them). A test never sees another test's feeds, wantlist or blocklist; only global state is shared on a
 stack, such as the provider settings, title ids and details, and the sign-up switch.
 
+A test class that drives a layout lists the devices it runs on: `[Devices(Device.Desktop, Device.Phone)] public class X(Device device) : E2ETests(device)`.
+TUnit makes one copy of each test per device, named `… on Desktop` and `… on Phone`, and every run tests every listed device. `BrowserPages.OpenAsync`
+gives the Phone copy a 390 × 844 touch context (mobile, DPR 2); a class without `[Devices]` runs on the desktop only. `PageFitTests` checks, per page and
+device, that nothing runs past the right edge.
+
 Every machine runs the suite like CI's four-core runner, so a CI failure reproduces locally: `CiRunner` pins the test process, and every stack and
 browser it starts, to four cores, with two main stacks (`E2EApp.StackCount`) and one self-hosted (`SelfHostedApp.StackCount`). CI runs it on the Release PR,
 in Release, and on every Renovate PR before it merges; its `test-results-e2e` artifact holds the TRX and each stack's log.

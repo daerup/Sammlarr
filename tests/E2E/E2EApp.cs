@@ -42,6 +42,8 @@ public static class E2EApp
 
 	internal static Task<IPage> MemberAt(string route) => OpenAtAsync(OpenMemberPageAsync, route);
 
+	internal static Task<IPage> GuestAt(string route) => OpenAtAsync(OpenPageAsync, route);
+
 	private static async Task<IPage> OpenAtAsync(Func<Task<IPage>> open, string route)
 	{
 		var page = await open();
