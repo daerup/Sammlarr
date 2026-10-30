@@ -36,6 +36,7 @@ public class PhoneMenuTests : BunitContext
 				CollectionOrdering.Matching
 			);
 		await Assert.That(cut.Find("a.menu-sub[href='/settings?section=account']").TextContent.Trim()).IsEqualTo("Account");
+		await Assert.That(cut.FindAll("[data-sheet][role=dialog]")).HasSingleItem();
 	}
 
 	[Test]

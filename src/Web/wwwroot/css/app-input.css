@@ -31,6 +31,73 @@
   }
 }
 
+@media (width < 48rem) {
+  .as-sheet {
+    position: fixed !important;
+    inset: 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: none !important;
+    display: flex !important;
+    flex-direction: column;
+    justify-content: flex-end;
+    background: color-mix(in oklch, black 45%, transparent);
+  }
+
+  .as-sheet > :not(.sheet-handle) {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    max-height: calc(86dvh - 22px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-top: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    transform: translateY(var(--sheet-drag, 0px)) !important;
+  }
+
+  .as-sheet::after {
+    content: "";
+    flex: none;
+    height: env(safe-area-inset-bottom);
+    background: var(--popover);
+    transform: translateY(var(--sheet-drag, 0px));
+  }
+
+  .as-sheet.sheet-under {
+    z-index: 40 !important;
+  }
+
+  .sheet-handle {
+    display: grid;
+    flex: none;
+    place-items: center;
+    height: 22px;
+    border: 1px solid var(--border);
+    border-bottom: 0;
+    border-radius: 14px 14px 0 0;
+    background: var(--popover);
+    touch-action: none;
+    transform: translateY(var(--sheet-drag, 0px));
+  }
+
+  .sheet-handle::after {
+    content: "";
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--muted-foreground);
+    opacity: 0.4;
+  }
+
+  .as-sheet :is([role="option"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]) {
+    min-height: 44px;
+  }
+}
+
 @font-face {
   font-family: 'Roboto';
   font-style: normal;
