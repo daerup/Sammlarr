@@ -36,11 +36,11 @@
                     <span>@_error</span>
                 </p>
             }
-            <BbDialogFooter>
+            <BbDialogFooter data-dialog-actions>
                 <BbDialogClose>
-                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">Cancel</BbButton>
+                    <BbButton data-dialog-cancel Variant="ButtonVariant.Outline" Size="ButtonSize.Small">Cancel</BbButton>
                 </BbDialogClose>
-                <BbButton Size="ButtonSize.Small" Disabled="@(_username.Trim().Length == 0 || _creating)" OnClick="CreateAsync">Create link</BbButton>
+                <BbButton data-dialog-commit Size="ButtonSize.Small" Disabled="@(_username.Trim().Length == 0 || _creating)" OnClick="CreateAsync">Create link</BbButton>
             </BbDialogFooter>
         }
     </BbDialogContent>

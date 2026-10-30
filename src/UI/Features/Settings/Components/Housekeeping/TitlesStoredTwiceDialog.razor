@@ -57,13 +57,13 @@
                             </span>
                             <span class="text-muted-foreground">@TitlesStoredTwiceView.Reason(pair, CurrentUser.Id, Branding)</span>
                         </div>
-                        <div class="st-foot" data-testid="stored-twice-actions">
+                        <div class="st-foot" data-testid="stored-twice-actions" data-dialog-actions>
                             <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="_index == 0" OnClick="Back">
                                 <LucideIcon Name="chevron-left" Size="13" Class="mr-1"/>Back
                             </BbButton>
                             @if (Mark(pair) is Some<ConflictChoice>(var chosen))
                             {
-                                <span class="st-chosen">
+                                <span class="st-chosen" data-dialog-lead>
                                     <LucideIcon Name="check" Size="12"/>@TitlesStoredTwiceView.Staged(chosen)
                                 </span>
                             }
@@ -82,7 +82,7 @@
                             }
                             else if (TitlesStoredTwiceView.Contradicts(pair))
                             {
-                                <span class="st-cant">can't be merged</span>
+                                <span class="st-cant" data-dialog-lead>can't be merged</span>
                                 <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="Next">
                                     Next<LucideIcon Name="chevron-right" Size="13" Class="ml-1"/>
                                 </BbButton>
@@ -109,10 +109,10 @@
                                 <span class="st-refused">Not merged: @TitlesStoredTwiceView.Plain(pairs.Single(candidate => SamePair(candidate.Note, one.Note))), the two now contradict each other.</span>
                             }
                         </div>
-                        <div class="st-foot">
+                        <div class="st-foot" data-dialog-actions>
                             <span class="flex-1"></span>
                             <BbDialogClose>
-                                <BbButton Size="ButtonSize.Small">Close</BbButton>
+                                <BbButton Size="ButtonSize.Small" data-dialog-commit>Close</BbButton>
                             </BbDialogClose>
                         </div>
                     }
@@ -132,19 +132,19 @@
                             </div>
                             <span class="text-muted-foreground">Nothing has changed yet. A merge can't be undone; closing now discards these choices.</span>
                         </div>
-                        <div class="st-foot">
+                        <div class="st-foot" data-dialog-actions>
                             <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="_applying" OnClick="Back">
                                 <LucideIcon Name="chevron-left" Size="13" Class="mr-1"/>Back
                             </BbButton>
                             @if (_applying && _waits)
                             {
-                                <span class="st-cant">Waits for the job that is running…</span>
+                                <span class="st-cant" data-dialog-lead>Waits for the job that is running…</span>
                             }
                             <span class="flex-1"></span>
                             <BbDialogClose>
-                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">Close</BbButton>
+                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" data-dialog-cancel>Close</BbButton>
                             </BbDialogClose>
-                            <BbButton Size="ButtonSize.Small" Disabled="Changes == 0 || _applying" OnClick="ApplyAsync">
+                            <BbButton Size="ButtonSize.Small" Disabled="Changes == 0 || _applying" OnClick="ApplyAsync" data-dialog-commit>
                                 <LucideIcon Name="check" Size="13" Class="mr-1.5"/>Apply @Changes
                             </BbButton>
                         </div>

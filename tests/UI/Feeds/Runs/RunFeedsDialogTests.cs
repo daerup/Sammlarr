@@ -42,6 +42,17 @@ public class RunFeedsDialogTests : BunitContext
 		await Assert.That(cut.FindAll(".run-from")).IsEmpty();
 	}
 
+	[Test]
+	public async Task Footer_MarksTheSyncChoiceAndBothButtonsForPhones()
+	{
+		var cut = RenderDialog(null);
+
+		var footer = cut.Find("[data-dialog-actions]");
+		await Assert.That(footer.QuerySelector("[data-dialog-lead]")!.TextContent).Contains("Sync to");
+		await Assert.That(footer.QuerySelector("[data-dialog-buttons] [data-dialog-cancel]")!.TextContent.Trim()).IsEqualTo("Cancel");
+		await Assert.That(footer.QuerySelector("[data-dialog-buttons] [data-dialog-commit]")!.TextContent).Contains("Run 1 feed");
+	}
+
 	private IRenderedComponent<IComponent> RenderDialog(IReadOnlySet<FeedId>? selection) =>
 		Render(builder =>
 		{

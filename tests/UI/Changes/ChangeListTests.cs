@@ -165,6 +165,16 @@ public class ChangeListTests : BunitContext
 	}
 
 	[Test]
+	public async Task Dialog_Footer_MarksTheNoteAndTheActionsForPhones()
+	{
+		var portal = OpenDialog();
+
+		var footer = portal.Find("[data-dialog-actions]");
+		await Assert.That(footer.QuerySelector("a[data-dialog-lead]")!.TextContent.Trim()).IsEqualTo("7 runs");
+		await Assert.That(footer.QuerySelector("[data-dialog-buttons]")!.TextContent).IsEqualTo("Cancel");
+	}
+
+	[Test]
 	public async Task Render_ForUnchangedItems_GroupsThemLastUnderTheCallersLabel()
 	{
 		var cut = RenderList([Unchanged("Held"), Added("Fresh"), Removed("Gone")], [], unchangedLabel: "Already in sync");
@@ -413,6 +423,7 @@ public class ChangeListTests : BunitContext
 				.Add(dialog => dialog.UnchangedLabel, "Already in sync")
 				.Add(dialog => dialog.EmptyMessage, "Everything is in sync.")
 				.Add(dialog => dialog.Note, "7 runs")
+				.Add(dialog => dialog.NoteHref, "/feeds/x/runs")
 				.Add(dialog => dialog.BandTone, ChangeBandTone.Bad)
 				.Add(dialog => dialog.Prologue, builder => builder.AddContent(0, "5 waiting"))
 				.Add(dialog => dialog.Band, builder => builder.AddContent(0, "Plex is unreachable"))

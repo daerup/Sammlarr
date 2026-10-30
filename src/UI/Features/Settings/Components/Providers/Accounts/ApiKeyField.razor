@@ -23,12 +23,12 @@
                                     You will need to re-enter it to use @Uses again.
                                 </BbAlertDialogDescription>
                             </BbAlertDialogHeader>
-                            <BbAlertDialogFooter>
+                            <BbAlertDialogFooter data-dialog-actions>
                                 <BbAlertDialogCancel>
-                                    <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                                    <BbButton data-dialog-cancel Variant="ButtonVariant.Outline">Cancel</BbButton>
                                 </BbAlertDialogCancel>
                                 <BbAlertDialogAction>
-                                    <HoverButton Preset="HoverButtonPreset.Destructive" Icon="trash-2" Text="@DeleteText" OnClick="DeleteAsync"/>
+                                    <HoverButton data-dialog-commit Preset="HoverButtonPreset.Destructive" Icon="trash-2" Text="@DeleteText" OnClick="DeleteAsync"/>
                                 </BbAlertDialogAction>
                             </BbAlertDialogFooter>
                         </BbAlertDialogContent>

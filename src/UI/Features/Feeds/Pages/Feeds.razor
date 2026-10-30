@@ -223,8 +223,8 @@
         }
     </Badges>
     <Actions>
-        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => _confirmOpen = false)">Cancel</BbButton>
-        <BbButton Size="ButtonSize.Small" Disabled="@(_pendingFeed is null)" OnClick="ConfirmRunAsync">
+        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => _confirmOpen = false)" data-dialog-cancel>Cancel</BbButton>
+        <BbButton Size="ButtonSize.Small" Disabled="@(_pendingFeed is null)" OnClick="ConfirmRunAsync" data-dialog-commit>
             <LucideIcon Name="play" Size="13" Class="mr-1.5"/>
             Run
         </BbButton>
@@ -248,20 +248,20 @@
                 <BbAlertDialogTitle>@ConfirmTitle(confirm)</BbAlertDialogTitle>
                 <BbAlertDialogDescription>@ConfirmBody(confirm)</BbAlertDialogDescription>
             </BbAlertDialogHeader>
-            <BbAlertDialogFooter>
+            <BbAlertDialogFooter data-dialog-actions>
                 <BbAlertDialogCancel>
-                    <BbButton Variant="ButtonVariant.Outline" OnClick="() => _confirm = null">Cancel</BbButton>
+                    <BbButton data-dialog-cancel Variant="ButtonVariant.Outline" OnClick="() => _confirm = null">Cancel</BbButton>
                 </BbAlertDialogCancel>
                 @if (confirm is FeedsConfirm.Pause)
                 {
-                    <HoverButton Preset="HoverButtonPreset.Custom" Color="var(--alert-warning)" OnClick="PauseAsync">
+                    <HoverButton data-dialog-commit Preset="HoverButtonPreset.Custom" Color="var(--alert-warning)" OnClick="PauseAsync">
                         <LucideIcon Name="pause" Size="15" Class="mr-1"/>
                         <span>Pause</span>
                     </HoverButton>
                 }
                 else
                 {
-                    <HoverButton Preset="HoverButtonPreset.Destructive" OnClick="DeleteAsync">
+                    <HoverButton data-dialog-commit Preset="HoverButtonPreset.Destructive" OnClick="DeleteAsync">
                         <LucideIcon Name="trash-2" Size="15" Class="mr-1"/>
                         <span>Delete</span>
                     </HoverButton>

@@ -37,6 +37,18 @@ public class BulkActionBarTests : BunitContext
 	}
 
 	[Test]
+	public async Task Remove_WhenItAsks_MarksCancelAndConfirmForPhones()
+	{
+		var cut = RenderBar(selected: 7, page: 7, list: 7, onRemove: () => { });
+
+		await ClickRemove(cut);
+
+		var footer = cut.Find("[role=alertdialog] [data-dialog-actions]");
+		await Assert.That(footer.QuerySelector("[data-dialog-cancel]")!.TextContent.Trim()).IsEqualTo("Cancel");
+		await Assert.That(footer.QuerySelector("[data-dialog-commit]")!.TextContent).Contains("7");
+	}
+
+	[Test]
 	public async Task Remove_WhenOnlyThePageIsSelectedOutOfALongerList_RunsWithoutConfirmation()
 	{
 		var removed = false;

@@ -53,11 +53,11 @@
                             This drops the cached metadata for every item shown and re-fetches it from your providers. It may take a while for large lists.
                         </BbAlertDialogDescription>
                     </BbAlertDialogHeader>
-                    <BbAlertDialogFooter>
+                    <BbAlertDialogFooter data-dialog-actions>
                         <BbAlertDialogCancel>
-                            <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                            <BbButton data-dialog-cancel Variant="ButtonVariant.Outline">Cancel</BbButton>
                         </BbAlertDialogCancel>
-                        <BbButton Variant="ButtonVariant.Default" OnClick="OnRefreshConfirmedAsync">Refresh</BbButton>
+                        <BbButton data-dialog-commit Variant="ButtonVariant.Default" OnClick="OnRefreshConfirmedAsync">Refresh</BbButton>
                     </BbAlertDialogFooter>
                 </BbAlertDialogContent>
             </BbAlertDialog>

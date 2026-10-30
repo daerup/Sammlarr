@@ -1,4 +1,5 @@
-<a href="@Href"
+<a @attributes="Attributes"
+   href="@Href"
    class="@($"app-link{(Muted ? " is-muted" : null)} {Class}".Trim())"
    style="@(Color is null ? null : $"color: {Color}")"
    title="@Title"
@@ -27,4 +28,6 @@
     [Parameter] public string? Class { get; set; }
 
     [Parameter] public string? Title { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? Attributes { get; set; }
 }

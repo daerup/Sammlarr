@@ -42,7 +42,27 @@ public class InviteDialogTests : BunitContext
 		await Assert.That(cut.FindAll("[data-link]")).IsEmpty();
 	}
 
+	[Test]
+	public async Task Footer_MarksCancelAndCreateForPhones()
+	{
+		var cut = await OpenDialogAsync();
+
+		var footer = cut.Find("[data-dialog-actions]");
+		await Assert.That(footer.QuerySelector("[data-dialog-cancel]")!.TextContent.Trim()).IsEqualTo("Cancel");
+		await Assert.That(footer.QuerySelector("[data-dialog-commit]")!.TextContent.Trim()).IsEqualTo("Create link");
+	}
+
 	private async Task<IRenderedComponent<IComponent>> OpenAsync(string username)
+	{
+		var cut = await OpenDialogAsync();
+		await cut.InvokeAsync(() =>
+			cut.FindComponents<BbInput>().Single(input => input.Instance.Id == "invite-username").Instance.ValueChanged.InvokeAsync(username)
+		);
+		await cut.FindAll("button").Single(button => button.TextContent.Trim() == "Create link").ClickAsync();
+		return cut;
+	}
+
+	private async Task<IRenderedComponent<IComponent>> OpenDialogAsync()
 	{
 		var cut = Render(builder =>
 		{
@@ -52,10 +72,6 @@ public class InviteDialogTests : BunitContext
 			builder.CloseComponent();
 		});
 		await cut.FindAll("button").Single(button => button.TextContent.Contains("Invite member")).ClickAsync();
-		await cut.InvokeAsync(() =>
-			cut.FindComponents<BbInput>().Single(input => input.Instance.Id == "invite-username").Instance.ValueChanged.InvokeAsync(username)
-		);
-		await cut.FindAll("button").Single(button => button.TextContent.Trim() == "Create link").ClickAsync();
 		return cut;
 	}
 }

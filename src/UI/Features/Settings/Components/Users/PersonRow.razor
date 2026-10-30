@@ -95,12 +95,12 @@
                                             : "They'll gain full access to provider settings, cache, diagnostics, and user management.")
                                     </BbAlertDialogDescription>
                                 </BbAlertDialogHeader>
-                                <BbAlertDialogFooter>
+                                <BbAlertDialogFooter data-dialog-actions>
                                     <BbAlertDialogCancel>
-                                        <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                                        <BbButton data-dialog-cancel Variant="ButtonVariant.Outline">Cancel</BbButton>
                                     </BbAlertDialogCancel>
                                     <BbAlertDialogAction>
-                                        <BbButton Variant="ButtonVariant.Default" OnClick="() => ChangeRoleAsync(joined)">@RoleAction</BbButton>
+                                        <BbButton data-dialog-commit Variant="ButtonVariant.Default" OnClick="() => ChangeRoleAsync(joined)">@RoleAction</BbButton>
                                     </BbAlertDialogAction>
                                 </BbAlertDialogFooter>
                             </BbAlertDialogContent>

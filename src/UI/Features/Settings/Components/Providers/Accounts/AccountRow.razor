@@ -131,12 +131,12 @@
                     This removes the stored @Branding.NickName credential. You will need to reconnect to use @Branding.NickName again.
                 </BbAlertDialogDescription>
             </BbAlertDialogHeader>
-            <BbAlertDialogFooter>
+            <BbAlertDialogFooter data-dialog-actions>
                 <BbAlertDialogCancel>
-                    <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                    <BbButton data-dialog-cancel Variant="ButtonVariant.Outline">Cancel</BbButton>
                 </BbAlertDialogCancel>
                 <BbAlertDialogAction>
-                    <HoverButton Preset="HoverButtonPreset.Destructive" Icon="unplug" Text="Disconnect" OnClick="DisconnectAsync"/>
+                    <HoverButton data-dialog-commit Preset="HoverButtonPreset.Destructive" Icon="unplug" Text="Disconnect" OnClick="DisconnectAsync"/>
                 </BbAlertDialogAction>
             </BbAlertDialogFooter>
         </BbAlertDialogContent>

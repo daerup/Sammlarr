@@ -108,8 +108,8 @@
                   Prologue="@(OutboxEntries.Count > 0 ? OutboxStrip : null)"
                   Band="@(_dryRunError is not null ? ErrorBand : null)">
         <Actions>
-            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="CloseAsync">Cancel</BbButton>
-            <BbButton Size="ButtonSize.Small" Disabled="@(_dryRun is { TotalChanges: 0 } && OutboxEntries.Count == 0)" OnClick="ConfirmAsync">
+            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="CloseAsync" data-dialog-cancel>Cancel</BbButton>
+            <BbButton Size="ButtonSize.Small" Disabled="@(_dryRun is { TotalChanges: 0 } && OutboxEntries.Count == 0)" OnClick="ConfirmAsync" data-dialog-commit>
                 <LucideIcon Name="refresh-cw" Size="13" Class="mr-1.5"/>
                 Sync
             </BbButton>

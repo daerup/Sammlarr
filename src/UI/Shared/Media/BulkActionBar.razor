@@ -123,11 +123,11 @@
                     <span>@pending.Copy.Body</span>
                 </BbAlertDialogDescription>
             </BbAlertDialogHeader>
-            <BbAlertDialogFooter>
+            <BbAlertDialogFooter data-dialog-actions>
                 <BbAlertDialogCancel>
-                    <BbButton Variant="ButtonVariant.Outline" OnClick="CancelAsync">Cancel</BbButton>
+                    <BbButton data-dialog-cancel Variant="ButtonVariant.Outline" OnClick="CancelAsync">Cancel</BbButton>
                 </BbAlertDialogCancel>
-                <HoverButton Preset="@(pending.Tint is null ? HoverButtonPreset.Destructive : HoverButtonPreset.Custom)"
+                <HoverButton data-dialog-commit Preset="@(pending.Tint is null ? HoverButtonPreset.Destructive : HoverButtonPreset.Custom)"
                              Color="@pending.Tint"
                              OnClick="ConfirmAsync">
                     <LucideIcon Name="@pending.Icon" Size="15" Class="mr-1"/>
