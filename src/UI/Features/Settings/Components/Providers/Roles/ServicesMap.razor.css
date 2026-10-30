@@ -87,11 +87,18 @@
     transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
-.map-service.is-openable:hover,
 .map-service.is-openable:focus-visible {
     border-color: var(--brand);
     outline: none;
     box-shadow: 0 0 0 3px color-mix(in oklch, var(--brand) 25%, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .map-service.is-openable:hover {
+        border-color: var(--brand);
+        outline: none;
+        box-shadow: 0 0 0 3px color-mix(in oklch, var(--brand) 25%, transparent);
+    }
 }
 
 .map-service-glyph {
@@ -102,9 +109,14 @@
     transition: opacity 150ms ease;
 }
 
-.map-service.is-openable:hover .map-service-glyph,
 .map-service.is-openable:focus-visible .map-service-glyph {
     opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .map-service.is-openable:hover .map-service-glyph {
+        opacity: 1;
+    }
 }
 
 .map-service-name {
@@ -141,11 +153,18 @@
     transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
-.map-source:hover,
 .map-source:focus-visible {
     outline: none;
     border-color: var(--brand);
     box-shadow: 0 0 0 3px color-mix(in oklch, var(--brand) 25%, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .map-source:hover {
+        outline: none;
+        border-color: var(--brand);
+        box-shadow: 0 0 0 3px color-mix(in oklch, var(--brand) 25%, transparent);
+    }
 }
 
 .map-source.is-off {
@@ -243,11 +262,18 @@
     transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
 }
 
-.map-chip-slot ::deep .map-chip:hover,
 .map-chip-slot ::deep .map-chip.is-open {
     border-color: var(--brand);
     background: color-mix(in oklch, var(--brand) 14%, var(--card));
     color: var(--foreground);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .map-chip-slot ::deep .map-chip:hover {
+        border-color: var(--brand);
+        background: color-mix(in oklch, var(--brand) 14%, var(--card));
+        color: var(--foreground);
+    }
 }
 
 .map-dot {

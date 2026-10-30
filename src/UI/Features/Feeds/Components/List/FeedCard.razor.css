@@ -25,12 +25,16 @@
     transition: opacity 150ms ease;
 }
 
-.feed-card:not(.is-selecting):hover::before {
-    opacity: 1;
+@media (hover: hover) and (pointer: fine) {
+    .feed-card:not(.is-selecting):hover::before {
+        opacity: 1;
+    }
 }
 
-.feed-card:not(.is-selecting):has(.feed-card-control:hover)::before {
-    opacity: 0;
+@media (hover: hover) and (pointer: fine) {
+    .feed-card:not(.is-selecting):has(.feed-card-control:hover)::before {
+        opacity: 0;
+    }
 }
 
 .feed-card-link,
@@ -105,8 +109,10 @@
     cursor: pointer;
 }
 
-.feed-card-run:hover:not(:disabled) {
-    background: var(--secondary);
+@media (hover: hover) and (pointer: fine) {
+    .feed-card-run:hover:not(:disabled) {
+        background: var(--secondary);
+    }
 }
 
 .feed-card-run:disabled {
@@ -269,8 +275,10 @@
     cursor: pointer;
 }
 
-.feed-card-icon:hover {
-    background: var(--secondary);
+@media (hover: hover) and (pointer: fine) {
+    .feed-card-icon:hover {
+        background: var(--secondary);
+    }
 }
 
 .feed-card-icon.is-danger {

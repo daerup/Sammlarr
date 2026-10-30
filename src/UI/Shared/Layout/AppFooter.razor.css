@@ -3,7 +3,12 @@ footer ::deep .app-link {
     transition: color 150ms ease;
 }
 
-footer ::deep .app-link:hover,
 footer ::deep .app-link:focus-visible {
     color: var(--foreground);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    footer ::deep .app-link:hover {
+        color: var(--foreground);
+    }
 }

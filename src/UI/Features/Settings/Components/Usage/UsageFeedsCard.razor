@@ -327,7 +327,7 @@
             ? [("A ring: some calls were rate-limited", "var(--usage-after-429)"), ("some gave up", "var(--usage-gave-up)")]
             : [("A ring: some titles could not be looked up", "var(--fate-couldnot)")];
 
-    private string HoverRules => string.Concat(Keyed.Select(feed => Rules(feed.Key)));
+    private string HoverRules => $"@media (hover: hover) and (pointer: fine) {{ {string.Concat(Keyed.Select(feed => Rules(feed.Key)))}}}";
 
     private string Rules(string key)
     {

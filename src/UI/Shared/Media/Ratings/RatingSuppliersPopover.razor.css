@@ -13,11 +13,17 @@
     cursor: pointer;
 }
 
-.rating-suppliers ::deep .rating-suppliers-link:hover,
 .rating-suppliers ::deep .rating-suppliers-link:focus-visible,
 .rating-suppliers ::deep .rating-suppliers-link[data-state="open"] {
     text-decoration: underline;
     outline: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .rating-suppliers ::deep .rating-suppliers-link:hover {
+        text-decoration: underline;
+        outline: none;
+    }
 }
 
 .rating-suppliers-pop {
@@ -58,13 +64,18 @@
     border-top: 1px solid var(--border);
 }
 
-.rating-supplier:hover,
 .rating-supplier:focus-visible {
     background: color-mix(in oklch, var(--brand) 12%, transparent);
     outline: none;
 }
 
-.rating-supplier:hover::before,
+@media (hover: hover) and (pointer: fine) {
+    .rating-supplier:hover {
+        background: color-mix(in oklch, var(--brand) 12%, transparent);
+        outline: none;
+    }
+}
+
 .rating-supplier:focus-visible::before {
     content: "";
     position: absolute;
@@ -74,6 +85,19 @@
     width: 3px;
     border-radius: 0 3px 3px 0;
     background: var(--brand);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .rating-supplier:hover::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 5px;
+        bottom: 5px;
+        width: 3px;
+        border-radius: 0 3px 3px 0;
+        background: var(--brand);
+    }
 }
 
 .rating-supplier-name {
@@ -89,7 +113,12 @@
     transition: opacity 180ms ease;
 }
 
-.rating-supplier:hover .rating-supplier-go,
 .rating-supplier:focus-visible .rating-supplier-go {
     opacity: 0.95;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .rating-supplier:hover .rating-supplier-go {
+        opacity: 0.95;
+    }
 }

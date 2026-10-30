@@ -43,8 +43,10 @@
     text-align: left;
 }
 
-.st-item:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--foreground) 4%, transparent);
+@media (hover: hover) and (pointer: fine) {
+    .st-item:hover:not(:disabled) {
+        background: color-mix(in srgb, var(--foreground) 4%, transparent);
+    }
 }
 
 .st-item.is-on {
@@ -204,9 +206,11 @@
     text-decoration: none;
 }
 
-a.st-id:hover {
-    color: var(--foreground);
-    text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+    a.st-id:hover {
+        color: var(--foreground);
+        text-decoration: underline;
+    }
 }
 
 .st-id.is-clash {

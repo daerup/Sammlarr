@@ -25,9 +25,14 @@
     transition: rotate 0.2s;
 }
 
-.sammlarr-logo:hover .sammlarr-tilt,
 a.active .sammlarr-tilt {
     rotate: -6deg;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .sammlarr-logo:hover .sammlarr-tilt {
+        rotate: -6deg;
+    }
 }
 
 .sammlarr-bird {
@@ -56,20 +61,28 @@ a.active .sammlarr-tilt {
     transform-origin: 221.2px 45.3px;
 }
 
-.sammlarr-logo:hover .sammlarr-bird {
-    animation: sammlarr-hop 1s ease-in-out;
+@media (hover: hover) and (pointer: fine) {
+    .sammlarr-logo:hover .sammlarr-bird {
+        animation: sammlarr-hop 1s ease-in-out;
+    }
 }
 
-.sammlarr-logo:hover .sammlarr-tail {
-    animation: sammlarr-flick 1s ease-in-out;
+@media (hover: hover) and (pointer: fine) {
+    .sammlarr-logo:hover .sammlarr-tail {
+        animation: sammlarr-flick 1s ease-in-out;
+    }
 }
 
-.sammlarr-logo:hover .sammlarr-star {
-    animation: sammlarr-shine 1s ease-in-out;
+@media (hover: hover) and (pointer: fine) {
+    .sammlarr-logo:hover .sammlarr-star {
+        animation: sammlarr-shine 1s ease-in-out;
+    }
 }
 
-.sammlarr-logo:hover .sammlarr-rays {
-    animation: sammlarr-rays 1s ease-in-out;
+@media (hover: hover) and (pointer: fine) {
+    .sammlarr-logo:hover .sammlarr-rays {
+        animation: sammlarr-rays 1s ease-in-out;
+    }
 }
 
 @keyframes sammlarr-hop {
@@ -101,10 +114,12 @@ a.active .sammlarr-tilt {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .sammlarr-logo:hover .sammlarr-bird,
-    .sammlarr-logo:hover .sammlarr-tail,
-    .sammlarr-logo:hover .sammlarr-star,
-    .sammlarr-logo:hover .sammlarr-rays {
-        animation: none;
+    @media (hover: hover) and (pointer: fine) {
+        .sammlarr-logo:hover .sammlarr-bird,
+        .sammlarr-logo:hover .sammlarr-tail,
+        .sammlarr-logo:hover .sammlarr-star,
+        .sammlarr-logo:hover .sammlarr-rays {
+            animation: none;
+        }
     }
 }

@@ -67,8 +67,10 @@
     cursor: pointer;
 }
 
-.sb-key:hover {
-    background: var(--secondary);
+@media (hover: hover) and (pointer: fine) {
+    .sb-key:hover {
+        background: var(--secondary);
+    }
 }
 
 .sb-key:focus-visible {

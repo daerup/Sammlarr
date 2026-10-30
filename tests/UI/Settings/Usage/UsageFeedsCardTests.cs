@@ -147,6 +147,14 @@ public class UsageFeedsCardTests : BunitContext
 	}
 
 	[Test]
+	public async Task Hover_AppliesOnlyWithAFinePointer()
+	{
+		var cut = Render<Harness>();
+
+		await Assert.That(HoverRules(cut)).StartsWith("@media (hover: hover) and (pointer: fine) {");
+	}
+
+	[Test]
 	public async Task Hover_WhileAFeedIsPicked_LightsUpAPointedRowsFeedButNothingPointedInTheChart()
 	{
 		var cut = Render<Harness>();

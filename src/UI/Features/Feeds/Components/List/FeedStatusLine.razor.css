@@ -77,10 +77,16 @@
     color: inherit;
 }
 
-.status-line ::deep .status-next:hover,
 .status-line ::deep .status-next[data-state="open"] {
     color: var(--foreground);
     background: color-mix(in srgb, var(--foreground) 6%, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .status-line ::deep .status-next:hover {
+        color: var(--foreground);
+        background: color-mix(in srgb, var(--foreground) 6%, transparent);
+    }
 }
 
 .next-details {

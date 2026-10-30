@@ -10,9 +10,11 @@
     transition: color 0.15s ease, background-color 0.15s ease;
 }
 
-.preview-filter-badge:hover {
-    color: var(--foreground);
-    background-color: color-mix(in oklab, var(--accent) 45%, transparent);
+@media (hover: hover) and (pointer: fine) {
+    .preview-filter-badge:hover {
+        color: var(--foreground);
+        background-color: color-mix(in oklab, var(--accent) 45%, transparent);
+    }
 }
 
 .preview-filter-badge.is-active {

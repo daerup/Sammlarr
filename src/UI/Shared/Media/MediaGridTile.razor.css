@@ -47,12 +47,16 @@
     transition: transform 0.4s ease;
 }
 
-.cursor-pointer.group:hover {
-    transform: scale(1.05);
+@media (hover: hover) and (pointer: fine) {
+    .cursor-pointer.group:hover {
+        transform: scale(1.05);
+    }
 }
 
-.media-card-backdrop:hover .media-card-poster {
-    transform: scale(1);
+@media (hover: hover) and (pointer: fine) {
+    .media-card-backdrop:hover .media-card-poster {
+        transform: scale(1);
+    }
 }
 
 .dark .media-card-failed {

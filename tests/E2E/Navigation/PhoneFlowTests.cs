@@ -1,3 +1,4 @@
+using E2E.Tests.Browse;
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
@@ -17,5 +18,18 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 		await page.ShouldBeAtAsync(Routes.Settings);
 		await Expect(page.Modal("Menu")).ToBeHiddenAsync();
 		await Expect(page.Locator("header .phone-title")).ToHaveTextAsync("Notifications");
+	}
+
+	[Test]
+	public async Task BrowseTile_WhenTapped_KeepsItsSize()
+	{
+		var page = await E2EApp.AdminAt(Routes.Browse);
+		var tile = TrendingTiles.Resolved(page, TrendingTiles.Title);
+		await Expect(tile).ToBeVisibleAsync(Wait.Settle);
+
+		await tile.TapAsync();
+
+		await Expect(page.ButtonContaining("Add to Wantlist")).ToBeVisibleAsync(Wait.Settle);
+		await Expect(tile).ToHaveCSSAsync("transform", "none");
 	}
 }

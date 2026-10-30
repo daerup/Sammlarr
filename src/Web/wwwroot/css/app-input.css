@@ -15,6 +15,22 @@
 @source "../../*.razor";
 @source "../../appsettings.json";
 
+@custom-variant hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
+@media (width < 48rem), (pointer: coarse) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
 @font-face {
   font-family: 'Roboto';
   font-style: normal;
@@ -456,10 +472,16 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
     color: var(--foreground);
 }
 
-.signin .signin-button:hover,
 .signin .signin-button:focus-visible {
     background: color-mix(in oklch, var(--brand) 14%, var(--card));
     border-color: var(--brand);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .signin .signin-button:hover {
+        background: color-mix(in oklch, var(--brand) 14%, var(--card));
+        border-color: var(--brand);
+    }
 }
 
 @layer components {
@@ -698,8 +720,10 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
         background: color-mix(in srgb, var(--foreground) 5%, transparent);
     }
 
-    .feed-live .fl-slot:hover {
-        outline: 1px solid var(--ring);
+    @media (hover: hover) and (pointer: fine) {
+        .feed-live .fl-slot:hover {
+            outline: 1px solid var(--ring);
+        }
     }
 
     .feed-live .fl-slot.is-blocked .st {
@@ -1037,18 +1061,30 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
     color: var(--muted-foreground);
     cursor: pointer;
 
-    &:hover,
     &[data-state="open"],
     &[aria-expanded="true"] {
         background: var(--accent);
         color: var(--foreground);
     }
 
-    &.is-gold:hover,
+    @media (hover: hover) and (pointer: fine) {
+        &:hover {
+            background: var(--accent);
+            color: var(--foreground);
+        }
+    }
+
     &.is-gold[data-state="open"],
     &.is-gold[aria-expanded="true"] {
         background: color-mix(in srgb, var(--sammlarr-gold) 14%, transparent);
         color: var(--sammlarr-gold);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        &.is-gold:hover {
+            background: color-mix(in srgb, var(--sammlarr-gold) 14%, transparent);
+            color: var(--sammlarr-gold);
+        }
     }
 
     &[data-state="open"] .magpie-star path,

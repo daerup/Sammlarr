@@ -7,8 +7,10 @@
     cursor: pointer;
 }
 
-.change-row:hover {
-    background: color-mix(in srgb, var(--foreground) 5%, transparent);
+@media (hover: hover) and (pointer: fine) {
+    .change-row:hover {
+        background: color-mix(in srgb, var(--foreground) 5%, transparent);
+    }
 }
 
 .change-row.is-highlight {

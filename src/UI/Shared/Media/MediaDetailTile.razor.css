@@ -128,42 +128,80 @@
     z-index: 1;
 }
 
-.search-result-row.hover-bg:not(.is-unmatched):hover,
 .search-result-row.hover-bg:not(.is-unmatched).row-focused {
     background-color: #0a0a0a;
     border-color: rgba(255, 255, 255, 0.08);
     color: rgba(255, 255, 255, 0.92);
 }
 
-.search-result-row.hover-bg:not(.is-unmatched):hover::before,
+@media (hover: hover) and (pointer: fine) {
+    .search-result-row.hover-bg:not(.is-unmatched):hover {
+        background-color: #0a0a0a;
+        border-color: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.92);
+    }
+}
+
 .search-result-row.hover-bg:not(.is-unmatched).row-focused::before {
     opacity: 0.5;
     transform: scale(1.06);
 }
 
-.search-result-row.hover-bg:not(.is-unmatched):hover .search-result-content .text-muted-foreground,
+@media (hover: hover) and (pointer: fine) {
+    .search-result-row.hover-bg:not(.is-unmatched):hover::before {
+        opacity: 0.5;
+        transform: scale(1.06);
+    }
+}
+
 .search-result-row.hover-bg:not(.is-unmatched).row-focused .search-result-content .text-muted-foreground,
-.search-result-row.hover-bg:not(.is-unmatched):hover .search-result-content .text-foreground,
 .search-result-row.hover-bg:not(.is-unmatched).row-focused .search-result-content .text-foreground {
     color: rgba(255, 255, 255, 0.92);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .search-result-row.hover-bg:not(.is-unmatched):hover .search-result-content .text-muted-foreground,
+    .search-result-row.hover-bg:not(.is-unmatched):hover .search-result-content .text-foreground {
+        color: rgba(255, 255, 255, 0.92);
+    }
 }
 
 .search-result-row.hover-bg::before {
     opacity: 0.1;
 }
 
-.dark .search-result-row.hover-bg:not(.is-unmatched):hover::before,
 .dark .search-result-row.hover-bg:not(.is-unmatched).row-focused::before {
     opacity: 0.5;
 }
 
-::deep .search-result-toggle-btn.is-marked:not(:disabled):is(:hover, :focus-visible) {
+@media (hover: hover) and (pointer: fine) {
+    .dark .search-result-row.hover-bg:not(.is-unmatched):hover::before {
+        opacity: 0.5;
+    }
+}
+
+::deep .search-result-toggle-btn.is-marked:not(:disabled):focus-visible {
     opacity: 1;
     background: none;
 }
 
-::deep .search-result-toggle-btn:not(.is-marked):not(:disabled):is(:hover, :focus-visible) svg {
+@media (hover: hover) and (pointer: fine) {
+    ::deep .search-result-toggle-btn.is-marked:not(:disabled):hover {
+        opacity: 1;
+        background: none;
+    }
+}
+
+::deep .search-result-toggle-btn:not(.is-marked):not(:disabled):focus-visible svg {
     stroke: var(--toggle-active-color, orange);
     fill: color-mix(in srgb, var(--toggle-active-color, orange) 15%, transparent);
     transition: stroke 0.15s ease, fill 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    ::deep .search-result-toggle-btn:not(.is-marked):not(:disabled):hover svg {
+        stroke: var(--toggle-active-color, orange);
+        fill: color-mix(in srgb, var(--toggle-active-color, orange) 15%, transparent);
+        transition: stroke 0.15s ease, fill 0.15s ease;
+    }
 }

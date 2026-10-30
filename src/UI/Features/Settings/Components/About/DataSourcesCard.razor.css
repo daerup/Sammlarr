@@ -57,10 +57,12 @@
     text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
 }
 
-.source-note a:hover,
-.credit-origin a:hover,
-.credit-source:hover {
-    color: var(--foreground);
+@media (hover: hover) and (pointer: fine) {
+    .source-note a:hover,
+    .credit-origin a:hover,
+    .credit-source:hover {
+        color: var(--foreground);
+    }
 }
 
 .source-open {
@@ -68,9 +70,14 @@
     color: var(--muted-foreground);
 }
 
-.source-open:hover,
 .source-open:focus-visible {
     color: var(--foreground);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .source-open:hover {
+        color: var(--foreground);
+    }
 }
 
 .source-band {

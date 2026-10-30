@@ -29,8 +29,10 @@
     cursor: pointer;
 }
 
-.bulk-caret:hover {
-    color: var(--foreground);
+@media (hover: hover) and (pointer: fine) {
+    .bulk-caret:hover {
+        color: var(--foreground);
+    }
 }
 
 .bulk-sticky {

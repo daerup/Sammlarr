@@ -47,9 +47,14 @@
     text-decoration: none;
 }
 
-.rating-picker-link:hover,
 .rating-picker-link:focus-visible {
     text-decoration: underline;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .rating-picker-link:hover {
+        text-decoration: underline;
+    }
 }
 
 .rating-picker-list {

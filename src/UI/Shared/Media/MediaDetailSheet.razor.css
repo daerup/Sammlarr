@@ -47,8 +47,16 @@
     color: var(--toggle-active-color, orange);
 }
 
-::deep .search-result-toggle-btn:not(.is-marked):not(:disabled):is(:hover, :focus-visible) svg {
+::deep .search-result-toggle-btn:not(.is-marked):not(:disabled):focus-visible svg {
     stroke: var(--toggle-active-color, orange);
     fill: color-mix(in srgb, var(--toggle-active-color, orange) 15%, transparent);
     transition: stroke 0.15s ease, fill 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    ::deep .search-result-toggle-btn:not(.is-marked):not(:disabled):hover svg {
+        stroke: var(--toggle-active-color, orange);
+        fill: color-mix(in srgb, var(--toggle-active-color, orange) 15%, transparent);
+        transition: stroke 0.15s ease, fill 0.15s ease;
+    }
 }

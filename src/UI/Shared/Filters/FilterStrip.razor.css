@@ -26,10 +26,12 @@
     cursor: pointer;
 }
 
-.filter-clear:hover {
-    color: var(--foreground);
-    text-decoration: underline;
-    text-underline-offset: 3px;
+@media (hover: hover) and (pointer: fine) {
+    .filter-clear:hover {
+        color: var(--foreground);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
 }
 
 .filter-spacer {

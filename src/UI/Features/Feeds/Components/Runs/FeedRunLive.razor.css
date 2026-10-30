@@ -99,9 +99,11 @@
     color: var(--muted-foreground);
 }
 
-.live-link:hover {
-    color: var(--foreground);
-    text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+    .live-link:hover {
+        color: var(--foreground);
+        text-decoration: underline;
+    }
 }
 
 .live-body {

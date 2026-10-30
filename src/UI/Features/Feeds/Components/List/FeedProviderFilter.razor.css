@@ -36,13 +36,18 @@
     cursor: pointer;
 }
 
-.provider-filter-row:hover,
 .provider-filter-row:focus-visible {
     outline: none;
     background: color-mix(in oklch, var(--brand) 12%, transparent);
 }
 
-.provider-filter-row:hover::before,
+@media (hover: hover) and (pointer: fine) {
+    .provider-filter-row:hover {
+        outline: none;
+        background: color-mix(in oklch, var(--brand) 12%, transparent);
+    }
+}
+
 .provider-filter-row:focus-visible::before {
     content: "";
     position: absolute;
@@ -52,6 +57,19 @@
     width: 3px;
     border-radius: 0 3px 3px 0;
     background: var(--brand);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .provider-filter-row:hover::before {
+        content: "";
+        position: absolute;
+        left: -4px;
+        top: 5px;
+        bottom: 5px;
+        width: 3px;
+        border-radius: 0 3px 3px 0;
+        background: var(--brand);
+    }
 }
 
 .provider-filter-name {

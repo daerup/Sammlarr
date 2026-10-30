@@ -33,9 +33,11 @@
     cursor: pointer;
 }
 
-.change-chip:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--foreground) 6%, transparent);
-    color: var(--foreground);
+@media (hover: hover) and (pointer: fine) {
+    .change-chip:hover:not(:disabled) {
+        background: color-mix(in srgb, var(--foreground) 6%, transparent);
+        color: var(--foreground);
+    }
 }
 
 .change-chip.is-on {
@@ -57,30 +59,48 @@
     color: var(--alert-success);
 }
 
-.change-chip.tone-added:hover:not(:disabled),
 .change-chip.tone-added.is-on {
     background: color-mix(in oklch, var(--alert-success) 16%, transparent);
     color: var(--alert-success);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .change-chip.tone-added:hover:not(:disabled) {
+        background: color-mix(in oklch, var(--alert-success) 16%, transparent);
+        color: var(--alert-success);
+    }
 }
 
 .change-chip.tone-removed {
     color: var(--destructive);
 }
 
-.change-chip.tone-removed:hover:not(:disabled),
 .change-chip.tone-removed.is-on {
     background: color-mix(in oklch, var(--destructive) 16%, transparent);
     color: var(--destructive);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .change-chip.tone-removed:hover:not(:disabled) {
+        background: color-mix(in oklch, var(--destructive) 16%, transparent);
+        color: var(--destructive);
+    }
 }
 
 .change-chip.tone-unmatched {
     color: var(--alert-warning);
 }
 
-.change-chip.tone-unmatched:hover:not(:disabled),
 .change-chip.tone-unmatched.is-on {
     background: color-mix(in oklch, var(--alert-warning) 16%, transparent);
     color: var(--alert-warning);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .change-chip.tone-unmatched:hover:not(:disabled) {
+        background: color-mix(in oklch, var(--alert-warning) 16%, transparent);
+        color: var(--alert-warning);
+    }
 }
 
 .change-glyph {
@@ -210,8 +230,10 @@
     cursor: pointer;
 }
 
-.change-fold:hover {
-    background: color-mix(in srgb, var(--foreground) 6%, var(--card));
+@media (hover: hover) and (pointer: fine) {
+    .change-fold:hover {
+        background: color-mix(in srgb, var(--foreground) 6%, var(--card));
+    }
 }
 
 .change-pin {
@@ -236,4 +258,10 @@
 
 .change-pin .change-fold {
     margin: 0 0 0 auto;
+}
+
+@media (width < 48rem), (pointer: coarse) {
+    .change-search input {
+        font-size: 16px;
+    }
 }

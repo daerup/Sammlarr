@@ -6,8 +6,10 @@
     background: color-mix(in oklch, var(--tint) 12%, transparent);
 }
 
-.feed-provider-select ::deep .provider-trigger:hover {
-    background: color-mix(in oklch, var(--tint) 18%, transparent);
+@media (hover: hover) and (pointer: fine) {
+    .feed-provider-select ::deep .provider-trigger:hover {
+        background: color-mix(in oklch, var(--tint) 18%, transparent);
+    }
 }
 
 .provider-wash {

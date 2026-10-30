@@ -4,15 +4,24 @@ header ::deep .nav-link {
 	transition: color 0.15s ease;
 }
 
-header ::deep .nav-link:hover {
-	color: color-mix(in oklab, var(--foreground) 80%, transparent);
+@media (hover: hover) and (pointer: fine) {
+	header ::deep .nav-link:hover {
+		color: color-mix(in oklab, var(--foreground) 80%, transparent);
+	}
 }
 
-header ::deep .nav-link[aria-current="page"],
-header ::deep .nav-link[aria-current="page"]:hover {
+header ::deep .nav-link[aria-current="page"] {
 	color: var(--foreground);
 	background-color: transparent;
 	text-decoration: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+	header ::deep .nav-link[aria-current="page"]:hover {
+		color: var(--foreground);
+		background-color: transparent;
+		text-decoration: none;
+	}
 }
 
 header ::deep nav > ul {
@@ -50,9 +59,11 @@ header ::deep nav > ul[data-underline-ready="true"]::after {
     cursor: pointer;
 }
 
-.search-trigger:hover {
-    color: var(--foreground);
-    border-color: var(--muted-foreground);
+@media (hover: hover) and (pointer: fine) {
+    .search-trigger:hover {
+        color: var(--foreground);
+        border-color: var(--muted-foreground);
+    }
 }
 
 .search-trigger-label {

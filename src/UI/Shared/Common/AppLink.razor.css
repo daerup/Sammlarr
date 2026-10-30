@@ -9,18 +9,28 @@
     text-underline-offset: 3px;
 }
 
-.app-link:hover,
 .app-link:focus-visible {
     text-decoration: underline;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .app-link:hover {
+        text-decoration: underline;
+    }
 }
 
 .app-link.is-muted {
     color: var(--muted-foreground);
 }
 
-.app-link.is-muted:hover,
 .app-link.is-muted:focus-visible {
     color: var(--foreground);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .app-link.is-muted:hover {
+        color: var(--foreground);
+    }
 }
 
 .app-link ::deep .app-link-arrow {
@@ -32,7 +42,12 @@
     transition: opacity 150ms ease;
 }
 
-.app-link:hover ::deep .app-link-arrow,
 .app-link:focus-visible ::deep .app-link-arrow {
     opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .app-link:hover ::deep .app-link-arrow {
+        opacity: 1;
+    }
 }

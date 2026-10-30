@@ -10,9 +10,11 @@
     transition: border-color 120ms, background-color 120ms;
 }
 
-.choice-card:hover {
-    border-color: var(--brand);
-    background: color-mix(in oklch, var(--brand) 3%, var(--card));
+@media (hover: hover) and (pointer: fine) {
+    .choice-card:hover {
+        border-color: var(--brand);
+        background: color-mix(in oklch, var(--brand) 3%, var(--card));
+    }
 }
 
 .choice-card[data-picked] {

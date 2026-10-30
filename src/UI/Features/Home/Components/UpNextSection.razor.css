@@ -11,8 +11,10 @@
     cursor: pointer;
 }
 
-.sect:hover {
-    color: var(--foreground);
+@media (hover: hover) and (pointer: fine) {
+    .sect:hover {
+        color: var(--foreground);
+    }
 }
 
 .sect-title {
@@ -173,12 +175,17 @@
     transition: opacity 120ms ease;
 }
 
-.row:hover ::deep .row-cancel,
 .row:focus-within ::deep .row-cancel {
     opacity: 1;
 }
 
-@media (hover: none) {
+@media (hover: hover) and (pointer: fine) {
+    .row:hover ::deep .row-cancel {
+        opacity: 1;
+    }
+}
+
+@media not ((hover: hover) and (pointer: fine)) {
     .row ::deep .row-cancel {
         opacity: 1;
     }
