@@ -35,13 +35,11 @@
                               FallbackAction="@(() => NavigationManager.NavigateTo(SettingsLinks.Provider(_providerConfig.TrendingProvider.Service)))">
                 @if (_isLoading)
                 {
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        <AutoSkeletons Preset="AutoSkeletonPreset.MediaGridTile" Count="20"/>
-                    </div>
+                    <MediaGrid Loading="true" Skeletons="20"/>
                 }
                 else if (_trendingMedia != null)
                 {
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <MediaGrid>
                         @foreach (var media in _trendingMedia)
                         {
                             <MediaGridTile @key="media"
@@ -51,7 +49,7 @@
                                            Wantlisted="WantlistItemOf(media)"
                                            RatingsStoredOnly="true"/>
                         }
-                    </div>
+                    </MediaGrid>
 
                     <PaginationControls CurrentPage="_currentPage"
                                         TotalPages="_totalPages"

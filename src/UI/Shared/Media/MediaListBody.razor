@@ -15,9 +15,7 @@
 }
 else if (IsLoading || TotalCount is null)
 {
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <AutoSkeletons Preset="AutoSkeletonPreset.MediaGridTile" Count="12"/>
-    </div>
+    <MediaGrid Loading="true"/>
 }
 else if (TotalCount is 0)
 {

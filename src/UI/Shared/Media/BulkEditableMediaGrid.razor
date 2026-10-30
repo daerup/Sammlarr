@@ -24,7 +24,7 @@
                    MarkConfirm="@MarkConfirm"/>
 }
 
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<MediaGrid>
     @foreach (var item in Items)
     {
         var detail = Detail(item);
@@ -51,7 +51,7 @@
             @Overlay?.Invoke(item)
         </div>
     }
-</div>
+</MediaGrid>
 
 @code {
     [Parameter, EditorRequired] public IReadOnlyList<TItem> Items { get; set; } = [];

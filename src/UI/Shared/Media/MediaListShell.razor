@@ -3,9 +3,7 @@
 @if (Settings is null)
 {
     <PageContainer>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <AutoSkeletons Preset="AutoSkeletonPreset.MediaGridTile" Count="12"/>
-        </div>
+        <MediaGrid Loading="true"/>
     </PageContainer>
 }
 else
