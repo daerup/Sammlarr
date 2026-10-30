@@ -1,0 +1,27 @@
+<div class="unfold-row @(Divided ? "divided" : null) @Class" style="@RowStyle" @attributes="Attributes">
+    <BbCollapsible Open="Open" OpenChanged="OpenChanged">
+        <BbCollapsibleTrigger AsChild="false"
+                              Class="@($"group w-full grid {TriggerClass} items-center gap-3.5 pl-5 pr-4 text-left bg-foreground/5 hover:bg-foreground/8 transition-colors")">
+            <LucideIcon Name="chevron-right" Size="15" Class="text-muted-foreground transition-transform duration-150 group-data-[state=open]:rotate-90"/>
+            @Summary
+        </BbCollapsibleTrigger>
+        <BbCollapsibleContent>
+            @Details
+        </BbCollapsibleContent>
+    </BbCollapsible>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public required string TriggerClass { get; set; }
+    [Parameter] public string? Edge { get; set; }
+    [Parameter] public bool Divided { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+    [Parameter, EditorRequired] public required RenderFragment Summary { get; set; }
+    [Parameter, EditorRequired] public required RenderFragment Details { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? Attributes { get; set; }
+
+    private string? RowStyle => Edge is null ? Style : $"--edge: {Edge};{Style}";
+}

@@ -6,120 +6,117 @@
 @inject NavigationManager Navigation
 @inject Notifier Notifier
 
-<div class="person-row @(Colour is { } ? "has-hue" : null)" style="@ColourStyle" data-person="@Name">
-    <BbCollapsible Open="Open" OpenChanged="OpenChanged">
-        <BbCollapsibleTrigger AsChild="false"
-                              Class="group grid w-full grid-cols-[15px_1fr_auto_auto] items-center gap-3.5 bg-foreground/5 py-3 pl-5 pr-4 text-left transition-colors hover:bg-foreground/8">
-            <LucideIcon Name="chevron-right" Size="15" Class="text-muted-foreground transition-transform duration-150 group-data-[state=open]:rotate-90"/>
-            <span class="flex min-w-0 items-center gap-2.5">
+<UnfoldRow Class="@(Colour is { } ? "person-row bird-edge" : "person-row")" Style="@ColourStyle" Divided="true" data-person="@Name" Open="Open" OpenChanged="OpenChanged"
+           TriggerClass="grid-cols-[15px_1fr_auto_auto] py-3">
+    <Summary>
+        <span class="flex min-w-0 items-center gap-2.5">
+            @switch (Person)
+            {
+                case JoinedPerson joined when SignIn == AuthProvider.Plex && joined.User.AvatarUrl.Length > 0:
+                    <BbAvatar Size="AvatarSize.Small">
+                        <BbAvatarImage Source="@joined.User.AvatarUrl" Alt="@Name"/>
+                        <BbAvatarFallback>
+                            <PersonAvatar Person="joined.User.Id" Colour="Colour!"/>
+                        </BbAvatarFallback>
+                    </BbAvatar>
+                    break;
+                case JoinedPerson joined:
+                    <PersonAvatar Person="joined.User.Id" Colour="Colour!"/>
+                    break;
+                case InvitedPerson:
+                    <BbAvatar Size="AvatarSize.Small">
+                        <BbAvatarFallback>
+                            <LucideIcon Name="user" Size="15"/>
+                        </BbAvatarFallback>
+                    </BbAvatar>
+                    break;
+            }
+            <span class="flex min-w-0 flex-col">
+                <span class="flex items-center gap-2">
+                    <span class="truncate text-sm font-medium">@Name</span>
+                    @if (IsYou)
+                    {
+                        <span class="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">You</span>
+                    }
+                </span>
+                <span class="truncate text-xs text-muted-foreground" data-owns>@Owns</span>
+            </span>
+        </span>
+        <BbBadge Variant="@(Role == UserRole.Admin ? BadgeVariant.Default : BadgeVariant.Outline)" Class="h-5 text-[10px]">@Role</BbBadge>
+        <span class="flex items-center gap-1.5 whitespace-nowrap text-xs @Status.Tone" data-status>
+            <span class="inline-block size-1.5 rounded-full @Status.Dot"></span>
+            @Status.Text
+        </span>
+    </Summary>
+    <Details>
+        <div class="flex flex-col gap-3 pb-4 pl-[61px] pr-4 pt-3">
+            <p class="text-[13px] text-muted-foreground">@About</p>
+            <div class="flex flex-wrap items-center gap-2">
                 @switch (Person)
                 {
-                    case JoinedPerson joined when SignIn == AuthProvider.Plex && joined.User.AvatarUrl.Length > 0:
-                        <BbAvatar Size="AvatarSize.Small">
-                            <BbAvatarImage Source="@joined.User.AvatarUrl" Alt="@Name"/>
-                            <BbAvatarFallback>
-                                <PersonAvatar Person="joined.User.Id" Colour="Colour!"/>
-                            </BbAvatarFallback>
-                        </BbAvatar>
+                    case InvitedPerson invited:
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => RenewAsync(invited)">
+                            <LucideIcon Name="link" Size="13" Class="mr-1.5"/>
+                            New invite link
+                        </BbButton>
+                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="() => RevokeAsync(invited)">Revoke invite</BbButton>
+                        break;
+                    case JoinedPerson when IsLastAdmin:
+                        <p class="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <LucideIcon Name="lock" Size="13"/>
+                            The last admin can't be made a member or removed.
+                        </p>
                         break;
                     case JoinedPerson joined:
-                        <PersonAvatar Person="joined.User.Id" Colour="Colour!"/>
-                        break;
-                    case InvitedPerson:
-                        <BbAvatar Size="AvatarSize.Small">
-                            <BbAvatarFallback>
-                                <LucideIcon Name="user" Size="15"/>
-                            </BbAvatarFallback>
-                        </BbAvatar>
+                        @if (joined.LockedUntil is Some<DateTimeOffset>)
+                        {
+                            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => UnlockAsync(joined)">
+                                <LucideIcon Name="lock-open" Size="13" Class="mr-1.5"/>
+                                Unlock
+                            </BbButton>
+                        }
+                        @if (SignIn == AuthProvider.Local)
+                        {
+                            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => ResetLinkAsync(joined)">
+                                <LucideIcon Name="key-round" Size="13" Class="mr-1.5"/>
+                                Reset link
+                            </BbButton>
+                        }
+                        <BbAlertDialog>
+                            <BbAlertDialogTrigger>
+                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">@RoleAction</BbButton>
+                            </BbAlertDialogTrigger>
+                            <BbAlertDialogContent>
+                                <BbAlertDialogHeader>
+                                    <BbAlertDialogTitle>@(Role == UserRole.Admin ? $"Make {Name} a member?" : $"Make {Name} an admin?")</BbAlertDialogTitle>
+                                    <BbAlertDialogDescription>
+                                        @(Role == UserRole.Admin
+                                            ? "They'll lose access to provider settings, cache, diagnostics, and user management."
+                                            : "They'll gain full access to provider settings, cache, diagnostics, and user management.")
+                                    </BbAlertDialogDescription>
+                                </BbAlertDialogHeader>
+                                <BbAlertDialogFooter>
+                                    <BbAlertDialogCancel>
+                                        <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                                    </BbAlertDialogCancel>
+                                    <BbAlertDialogAction>
+                                        <BbButton Variant="ButtonVariant.Default" OnClick="() => ChangeRoleAsync(joined)">@RoleAction</BbButton>
+                                    </BbAlertDialogAction>
+                                </BbAlertDialogFooter>
+                            </BbAlertDialogContent>
+                        </BbAlertDialog>
+                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Class="ml-auto text-destructive hover:text-destructive"
+                                  OnClick="() => _removing = true">
+                            <LucideIcon Name="trash-2" Size="13" Class="mr-1.5"/>
+                            Remove
+                        </BbButton>
+                        <RemovePersonDialog Open="_removing" OpenChanged="open => _removing = open" Person="joined" Sink="Sink" Removed="Changed"/>
                         break;
                 }
-                <span class="flex min-w-0 flex-col">
-                    <span class="flex items-center gap-2">
-                        <span class="truncate text-sm font-medium">@Name</span>
-                        @if (IsYou)
-                        {
-                            <span class="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">You</span>
-                        }
-                    </span>
-                    <span class="truncate text-xs text-muted-foreground" data-owns>@Owns</span>
-                </span>
-            </span>
-            <BbBadge Variant="@(Role == UserRole.Admin ? BadgeVariant.Default : BadgeVariant.Outline)" Class="h-5 text-[10px]">@Role</BbBadge>
-            <span class="flex items-center gap-1.5 whitespace-nowrap text-xs @Status.Tone" data-status>
-                <span class="inline-block size-1.5 rounded-full @Status.Dot"></span>
-                @Status.Text
-            </span>
-        </BbCollapsibleTrigger>
-        <BbCollapsibleContent>
-            <div class="flex flex-col gap-3 pb-4 pl-[61px] pr-4 pt-3">
-                <p class="text-[13px] text-muted-foreground">@About</p>
-                <div class="flex flex-wrap items-center gap-2">
-                    @switch (Person)
-                    {
-                        case InvitedPerson invited:
-                            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => RenewAsync(invited)">
-                                <LucideIcon Name="link" Size="13" Class="mr-1.5"/>
-                                New invite link
-                            </BbButton>
-                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="() => RevokeAsync(invited)">Revoke invite</BbButton>
-                            break;
-                        case JoinedPerson when IsLastAdmin:
-                            <p class="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <LucideIcon Name="lock" Size="13"/>
-                                The last admin can't be made a member or removed.
-                            </p>
-                            break;
-                        case JoinedPerson joined:
-                            @if (joined.LockedUntil is Some<DateTimeOffset>)
-                            {
-                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => UnlockAsync(joined)">
-                                    <LucideIcon Name="lock-open" Size="13" Class="mr-1.5"/>
-                                    Unlock
-                                </BbButton>
-                            }
-                            @if (SignIn == AuthProvider.Local)
-                            {
-                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => ResetLinkAsync(joined)">
-                                    <LucideIcon Name="key-round" Size="13" Class="mr-1.5"/>
-                                    Reset link
-                                </BbButton>
-                            }
-                            <BbAlertDialog>
-                                <BbAlertDialogTrigger>
-                                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">@RoleAction</BbButton>
-                                </BbAlertDialogTrigger>
-                                <BbAlertDialogContent>
-                                    <BbAlertDialogHeader>
-                                        <BbAlertDialogTitle>@(Role == UserRole.Admin ? $"Make {Name} a member?" : $"Make {Name} an admin?")</BbAlertDialogTitle>
-                                        <BbAlertDialogDescription>
-                                            @(Role == UserRole.Admin
-                                                ? "They'll lose access to provider settings, cache, diagnostics, and user management."
-                                                : "They'll gain full access to provider settings, cache, diagnostics, and user management.")
-                                        </BbAlertDialogDescription>
-                                    </BbAlertDialogHeader>
-                                    <BbAlertDialogFooter>
-                                        <BbAlertDialogCancel>
-                                            <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
-                                        </BbAlertDialogCancel>
-                                        <BbAlertDialogAction>
-                                            <BbButton Variant="ButtonVariant.Default" OnClick="() => ChangeRoleAsync(joined)">@RoleAction</BbButton>
-                                        </BbAlertDialogAction>
-                                    </BbAlertDialogFooter>
-                                </BbAlertDialogContent>
-                            </BbAlertDialog>
-                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Class="ml-auto text-destructive hover:text-destructive"
-                                      OnClick="() => _removing = true">
-                                <LucideIcon Name="trash-2" Size="13" Class="mr-1.5"/>
-                                Remove
-                            </BbButton>
-                            <RemovePersonDialog Open="_removing" OpenChanged="open => _removing = open" Person="joined" Sink="Sink" Removed="Changed"/>
-                            break;
-                    }
-                </div>
             </div>
-        </BbCollapsibleContent>
-    </BbCollapsible>
-</div>
+        </div>
+    </Details>
+</UnfoldRow>
 
 @if (_issued is { } issued)
 {

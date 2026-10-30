@@ -1,0 +1,17 @@
+.unfold-row {
+    position: relative;
+}
+
+.unfold-row.divided + .unfold-row.divided {
+    border-top: 1px solid var(--border);
+}
+
+.unfold-row::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    background: var(--edge, transparent);
+}

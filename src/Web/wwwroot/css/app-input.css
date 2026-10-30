@@ -463,6 +463,16 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
 }
 
 @layer components {
+    .bird-edge {
+        --edge: oklch(0.6 var(--bird-chroma, 0.13) var(--bird-hue));
+    }
+
+    .dark .bird-edge {
+        --edge: oklch(0.74 var(--bird-chroma, 0.12) var(--bird-hue));
+    }
+}
+
+@layer components {
     .popover-band {
         background: oklch(from var(--muted) calc(l - 0.08) c h);
         border-bottom: 2px solid var(--border);

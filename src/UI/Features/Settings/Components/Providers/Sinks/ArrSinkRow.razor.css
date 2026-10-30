@@ -1,18 +1,3 @@
-.arr-row {
-    position: relative;
-    scroll-margin-top: 80px;
-}
-
-.arr-row::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 3px;
-    background: var(--mix);
-}
-
 .arr-lockup {
     display: inline-flex;
     align-items: center;
