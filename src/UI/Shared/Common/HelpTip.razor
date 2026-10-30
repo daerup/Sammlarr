@@ -1,9 +1,10 @@
-<BbTooltip DelayDuration="Delay" Placement="Placement">
-    <BbTooltipTrigger AsChild="false" Class="@TriggerClass" Focusable="Focusable" @attributes="Attributes">
+<DetailTip Title="@Title" Delay="Delay" Placement="Placement" TriggerClass="@TriggerClass" Focusable="Focusable" ContentClass="@ContentClass" ContentTestId="@ContentTestId"
+           @attributes="Attributes">
+    <Trigger>
         <LucideIcon Name="info" Size="IconSize" Class="@IconClass"/>
-    </BbTooltipTrigger>
-    <BbTooltipContent Class="@ContentClass" data-testid="@ContentTestId">@ChildContent</BbTooltipContent>
-</BbTooltip>
+    </Trigger>
+    <Detail>@ChildContent</Detail>
+</DetailTip>
 
 @code {
     [Parameter, EditorRequired] public required string Title { get; set; }

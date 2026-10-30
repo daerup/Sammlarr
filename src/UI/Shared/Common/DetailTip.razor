@@ -1,0 +1,19 @@
+<BbTooltip DelayDuration="Delay" Placement="Placement">
+    <BbTooltipTrigger AsChild="false" Class="@TriggerClass" Focusable="Focusable" @attributes="Attributes">
+        @Trigger
+    </BbTooltipTrigger>
+    <BbTooltipContent Class="@ContentClass" data-testid="@ContentTestId">@Detail</BbTooltipContent>
+</BbTooltip>
+
+@code {
+    [Parameter, EditorRequired] public required string Title { get; set; }
+    [Parameter] public int Delay { get; set; } = 300;
+    [Parameter] public PopoverPlacement Placement { get; set; } = PopoverPlacement.Top;
+    [Parameter] public string? TriggerClass { get; set; }
+    [Parameter] public bool Focusable { get; set; } = true;
+    [Parameter] public string? ContentClass { get; set; }
+    [Parameter] public string? ContentTestId { get; set; }
+    [Parameter, EditorRequired] public required RenderFragment Trigger { get; set; }
+    [Parameter, EditorRequired] public required RenderFragment Detail { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? Attributes { get; set; }
+}

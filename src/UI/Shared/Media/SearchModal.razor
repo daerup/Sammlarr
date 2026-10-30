@@ -124,12 +124,14 @@
                                     }
                                     else if (result is UnmatchedMedia { Reason: UnmatchedReason.Conflict })
                                     {
-                                        <BbTooltip>
-                                            <BbTooltipTrigger AsChild="false" Class="text-muted-foreground" data-testid="search-conflict">
+                                        <DetailTip Title="Can't be added" TriggerClass="text-muted-foreground" data-testid="search-conflict">
+                                            <Trigger>
                                                 <LucideIcon Name="split" Size="16"/>
-                                            </BbTooltipTrigger>
-                                            <BbTooltipContent>Its ids disagree with titles already in your library, so it can't be added.</BbTooltipContent>
-                                        </BbTooltip>
+                                            </Trigger>
+                                            <Detail>
+                                                Its ids disagree with titles already in your library, so it can't be added.
+                                            </Detail>
+                                        </DetailTip>
                                     }
                                 </Icons>
                             </MediaDetailTile>

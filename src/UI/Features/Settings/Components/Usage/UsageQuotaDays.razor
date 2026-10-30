@@ -13,9 +13,8 @@
     {
         var last = index == Quota.Days.Count - 1;
         <div class="absolute" style="@($"left: {At(index)}; width: {Slot}; top: {PlotTop}px; height: {PlotHeight}px")">
-            <BbTooltip DelayDuration="100" Placement="PopoverPlacement.Top">
-                <BbTooltipTrigger Focusable="false" Class="block size-full" style="display: block; position: relative; width: 100%; height: 100%"
-                                  data-testid="usage-quota-day">
+            <DetailTip Title="@Label(day, last)" Delay="100" TriggerClass="block size-full" Focusable="false" ContentClass="@Tooltips.Panel" ContentTestId="usage-quota-day-tip" style="display: block; position: relative; width: 100%; height: 100%" data-testid="usage-quota-day">
+                <Trigger>
                     <span class="absolute bottom-0 left-1/2 flex -translate-x-1/2 flex-col-reverse gap-[1.5px]"
                           style="@($"width: min(64px, 56%); height: {Percent(day.Total)}")">
                         @foreach (var (_, spent) in Stacked(day))
@@ -28,8 +27,8 @@
                         <span class="absolute left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] text-foreground" style="@($"bottom: calc({Percent(day.Total)} + 5px)")"
                               data-testid="usage-quota-day-total">@UsageView.Count(day.Total)@(last ? " so far" : string.Empty)</span>
                     }
-                </BbTooltipTrigger>
-                <BbTooltipContent Class="@Tooltips.Panel" data-testid="usage-quota-day-tip">
+                </Trigger>
+                <Detail>
                     <div class="mb-1 font-semibold whitespace-nowrap">@Label(day, last) · @UsageView.Requests(day.Total)</div>
                     @foreach (var (cause, spent) in day.Spent.Where(pair => pair.Value > 0).OrderByDescending(pair => pair.Value))
                     {
@@ -39,8 +38,8 @@
                             <span class="pl-3 text-right font-medium tabular-nums">@UsageView.Count(spent)</span>
                         </div>
                     }
-                </BbTooltipContent>
-            </BbTooltip>
+                </Detail>
+            </DetailTip>
         </div>
         @if (Quota.Days.Count <= 7 || index % 3 == (Quota.Days.Count - 1) % 3)
         {

@@ -87,19 +87,19 @@
                     </div>
                     <div class="flex min-w-0 flex-1 flex-col">
                         <p class="min-w-0 truncate font-medium">@alert.Client.Name</p>
-                        <BbTooltip>
-                            <BbTooltipTrigger AsChild="false" Class="inline-flex min-w-0 max-w-full">
+                        <DetailTip Title="Notifies on" TriggerClass="inline-flex min-w-0 max-w-full" ContentClass="max-w-xs">
+                            <Trigger>
                                 <span class="min-w-0 truncate text-sm text-muted-foreground">@NotificationEventCatalog.Summarise(alert.Subscription.EventTypes)</span>
-                            </BbTooltipTrigger>
-                            <BbTooltipContent Class="max-w-xs">
+                            </Trigger>
+                            <Detail>
                                 <div class="flex flex-wrap gap-1">
                                     @foreach (var eventType in alert.Subscription.EventTypes)
                                     {
                                         <BbBadge Variant="BadgeVariant.Secondary" Class="px-2 py-0.5">@eventType.Humanize()</BbBadge>
                                     }
                                 </div>
-                            </BbTooltipContent>
-                        </BbTooltip>
+                            </Detail>
+                        </DetailTip>
                     </div>
                     <div class="flex shrink-0 items-center gap-1">
                         <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="() => EditAlert(alert)">

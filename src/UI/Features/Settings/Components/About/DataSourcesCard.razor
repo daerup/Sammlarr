@@ -78,14 +78,16 @@
                 <div class="source-chips">
                     @foreach (var chip in row.Chips)
                     {
-                        <BbTooltip DelayDuration="150">
-                            <BbTooltipTrigger Focusable="false">
+                        <DetailTip Title="@chip.Name" Delay="150" Focusable="false" ContentClass="max-w-[320px]">
+                            <Trigger>
                                 <BbBadge Variant="BadgeVariant.Secondary" Class="h-[22px] cursor-default gap-[5px] rounded-md border-0 pl-1.5 pr-2 text-[11.5px] font-normal text-foreground/80 hover:bg-secondary" data-chip="@chip.Name">
                                     <BbBadgeIcon Name="@chip.Icon" Class="text-muted-foreground"/>@chip.Name
                                 </BbBadge>
-                            </BbTooltipTrigger>
-                            <BbTooltipContent Class="max-w-[320px]">@chip.Tip</BbTooltipContent>
-                        </BbTooltip>
+                            </Trigger>
+                            <Detail>
+                                @chip.Tip
+                            </Detail>
+                        </DetailTip>
                     }
                     @row.Via.Match(Via, () => Nothing)
                 </div>

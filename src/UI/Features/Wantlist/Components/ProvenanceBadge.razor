@@ -32,15 +32,17 @@ else
 
     private RenderFragment Badge =>
         @<BbBadge Variant="@ProvenanceBadgeVariant(Provenance)" Class="wl-badge">
-            <BbTooltip>
-                <BbTooltipTrigger AsChild="false" Class="p-0">
+            <DetailTip Title="Where it came from" TriggerClass="p-0">
+                <Trigger>
                     <span class="flex items-center gap-1 wl-badge-content">
                         <LucideIcon Name="@ProvenanceView.Icon(Provenance)" Size="14" Color="@IconColor"/>
                         <span class="wl-badge-label">@ProvenanceView.Label(Provenance, Branding, Type)</span>
                     </span>
-                </BbTooltipTrigger>
-                <BbTooltipContent>@ProvenanceView.Description(Provenance, Branding, AddedAt, Type)</BbTooltipContent>
-            </BbTooltip>
+                </Trigger>
+                <Detail>
+                    @ProvenanceView.Description(Provenance, Branding, AddedAt, Type)
+                </Detail>
+            </DetailTip>
         </BbBadge>;
 
     private static BadgeVariant ProvenanceBadgeVariant(WantlistItemProvenance provenance) =>

@@ -32,14 +32,14 @@
     <td class="max-w-[48ch] px-3 py-2.5 align-top text-muted-foreground" data-testid="housekeeping-did">
         @if (Breakdown is Some<RenderFragment>(var breakdown))
         {
-            <BbTooltip DelayDuration="150">
-                <BbTooltipTrigger AsChild="false">
+            <DetailTip Title="@Name" Delay="150" ContentClass="w-[340px] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg">
+                <Trigger>
                     <span class="inline-flex items-center gap-1.5 whitespace-nowrap">@Result<LucideIcon Name="info" Size="13" Class="opacity-70"/></span>
-                </BbTooltipTrigger>
-                <BbTooltipContent Class="w-[340px] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg">
+                </Trigger>
+                <Detail>
                     @breakdown
-                </BbTooltipContent>
-            </BbTooltip>
+                </Detail>
+            </DetailTip>
         }
         else
         {

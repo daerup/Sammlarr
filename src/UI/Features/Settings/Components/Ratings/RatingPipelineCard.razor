@@ -70,10 +70,14 @@
                                 }
                                 else
                                 {
-                                    <BbTooltip DelayDuration="150">
-                                        <BbTooltipTrigger AsChild="false"><span class="pipeline-name">@RatingTexts.Name(tile.Source)</span></BbTooltipTrigger>
-                                        <BbTooltipContent Class="max-w-xs">@RatingTexts.Scale(tile.Source)</BbTooltipContent>
-                                    </BbTooltip>
+                                    <DetailTip Title="@RatingTexts.Name(tile.Source)" Delay="150" ContentClass="max-w-xs">
+                                        <Trigger>
+                                            <span class="pipeline-name">@RatingTexts.Name(tile.Source)</span>
+                                        </Trigger>
+                                        <Detail>
+                                            @RatingTexts.Scale(tile.Source)
+                                        </Detail>
+                                    </DetailTip>
                                 }
                                 @if (!Ordered && tile.Supplied)
                                 {
