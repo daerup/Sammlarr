@@ -18,11 +18,19 @@ namespace UI.Tests.Layout;
 
 public class MainLayoutTests : BunitContext
 {
+	private static readonly RenderFragment FeedsPage = builder =>
+	{
+		builder.OpenComponent<PageContainer>(0);
+		builder.AddAttribute(1, nameof(PageContainer.Heading), "Feeds");
+		builder.CloseComponent();
+	};
+
 	[Before(Test)]
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddScoped(_ => new CurrentUserAccessor(new CurrentUserOverride()));
+		Services.AddScoped<ICurrentUser>(sp => sp.GetRequiredService<CurrentUserAccessor>());
 		var versions = new AppVersionProvider(new ReleaseOptions(), new AppVersion("0.0.0-alpha.0.584"));
 		Services.AddSingleton(versions);
 		Services.AddSingleton(new AppUpdateChecker(versions, new ReleaseOptions(), IReleaseFeed.Mock().Object, new FakeTimeProvider()));
@@ -123,5 +131,52 @@ public class MainLayoutTests : BunitContext
 		await Assert.That(cut.WaitForElement("[data-testid=footer-update-dot]")).IsNotNull();
 	}
 
-	private IRenderedComponent<MainLayout> RenderLayout() => Render<MainLayout>(parameters => parameters.Add(layout => layout.Body, _ => { }));
+	[Test]
+	public async Task PhoneTitle_OnAPhone_ShowsThePageHeading()
+	{
+		AddAuthorization().SetAuthorized("alice");
+		var cut = RenderLayout(FeedsPage);
+
+		await cut.InvokeAsync(() => cut.FindComponent<PhoneLayout>().Instance.Changed(true));
+
+		await Assert.That(cut.Find("h1.phone-title").TextContent.Trim()).IsEqualTo("Feeds");
+	}
+
+	[Test]
+	public async Task PhoneTitle_OnADesktop_IsNotRendered()
+	{
+		AddAuthorization().SetAuthorized("alice");
+
+		var cut = RenderLayout(FeedsPage);
+
+		await Assert.That(cut.FindAll(".phone-title")).IsEmpty();
+		await Assert.That(cut.FindAll("h1").Select(heading => heading.TextContent)).IsEquivalentTo(["Feeds"]);
+	}
+
+	[Test]
+	public async Task Menu_OnADesktop_IsNotMounted()
+	{
+		AddAuthorization().SetAuthorized("alice");
+
+		var cut = RenderLayout();
+
+		await Assert.That(cut.FindComponents<PhoneMenu>()).IsEmpty();
+	}
+
+	[Test]
+	public async Task MenuButton_OnAPhone_OpensTheMenu()
+	{
+		AddAuthorization().SetAuthorized("alice");
+		var cut = RenderLayout();
+		await cut.InvokeAsync(() => cut.FindComponent<PhoneLayout>().Instance.Changed(true));
+
+		await cut.Find("button[aria-label='Open menu']").ClickAsync();
+
+		await Assert.That(cut.FindComponent<PhoneMenu>().Instance.Open).IsTrue();
+		await Assert.That(cut.Find("button[aria-label='Open menu']").GetAttribute("aria-expanded")).IsEqualTo("true");
+	}
+
+	private IRenderedComponent<MainLayout> RenderLayout() => RenderLayout(_ => { });
+
+	private IRenderedComponent<MainLayout> RenderLayout(RenderFragment body) => Render<MainLayout>(parameters => parameters.Add(layout => layout.Body, body));
 }

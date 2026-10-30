@@ -1,69 +1,85 @@
 @inherits LayoutComponentBase
 @implements IDisposable
+@using Microsoft.AspNetCore.Components.Sections
 @using UI.Features.Onboarding.Components
 @inject CurrentUserAccessor CurrentUser
 @inject AppVersionProvider Versions
 @inject AppUpdateChecker Updates
 @inject SearchLauncher SearchLauncher
 
-<SessionInvalidationListener/>
-<AuthorizeView>
-    <SetupRedirect/>
-</AuthorizeView>
-<AuthorizeView>
-    <GlobalSearch IsOpen="_isSearchOpen" IsOpenChanged="SearchOpenChanged" Purpose="_searchPurpose"/>
-</AuthorizeView>
+<PhoneLayout>
+    <SessionInvalidationListener/>
+    <AuthorizeView>
+        <SetupRedirect/>
+    </AuthorizeView>
+    <AuthorizeView>
+        <GlobalSearch IsOpen="_isSearchOpen" IsOpenChanged="SearchOpenChanged" Purpose="_searchPurpose"/>
+    </AuthorizeView>
 
-<div class="relative h-screen overflow-hidden flex flex-col">
-    <header class="shrink-0 z-50 w-full border-b bg-background">
-        <div class="flex h-12 items-center px-6">
-            <div class="mr-6 flex">
-                <NavLink href="/" Match="NavLinkMatch.All" class="flex items-center group" aria-label="Sammlarr home">
-                    <SammlarrLogo Size="33" WordSize="19"/>
-                </NavLink>
+    <div class="relative h-dvh overflow-hidden flex flex-col">
+        <header class="shrink-0 z-50 w-full border-b bg-background max-md:pt-[env(safe-area-inset-top)]">
+            <div class="flex h-12 items-center px-6 max-md:h-13 max-md:gap-0.5 max-md:px-2">
+                <div class="contents md:hidden">
+                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Open menu" aria-haspopup="dialog" aria-expanded="@(_isMenuOpen ? "true" : "false")" OnClick="@(() => _isMenuOpen = true)">
+                        <LucideIcon Name="menu" Size="20"/>
+                    </BbButton>
+                    <PhoneOnly>
+                        <h1 class="phone-title"><SectionOutlet SectionName="@PhoneLayout.TitleSection"/></h1>
+                    </PhoneOnly>
+                </div>
+                <div class="mr-6 flex max-md:hidden">
+                    <NavLink href="/" Match="NavLinkMatch.All" class="flex items-center group" aria-label="Sammlarr home">
+                        <SammlarrLogo Size="33" WordSize="19"/>
+                    </NavLink>
+                </div>
+                <BbNavigationMenu Class="text-sm font-medium max-md:hidden">
+                    <BbNavigationMenuList>
+                        @foreach (var link in AppSections.Pages)
+                        {
+                            <BbNavigationMenuItem>
+                                <BbNavigationMenuLink Href="@link.Href" Class="nav-link">@link.Label</BbNavigationMenuLink>
+                            </BbNavigationMenuItem>
+                        }
+                    </BbNavigationMenuList>
+                </BbNavigationMenu>
+                <div class="flex items-center justify-end space-x-2 md:flex-1 max-md:ml-auto max-md:space-x-0.5">
+                    <AuthorizeView>
+                        <button type="button" class="search-trigger" aria-label="Search for a movie or show" @onclick="@(() => _isSearchOpen = true)">
+                            <LucideIcon Name="search" Size="14"/>
+                            <span class="search-trigger-label max-md:hidden">Search</span>
+                            <BbKbd Keys="Ctrl+K" Class="max-md:hidden"/>
+                        </button>
+                    </AuthorizeView>
+                    <BbDarkModeToggle Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" Class="max-md:hidden"/>
+                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" Href="/settings" AriaLabel="Settings" Class="max-md:hidden">
+                        <LucideIcon Name="settings" Size="16"/>
+                    </BbButton>
+
+                    <ProfileCard/>
+                </div>
             </div>
-            <BbNavigationMenu Class="text-sm font-medium">
-                <BbNavigationMenuList>
-                    @foreach (var link in AppSections.Pages)
-                    {
-                        <BbNavigationMenuItem>
-                            <BbNavigationMenuLink Href="@link.Href" Class="nav-link">@link.Label</BbNavigationMenuLink>
-                        </BbNavigationMenuItem>
-                    }
-                </BbNavigationMenuList>
-            </BbNavigationMenu>
-            <div class="flex flex-1 items-center justify-end space-x-2">
-                <AuthorizeView>
-                    <button type="button" class="search-trigger" aria-label="Search for a movie or show" @onclick="@(() => _isSearchOpen = true)">
-                        <LucideIcon Name="search" Size="14"/>
-                        <span class="search-trigger-label">Search</span>
-                        <BbKbd Keys="Ctrl+K"/>
-                    </button>
-                </AuthorizeView>
-                <BbDarkModeToggle Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"/>
-                <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" Href="/settings" AriaLabel="Settings">
-                    <LucideIcon Name="settings" Size="16"/>
-                </BbButton>
+        </header>
 
-                <ProfileCard/>
-            </div>
-        </div>
-    </header>
+        <main class="flex-1 min-h-0 overflow-y-auto">
+            @Body
+        </main>
 
-    <main class="flex-1 min-h-0 overflow-y-auto">
-        @Body
-    </main>
+        <AppFooter Version="Versions.Current" Update="_update" Class="max-md:hidden"/>
+    </div>
 
-    <AppFooter Version="Versions.Current" Update="_update"/>
-</div>
-
-<BbToastProvider Position="ToastPosition.BottomRight"/>
-<WebUiToastListener/>
-<BbDialogProvider/>
-<BbPortalHost/>
+    <PhoneOnly>
+        <PhoneMenu @bind-Open="_isMenuOpen" Version="Versions.Current" Update="_update"/>
+    </PhoneOnly>
+    <BbToastProvider Position="ToastPosition.BottomRight"/>
+    <WebUiToastListener/>
+    <BbDialogProvider/>
+    <BbPortalHost/>
+</PhoneLayout>
 
 @code {
 	private bool _isSearchOpen;
+
+	private bool _isMenuOpen;
 
 	private SearchPurpose _searchPurpose;
 

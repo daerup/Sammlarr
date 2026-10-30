@@ -1,0 +1,103 @@
+@using System.Web
+@using Contracts.Identity
+@implements IDisposable
+@inject NavigationManager Navigation
+@inject ICurrentUser CurrentUser
+@inject ThemeService Theme
+
+<BbSheet Side="SheetSide.Left" Open="Open" OpenChanged="OpenChanged">
+    <BbSheetContent Class="flex w-[80%] max-w-[320px] flex-col gap-3.5 p-0 px-3 pb-[max(14px,env(safe-area-inset-bottom))] pt-[calc(env(safe-area-inset-top)+14px)]">
+        <BbSheetTitle Class="sr-only">Menu</BbSheetTitle>
+        <div class="px-2.5">
+            <SammlarrLogo Size="30" WordSize="17"/>
+        </div>
+        <nav class="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto" aria-label="Pages">
+            @{
+                var path = Path;
+                var currentSection = CurrentSection(path);
+            }
+            <a href="/" class="menu-row @On(path == "/")" aria-current="@Current(path == "/")">
+                <LucideIcon Name="house" Size="18"/>Home
+            </a>
+            @foreach (var link in AppSections.Pages)
+            {
+                var onPage = path == link.Href || path.StartsWith($"{link.Href}/", StringComparison.Ordinal);
+                <a href="@link.Href" class="menu-row @On(onPage)" aria-current="@Current(onPage)">
+                    <LucideIcon Name="@link.Icon" Size="18"/>@link.Label
+                </a>
+            }
+            <div class="menu-sep"></div>
+            <a href="/settings" class="menu-row">
+                <LucideIcon Name="settings" Size="18"/>Settings
+            </a>
+            @foreach (var section in AppSections.SettingsFor(CurrentUser.Role))
+            {
+                var current = section == currentSection;
+                <a href="/settings?section=@section.Slug" class="menu-row menu-sub @On(current)" aria-current="@Current(current)">@section.Label</a>
+            }
+        </nav>
+        <div class="menu-foot">
+            <div class="menu-row">
+                <LucideIcon Name="moon" Size="18"/>Dark mode
+                <BbSwitch Checked="Theme.IsDarkMode" CheckedChanged="Theme.SetDarkModeAsync" AriaLabel="Dark mode" Class="ml-auto"/>
+            </div>
+            <AppLink Href="/settings?section=about" Title="@AppFooter.LinkTitle(Update)" Arrow="false" Muted="true" Class="menu-version">
+                @if (Update is Some<AppUpdate>)
+                {
+                    <span class="update-dot" data-testid="menu-update-dot"></span>
+                }
+                <span class="font-mono text-xs font-normal">Sammlarr @Version.Number</span>
+            </AppLink>
+        </div>
+    </BbSheetContent>
+</BbSheet>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    [Parameter] [EditorRequired] public required AppVersion Version { get; set; }
+
+    [Parameter] public Optional<AppUpdate> Update { get; set; } = new None();
+
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += Close;
+        Theme.OnThemeChanged += Refresh;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Theme.InitializeAsync();
+        }
+    }
+
+    private Uri Here => Navigation.ToAbsoluteUri(Navigation.Uri);
+
+    private string Path => "/" + Navigation.ToBaseRelativePath(Here.GetLeftPart(UriPartial.Path));
+
+    private SettingsSection? CurrentSection(string path) => path == "/settings" ? AppSections.SectionFor(CurrentUser.Role, HttpUtility.ParseQueryString(Here.Query)["section"]) : null;
+
+    private static string? On(bool current) => current ? "on" : null;
+
+    private static string? Current(bool current) => current ? "page" : null;
+
+    private void Close(object? sender, LocationChangedEventArgs args)
+    {
+        if (Open)
+        {
+            _ = InvokeAsync(() => OpenChanged.InvokeAsync(false));
+        }
+    }
+
+    private void Refresh() => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= Close;
+        Theme.OnThemeChanged -= Refresh;
+    }
+}

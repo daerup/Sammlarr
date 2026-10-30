@@ -62,3 +62,32 @@ header ::deep nav > ul[data-underline-ready="true"]::after {
 .search-trigger ::deep svg {
     display: block;
 }
+
+.phone-title {
+    flex: 1;
+    min-width: 0;
+    margin-left: 2px;
+    overflow: hidden;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+@media (width < 48rem) {
+    .search-trigger {
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: var(--foreground);
+    }
+
+    .search-trigger ::deep svg {
+        width: 20px;
+        height: 20px;
+    }
+}

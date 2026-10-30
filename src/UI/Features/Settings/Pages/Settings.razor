@@ -9,12 +9,14 @@
 <SignInGuard AccessChanged="HandleSignInChanged"/>
 
 <PageContainer Heading="Settings"
+               PhoneTitle="@_activeSection.Label"
+               PhoneHeader="false"
                Description="Connect providers, manage your keys, and keep the local cache and diagnostics in check.">
     <ProtectedSection GuardState="IsSignedIn"
                       DeniedActionDescription="manage your settings"
                       FallbackAction="() => AccountConnectionPrompt.RequestAsync()">
-    <div class="flex items-start gap-8 pt-2">
-        <nav class="w-48 shrink-0 flex flex-col gap-0.5 sticky top-0" aria-label="Settings sections">
+    <div class="flex items-start gap-8 pt-2 max-md:pt-3">
+        <nav class="w-48 shrink-0 flex flex-col gap-0.5 sticky top-0 max-md:hidden" aria-label="Settings sections">
             @foreach (var item in VisibleSections)
             {
                 var isActive = _activeSection == item;
@@ -34,7 +36,7 @@
             }
         </nav>
 
-        <div class="border-l self-stretch"></div>
+        <div class="border-l self-stretch max-md:hidden"></div>
 
         <div class="flex-1 min-w-0">
             <DynamicComponent Type="_activeSection.ComponentType" Parameters="SectionParameters"/>
@@ -55,10 +57,7 @@
     private void HandleSignInChanged(bool hasAccess)
     {
         _isSignedIn = hasAccess;
-        if (!VisibleSections.Contains(_activeSection))
-        {
-            _activeSection = VisibleSections.First();
-        }
+        _activeSection = AppSections.SectionFor(CurrentUser.Role, Section);
     }
 
     private const string SectionQuery = "section";
@@ -97,14 +96,10 @@
 
     protected override void OnParametersSet()
     {
-        _activeSection = ResolveSection() ?? VisibleSections.First();
+        _activeSection = AppSections.SectionFor(CurrentUser.Role, Section);
     }
 
     private void Show(SettingsSection section) =>
-        Navigation.NavigateTo(Navigation.GetUriWithQueryParameters(new Dictionary<string, object?> { [SectionQuery] = Slug(section.Label), [ProviderQuery] = null, [SearchQuery] = null }));
+        Navigation.NavigateTo(Navigation.GetUriWithQueryParameters(new Dictionary<string, object?> { [SectionQuery] = section.Slug, [ProviderQuery] = null, [SearchQuery] = null }));
 
-    private SettingsSection? ResolveSection() =>
-        string.IsNullOrEmpty(Section) ? null : VisibleSections.FirstOrDefault(section => Slug(section.Label).Equals(Section, StringComparison.OrdinalIgnoreCase));
-
-    private static string Slug(string label) => string.Join("-", label.Split(' ')).ToLowerInvariant();
 }

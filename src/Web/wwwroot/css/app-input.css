@@ -473,6 +473,62 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
 }
 
 @layer components {
+    .menu-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 10px;
+        border-radius: 8px;
+        font-size: 15px;
+        color: var(--muted-foreground);
+        text-decoration: none;
+    }
+
+    .menu-row.on {
+        color: var(--foreground);
+        background: var(--accent);
+        font-weight: 500;
+    }
+
+    .menu-sub {
+        padding-left: 40px;
+        font-size: 14px;
+    }
+
+    .menu-sep {
+        height: 1px;
+        margin: 6px 10px;
+        background: var(--border);
+    }
+
+    .menu-foot {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding-top: 10px;
+        border-top: 1px solid var(--border);
+    }
+
+    .menu-foot .menu-row {
+        padding-block: 4px;
+    }
+
+    .menu-version {
+        padding: 8px 10px;
+    }
+
+    .update-dot {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        margin-right: 6px;
+        border-radius: 9999px;
+        background: var(--alert-warning);
+        vertical-align: middle;
+    }
+}
+
+@layer components {
     .popover-band {
         background: oklch(from var(--muted) calc(l - 0.08) c h);
         border-bottom: 2px solid var(--border);

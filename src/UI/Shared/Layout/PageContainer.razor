@@ -1,13 +1,16 @@
-<div class="h-full flex flex-col pt-4 pb-2">
+@using Microsoft.AspNetCore.Components.Sections
+
+<div class="h-full flex flex-col pt-4 pb-2 max-md:overflow-y-auto max-md:pt-0 max-md:pb-0">
+    <SectionContent SectionName="@PhoneLayout.TitleSection">@(PhoneTitle ?? Heading)</SectionContent>
     @if (Heading is not null || HeaderSearch is not null || Actions is not null)
     {
         <PageHeader Heading="@Heading"
                     Description="@Description"
                     DescriptionContent="@DescriptionContent"
                     Actions="@HeaderRow"
-                    Class="px-6 pb-2 shrink-0"/>
+                    Class="@($"px-6 pb-2 shrink-0 max-md:px-4 max-md:pt-2 {(PhoneHeader ? null : "max-md:hidden")}")"/>
     }
-    <div class="flex-1 min-h-0 overflow-y-auto px-6 py-2">
+    <div class="flex-1 min-h-0 overflow-y-auto px-6 py-2 max-md:flex-none max-md:overflow-visible max-md:px-4">
         @ChildContent
     </div>
 </div>
@@ -20,6 +23,8 @@
     [Parameter] public RenderFragment? Actions { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter] public string? HeaderClass { get; set; }
+    [Parameter] public string? PhoneTitle { get; set; }
+    [Parameter] public bool PhoneHeader { get; set; } = true;
 
     private RenderFragment? HeaderRow => HeaderSearch is null && Actions is null ? null : @<text>@HeaderSearch@Actions</text>;
 }

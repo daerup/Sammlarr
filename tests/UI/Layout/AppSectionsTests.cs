@@ -13,4 +13,19 @@ public class AppSectionsTests
 
 		await Assert.That(labels).IsEquivalentTo(["Providers", "Ratings", "Notifications", "Account", "About"], CollectionOrdering.Matching);
 	}
+
+	[Test]
+	[Arguments(null)]
+	[Arguments("usage")]
+	[Arguments("nowhere")]
+	public async Task SectionFor_ASlugTheRoleCannotOpen_FallsBackToTheFirstSection(string? slug)
+	{
+		await Assert.That(AppSections.SectionFor(UserRole.Member, slug).Label).IsEqualTo("Providers");
+	}
+
+	[Test]
+	public async Task SectionFor_ASlugInAnyCase_OpensItsSection()
+	{
+		await Assert.That(AppSections.SectionFor(UserRole.Member, "NOTIFICATIONS").Label).IsEqualTo("Notifications");
+	}
 }

@@ -1,0 +1,10 @@
+@if (IsPhone)
+{
+    @ChildContent
+}
+
+@code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

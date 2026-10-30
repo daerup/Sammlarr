@@ -11,18 +11,21 @@ using UI.Shared.Branding;
 
 namespace UI.Shared.Layout;
 
-internal sealed record NavPage(string Label, string Href);
+internal sealed record NavPage(string Label, string Href, string Icon);
 
-internal sealed record SettingsSection(string Label, string Icon, Type ComponentType, UserRole? RequiredRole = null, MagpieStarVariant? Mark = null);
+internal sealed record SettingsSection(string Label, string Icon, Type ComponentType, UserRole? RequiredRole = null, MagpieStarVariant? Mark = null)
+{
+	internal string Slug => string.Join("-", Label.Split(' ')).ToLowerInvariant();
+}
 
 internal static class AppSections
 {
 	internal static readonly IReadOnlyList<NavPage> Pages =
 	[
-		new("Browse", "/browse"),
-		new("Feeds", "/feeds"),
-		new("Wantlist", "/wantlist"),
-		new("Blocklist", "/blocklist"),
+		new("Browse", "/browse", "compass"),
+		new("Feeds", "/feeds", "rss"),
+		new("Wantlist", "/wantlist", "bookmark"),
+		new("Blocklist", "/blocklist", "list-x"),
 	];
 
 	private static readonly IReadOnlyList<SettingsSection> Settings =
@@ -44,5 +47,11 @@ internal static class AppSections
 	internal static IEnumerable<SettingsSection> SettingsFor(UserRole role)
 	{
 		return Settings.Where(section => section.RequiredRole is null || section.RequiredRole == role);
+	}
+
+	internal static SettingsSection SectionFor(UserRole role, string? slug)
+	{
+		var visible = SettingsFor(role).ToList();
+		return visible.FirstOrDefault(section => section.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase)) ?? visible[0];
 	}
 }
