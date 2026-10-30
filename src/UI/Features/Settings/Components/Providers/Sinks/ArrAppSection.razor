@@ -124,20 +124,17 @@
                         <span class="shrink-0 font-medium">Anime folder and profile</span>
                         <span class="truncate text-muted-foreground group-data-[state=open]:hidden">@AnimeSummary</span>
                     </BbCollapsibleTrigger>
-                    <BbTooltip DelayDuration="150" Placement="PopoverPlacement.BottomEnd">
-                        <BbTooltipTrigger AsChild="false" Class="inline-flex text-muted-foreground" role="button" aria-label="What counts as anime">
-                            <LucideIcon Name="info" Size="13"/>
-                        </BbTooltipTrigger>
-                        <BbTooltipContent Class="w-[min(400px,calc(100vw-2rem))] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg">
-                            <b class="mb-1 block font-semibold text-foreground">What counts as anime</b>
-                            @AnimeLead(App)
-                            <ol class="my-1.5 list-decimal space-y-0.5 pl-4">
-                                <li><b class="font-medium text-foreground">Sammlarr's own anime data</b>: Sammlarr holds an AniList or MyAnimeList id for it, or finds its @AnimeMapId(App) id in the anime id map from anime-lists.</li>
-                                <li><b class="font-medium text-foreground">@App.Name, for animated @Titles(App).ToLowerInvariant() only</b>: when it is animated (genre Animation) and Sammlarr's data does not call it anime, Sammlarr asks @App.Name, which counts it as anime when @AnimeTag(App).</li>
-                            </ol>
-                            <span class="block">Everything else goes to the normal folder, for example @AnimeExamples(App). @Titles(App) already in @App.Name never move.</span>
-                        </BbTooltipContent>
-                    </BbTooltip>
+                    <HelpTip Title="What counts as anime" Delay="150" Placement="PopoverPlacement.BottomEnd" IconSize="13" TriggerClass="inline-flex text-muted-foreground"
+                             ContentClass="w-[min(400px,calc(100vw-2rem))] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg"
+                             role="button" aria-label="What counts as anime">
+                        <b class="mb-1 block font-semibold text-foreground">What counts as anime</b>
+                        @AnimeLead(App)
+                        <ol class="my-1.5 list-decimal space-y-0.5 pl-4">
+                            <li><b class="font-medium text-foreground">Sammlarr's own anime data</b>: Sammlarr holds an AniList or MyAnimeList id for it, or finds its @AnimeMapId(App) id in the anime id map from anime-lists.</li>
+                            <li><b class="font-medium text-foreground">@App.Name, for animated @Titles(App).ToLowerInvariant() only</b>: when it is animated (genre Animation) and Sammlarr's data does not call it anime, Sammlarr asks @App.Name, which counts it as anime when @AnimeTag(App).</li>
+                        </ol>
+                        <span class="block">Everything else goes to the normal folder, for example @AnimeExamples(App). @Titles(App) already in @App.Name never move.</span>
+                    </HelpTip>
                 </div>
                 <BbCollapsibleContent>
                     <div class="arr-app-anime-pair border-t p-3">

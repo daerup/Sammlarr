@@ -43,12 +43,7 @@
                             <p class="min-w-0 truncate font-medium">@client.Name</p>
                             @if (ChannelHint(client.Channel) is { } hint)
                             {
-                                <BbTooltip>
-                                    <BbTooltipTrigger AsChild="false" Class="inline-flex shrink-0" Focusable="false">
-                                        <LucideIcon Name="info" Size="13" Class="shrink-0 text-muted-foreground"/>
-                                    </BbTooltipTrigger>
-                                    <BbTooltipContent>@hint</BbTooltipContent>
-                                </BbTooltip>
+                                <HelpTip Title="@client.Channel.Humanize()" IconSize="13" IconClass="shrink-0 text-muted-foreground" TriggerClass="inline-flex shrink-0" Focusable="false">@hint</HelpTip>
                             }
                             <NotificationHealthDot Outcomes="Health(client.Id)"/>
                         </div>

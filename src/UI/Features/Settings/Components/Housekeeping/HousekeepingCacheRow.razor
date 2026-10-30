@@ -2,12 +2,9 @@
     <div class="flex items-center gap-2.5 font-medium whitespace-nowrap">
         @Tile
         <span>@Name</span>
-        <BbTooltip DelayDuration="150">
-            <BbTooltipTrigger AsChild="false" Class="ml-1.5 inline-flex cursor-help text-muted-foreground opacity-75 hover:text-foreground hover:opacity-100" role="button" aria-label="@($"About {Name.ApplyCase(LetterCasing.LowerCase)}")" data-testid="housekeeping-cache-why">
-                <LucideIcon Name="info" Size="13"/>
-            </BbTooltipTrigger>
-            <BbTooltipContent Class="w-[340px] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg">@Why</BbTooltipContent>
-        </BbTooltip>
+        <HelpTip Title="@Name" Delay="150" IconSize="13" TriggerClass="ml-1.5 inline-flex cursor-help text-muted-foreground opacity-75 hover:text-foreground hover:opacity-100"
+                 ContentClass="w-[340px] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg"
+                 role="button" aria-label="@($"About {Name.ApplyCase(LetterCasing.LowerCase)}")" data-testid="housekeeping-cache-why">@Why</HelpTip>
     </div>
     <span class="whitespace-nowrap text-muted-foreground" data-testid="housekeeping-cache-holds">@Holds</span>
     <span class="whitespace-nowrap text-muted-foreground" data-testid="housekeeping-cache-size">@Size</span>
