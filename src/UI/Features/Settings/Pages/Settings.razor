@@ -1,6 +1,5 @@
 @page "/settings"
 @using Contracts.Identity
-@using Domain.Identity
 @inject AccountConnectionPrompt AccountConnectionPrompt
 @inject ICurrentUser CurrentUser
 @inject NavigationManager Navigation
@@ -24,7 +23,7 @@
                           OnClick="() => Show(item)">
                     @if (item.Mark is { } mark)
                     {
-                        <span class="mr-2.5 inline-flex shrink-0">@mark</span>
+                        <span class="mr-2.5 inline-flex shrink-0"><MagpieStarIcon Variant="mark" Size="16"/></span>
                     }
                     else
                     {
@@ -46,27 +45,7 @@
 
 @code {
 
-    private record SettingsSection(string Label, string Icon, Type ComponentType, UserRole? RequiredRole = null, RenderFragment? Mark = null);
-
-    private static readonly RenderFragment MagpieStarOutline = @<MagpieStarIcon Variant="MagpieStarVariant.Outline" Size="16"/>;
-
-    private readonly List<SettingsSection> _sections =
-    [
-        new("Providers", "plug", typeof(ProvidersSection)),
-        new("Ratings", "star", typeof(RatingsSection), Mark: MagpieStarOutline),
-        new("Notifications", "bell", typeof(NotificationsSection)),
-        new("Housekeeping", "database", typeof(HousekeepingSection), UserRole.Admin),
-        new("Usage", "chart-column", typeof(UsageSection), UserRole.Admin),
-        new("Diagnostics", "activity", typeof(DiagnosticsSection), UserRole.Admin),
-        new("Users", "users", typeof(UsersSection), UserRole.Admin),
-        new("Account", "user-round", typeof(AccountSection), UserRole.Member),
-#if DEBUG
-        new("Testing", "flask-conical", typeof(UI.Features.Settings.Components.Testing.TestingSection), UserRole.Admin),
-#endif
-        new("About", "info", typeof(AboutSection)),
-    ];
-
-    private IEnumerable<SettingsSection> VisibleSections => _sections.Where(section => section.RequiredRole is null || CurrentUser.Role == section.RequiredRole);
+    private IEnumerable<SettingsSection> VisibleSections => AppSections.SettingsFor(CurrentUser.Role);
 
     private SettingsSection _activeSection = null!;
     private bool _isSignedIn;

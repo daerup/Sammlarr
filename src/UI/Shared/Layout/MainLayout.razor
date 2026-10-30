@@ -24,18 +24,12 @@
             </div>
             <BbNavigationMenu Class="text-sm font-medium">
                 <BbNavigationMenuList>
-                    <BbNavigationMenuItem>
-                        <BbNavigationMenuLink Href="/browse" Class="nav-link">Browse</BbNavigationMenuLink>
-                    </BbNavigationMenuItem>
-                    <BbNavigationMenuItem>
-                        <BbNavigationMenuLink Href="/feeds" Class="nav-link">Feeds</BbNavigationMenuLink>
-                    </BbNavigationMenuItem>
-                    <BbNavigationMenuItem>
-                        <BbNavigationMenuLink Href="/wantlist" Class="nav-link">Wantlist</BbNavigationMenuLink>
-                    </BbNavigationMenuItem>
-                    <BbNavigationMenuItem>
-                        <BbNavigationMenuLink Href="/blocklist" Class="nav-link">Blocklist</BbNavigationMenuLink>
-                    </BbNavigationMenuItem>
+                    @foreach (var link in AppSections.Pages)
+                    {
+                        <BbNavigationMenuItem>
+                            <BbNavigationMenuLink Href="@link.Href" Class="nav-link">@link.Label</BbNavigationMenuLink>
+                        </BbNavigationMenuItem>
+                    }
                 </BbNavigationMenuList>
             </BbNavigationMenu>
             <div class="flex flex-1 items-center justify-end space-x-2">
