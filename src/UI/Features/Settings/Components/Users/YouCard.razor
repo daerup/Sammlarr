@@ -5,7 +5,7 @@
 
 @if (_signIn is { } signIn)
 {
-    <div class="overflow-hidden rounded-lg border bg-card" data-you>
+    <SectionCard data-you>
         <BbCollapsible @bind-Open="_open">
             <div class="flex items-center gap-3.5 bg-foreground/5 py-3 pl-5 pr-4">
                 <UserAvatar Name="@CurrentUser.DisplayName" Url="@CurrentUser.AvatarUrl" Size="AvatarSize.Small"/>
@@ -29,7 +29,7 @@
                 </div>
             </BbCollapsibleContent>
         </BbCollapsible>
-    </div>
+    </SectionCard>
 }
 else
 {

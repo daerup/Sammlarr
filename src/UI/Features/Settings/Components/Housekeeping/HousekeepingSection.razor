@@ -21,7 +21,7 @@ else
     var now = Clock.GetUtcNow();
     var cache = overview.Cache;
     var nextTrim = HousekeepingView.Next(overview.Pass.NextRun, now);
-    <div class="overflow-hidden rounded-xl border bg-card">
+    <SectionCard Look="SectionCardLook.Large">
         <div class="px-[18px] py-3.5">
             <h4 class="text-sm font-semibold">Housekeeping</h4>
             <p class="mt-0.5 text-xs text-muted-foreground" data-testid="housekeeping-size" data-bloated="@(HousekeepingView.Bloated(overview.Size) ? "true" : "false")">
@@ -165,7 +165,7 @@ else
                 </div>
             </div>
         </div>
-    </div>
+    </SectionCard>
 }
 
 @code {

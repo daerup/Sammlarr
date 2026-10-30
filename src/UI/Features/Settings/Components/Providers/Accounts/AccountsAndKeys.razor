@@ -1,4 +1,4 @@
-<div class="rounded-lg border bg-card overflow-hidden divide-y">
+<SectionCard Class="divide-y">
     @if (Config.AuthProvider == AuthProvider.Local)
     {
         <SammlarrAccountRow Open="Open is SammlarrAccounts" OpenChanged="open => ToggleAsync(new SammlarrAccounts(), open)"/>
@@ -130,7 +130,7 @@
             </KeySetup>
         </Setup>
     </ApiKeyRow>
-</div>
+</SectionCard>
 
 @code {
     private static readonly string[] TmdbUses =

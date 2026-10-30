@@ -6,8 +6,7 @@
 @inject IEnumerable<Keyed<RemoteService, IExternalIdConverter>> Converters
 @inject IEnumerable<Keyed<RemoteService, IDetailsEnricher>> Enrichers
 
-<div class="overflow-hidden rounded-lg border bg-card">
-    <CardHead Icon="database" Title="Data sources"/>
+<SectionCard Icon="database" Title="Data sources">
     @foreach (var remote in DataSources.Asked)
     {
         @Row(_sources.Row(remote), Note(remote))
@@ -60,7 +59,7 @@
             </div>
         </BbCollapsibleContent>
     </BbCollapsible>
-</div>
+</SectionCard>
 
 @code {
     private static readonly RenderFragment Nothing = _ => { };

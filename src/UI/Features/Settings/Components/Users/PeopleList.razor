@@ -17,14 +17,14 @@
 
 @if (_config is { } config)
 {
-    <div class="overflow-hidden rounded-lg border bg-card">
+    <SectionCard>
         @foreach (var person in _people)
         {
             var key = Key(person);
             <PersonRow @key="key" Person="person" Colour="ColourOf(person)" SignIn="config.AuthProvider" Sink="config.Sink" IsYou="IsYou(person)" IsLastAdmin="IsLastAdmin(person)"
                        Open="_open == key" OpenChanged="open => _open = open ? key : null" Changed="LoadAsync"/>
         }
-    </div>
+    </SectionCard>
 }
 else
 {

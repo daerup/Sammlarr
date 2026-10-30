@@ -1,5 +1,4 @@
-<div class="overflow-hidden rounded-lg border bg-card">
-    <CardHead Icon="tag" Title="Version"/>
+<SectionCard Icon="tag" Title="Version">
     <div class="flex items-center gap-3 px-[15px] py-3">
         <SammlarrLogo Size="24" WordSize="14"/>
         <div class="flex min-w-0 flex-col gap-0.5">
@@ -31,7 +30,7 @@
             </div>
         }
     </div>
-</div>
+</SectionCard>
 
 @code {
     [Parameter] [EditorRequired] public required AppVersion Version { get; set; }

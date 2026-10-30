@@ -1,13 +1,8 @@
-<div class="band">
-    <div class="band-head">
-        <span class="band-title">Up next</span>
-        <span class="band-note">@Note</span>
-    </div>
-
+<SectionCard Look="SectionCardLook.Panel" Title="Up next" Note="@Note" Class="mb-[18px]">
     <UpNextSection Title="Running and queued" Rows="Queued" Empty="Nothing is running or queued right now." OnCancel="OnCancel"/>
 
     <UpNextSection Title="On a schedule" Rows="NextScheduled" Empty="No feed is on a schedule, so nothing will run on its own."/>
-</div>
+</SectionCard>
 
 @code {
     private const int ScheduledShown = 5;

@@ -1,9 +1,4 @@
-<div class="band">
-    <div class="band-head">
-        <span class="band-title">Where your library came from</span>
-        <span class="band-note">@Note</span>
-    </div>
-
+<SectionCard Look="SectionCardLook.Panel" Title="Where your library came from" Note="@Note" Class="mb-[11px]">
     @if (Sources.Count == 0)
     {
         <p class="band-empty">Nothing on your wantlist yet, so there is nothing to attribute.</p>
@@ -22,7 +17,7 @@
             </StackedBar>
         </div>
     }
-</div>
+</SectionCard>
 
 @code {
     [Parameter, EditorRequired] public required IReadOnlyList<SourceShare> Sources { get; set; }

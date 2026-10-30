@@ -33,7 +33,7 @@ public class UpNextPanelTests : BunitContext
 
 		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Scheduled, scheduled));
 
-		await Assert.That(cut.Find(".band-note").TextContent).IsEqualTo("7 feeds on a schedule");
+		await Assert.That(cut.Find(".panel-note").TextContent).IsEqualTo("7 feeds on a schedule");
 		await Assert.That(cut.FindAll(".row")).Count().IsEqualTo(5);
 	}
 
@@ -44,7 +44,7 @@ public class UpNextPanelTests : BunitContext
 
 		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Scheduled, scheduled));
 
-		await Assert.That(cut.Find(".band-note").TextContent).IsEqualTo("1 feed on a schedule");
+		await Assert.That(cut.Find(".panel-note").TextContent).IsEqualTo("1 feed on a schedule");
 	}
 
 	[Test]
@@ -160,6 +160,6 @@ public class UpNextPanelTests : BunitContext
 	{
 		var cut = Render<UpNextPanel>();
 
-		await Assert.That(cut.Find(".band-note").TextContent).IsEqualTo("nothing scheduled");
+		await Assert.That(cut.Find(".panel-note").TextContent).IsEqualTo("nothing scheduled");
 	}
 }
