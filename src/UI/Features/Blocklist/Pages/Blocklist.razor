@@ -35,14 +35,10 @@
                 OnAccessChanged="HandleAccessChanged"
                 Search="@Filter.Search"
                 SearchChanged="ApplySearchAsync">
-    <HeaderExtras>
-        <MediaListViewActions HasItems="@(_items is { Count: > 0 })"
-                              IsEditMode="IsEditMode"
-                              ShowFilters="ShowFilters"
-                              ActiveFilters="Filter.ActiveCount"
-                              OnEnterEditMode="EnterEditMode"
-                              OnToggleFilters="ToggleFilterBar"/>
-    </HeaderExtras>
+    <Actions>
+        <PageAction Icon="square-check" Label="Select" DesktopLabel="Bulk edit" OnClick="EnterEditMode" Visible="HasItems && !IsEditMode"/>
+        <PageAction Icon="sliders-horizontal" Label="Filter" DesktopLabel="View" Active="ShowFilters" Badge="Filter.ActiveCount" OnClick="ToggleFilterBar" Visible="HasItems"/>
+    </Actions>
     <ChildContent>
         <MediaListBody IsLoading="IsLoadingList"
                        ErrorMessage="@ErrorMessage"
@@ -101,6 +97,8 @@
     private UserId? _userId;
     private CoalescedReload _blocklistReload = null!;
     private CoalescedReload _wantlistReload = null!;
+
+    private bool HasItems => _items is { Count: > 0 };
 
     private IReadOnlyList<BlocklistedMedia> GridItems =>
         [

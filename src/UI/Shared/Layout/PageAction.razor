@@ -1,0 +1,32 @@
+@if (Visible)
+{
+    @if (Desktop is not null)
+    {
+        @Desktop
+    }
+    else
+    {
+        <BbButton Variant="Variant" OnClick="OnClick" Class="@(Active ? "bg-accent" : null)">
+            <LucideIcon Name="@Icon" Size="IconSize" Class="@IconClass"/>
+            @(DesktopLabel ?? Label)
+            @if (Badge > 0)
+            {
+                <span class="action-badge">@Badge</span>
+            }
+        </BbButton>
+    }
+}
+
+@code {
+    [Parameter, EditorRequired] public required string Icon { get; set; }
+    [Parameter] public int IconSize { get; set; } = 16;
+    [Parameter] public string IconClass { get; set; } = "mr-2";
+    [Parameter, EditorRequired] public required string Label { get; set; }
+    [Parameter] public string? DesktopLabel { get; set; }
+    [Parameter] public ButtonVariant Variant { get; set; } = ButtonVariant.Outline;
+    [Parameter] public bool Active { get; set; }
+    [Parameter] public int Badge { get; set; }
+    [Parameter] public bool Visible { get; set; } = true;
+    [Parameter] public EventCallback OnClick { get; set; }
+    [Parameter] public RenderFragment? Desktop { get; set; }
+}

@@ -36,7 +36,7 @@
 
 <PageContainer Heading="Feeds">
     <DescriptionContent>
-        @if (_feeds.Count > 0)
+        @if (HasFeeds)
         {
             <FeedStatusLine Rows="_rows" Added="_lastWeek.Added" Removed="_lastWeek.Removed" Now="_now"/>
         }
@@ -45,33 +45,22 @@
             <span>Subscribe to media lists from supported providers to get started.</span>
         }
     </DescriptionContent>
-    <HeaderActions>
+    <HeaderSearch>
         <ProtectedSection GuardState="IsSignedIn" ShowFallback="false">
-            <div class="flex items-center gap-2">
-                @if (_feeds.Count > 0)
-                {
-                    <ListSearch Value="@_filter.Search" ValueChanged="ApplySearch" Placeholder="Search feeds"/>
-                }
-                <MediaListViewActions HasItems="_feeds.Count > 0"
-                                      IsEditMode="_isSelecting"
-                                      ShowFilters="_showFilters"
-                                      ActiveFilters="_filter.ActiveCount"
-                                      OnEnterEditMode="() => _isSelecting = true"
-                                      OnToggleFilters="() => _showFilters = !_showFilters"/>
-                @if (_feeds.Count > 0 && !_isSelecting)
-                {
-                    <BbButton Variant="ButtonVariant.Outline" OnClick="OpenRunFeeds">
-                        <LucideIcon Name="play" Size="16" Class="mr-2"/>
-                        Run feeds
-                    </BbButton>
-                }
-                <BbButton Variant="ButtonVariant.Secondary" OnClick="@(() => NavigationManager.NavigateTo("/feeds/create"))">
-                    <LucideIcon Name="plus" Size="15" Class="mr-2.5 shrink-0"/>
-                    Add feed
-                </BbButton>
-            </div>
+            @if (HasFeeds)
+            {
+                <ListSearch Value="@_filter.Search" ValueChanged="ApplySearch" Placeholder="Search feeds"/>
+            }
         </ProtectedSection>
-    </HeaderActions>
+    </HeaderSearch>
+    <Actions>
+        <ProtectedSection GuardState="IsSignedIn" ShowFallback="false">
+            <PageAction Icon="square-check" Label="Select" DesktopLabel="Bulk edit" OnClick="() => _isSelecting = true" Visible="HasFeeds && !_isSelecting"/>
+            <PageAction Icon="sliders-horizontal" Label="Filter" DesktopLabel="View" Active="_showFilters" Badge="_filter.ActiveCount" OnClick="() => _showFilters = !_showFilters" Visible="HasFeeds"/>
+            <PageAction Icon="play" Label="Run feeds" OnClick="OpenRunFeeds" Visible="HasFeeds && !_isSelecting"/>
+            <PageAction Icon="plus" IconSize="15" IconClass="mr-2.5 shrink-0" Label="Add feed" Variant="ButtonVariant.Secondary" OnClick="@(() => NavigationManager.NavigateTo("/feeds/create"))"/>
+        </ProtectedSection>
+    </Actions>
     <ChildContent>
         <ProtectedSection GuardState="IsSignedIn"
                           DeniedActionDescription="managing your feeds"
@@ -340,7 +329,9 @@
 
     private bool IsSignedIn() => _isSignedIn;
 
-    private bool ShowsLiveView => _live.Match(_ => true, () => !_isLoading && _watching && _feeds.Count > 0);
+    private bool HasFeeds => _feeds.Count > 0;
+
+    private bool ShowsLiveView => _live.Match(_ => true, () => !_isLoading && _watching && HasFeeds);
 
     private IReadOnlyList<FeedRow> PageRows => FeedPaging.Slice(_visible, FeedPaging.PageWithin(_currentPage, _visible.Count));
 

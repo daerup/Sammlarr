@@ -27,29 +27,36 @@
 <PageContainer Heading="@PageHeadingText"
                Description="@PageDescriptionText"
                HeaderClass="@(IsSignedIn() ? "border-b" : "")">
-    <HeaderActions>
-        @if (_isSaving)
-        {
-            <HoverButton Preset="HoverButtonPreset.Success" Disabled="true">
-                <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                <span>Saving…</span>
-            </HoverButton>
-        }
-        else
-        {
-            @if (IsSignedIn() && !_loadingFeed)
-            {
-                @SaveStatus()
-            }
-            <HoverButton Preset="HoverButtonPreset.Success"
-                         Icon="save"
-                         Text="Save"
-                         OnClick="HandleSaveAsync"
-                         Disabled="!CanSave"/>
-        }
-
-        <BbButton Variant="ButtonVariant.Outline" OnClick="Close" Disabled="_isSaving">Close</BbButton>
-    </HeaderActions>
+    <Actions>
+        <PageAction Icon="save" Label="Save">
+            <Desktop>
+                @if (_isSaving)
+                {
+                    <HoverButton Preset="HoverButtonPreset.Success" Disabled="true">
+                        <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                        <span>Saving…</span>
+                    </HoverButton>
+                }
+                else
+                {
+                    @if (IsSignedIn() && !_loadingFeed)
+                    {
+                        @SaveStatus()
+                    }
+                    <HoverButton Preset="HoverButtonPreset.Success"
+                                 Icon="save"
+                                 Text="Save"
+                                 OnClick="HandleSaveAsync"
+                                 Disabled="!CanSave"/>
+                }
+            </Desktop>
+        </PageAction>
+        <PageAction Icon="x" Label="Close">
+            <Desktop>
+                <BbButton Variant="ButtonVariant.Outline" OnClick="Close" Disabled="_isSaving">Close</BbButton>
+            </Desktop>
+        </PageAction>
+    </Actions>
     <ChildContent>
         <ProtectedSection GuardState="IsSignedIn"
                           DeniedActionDescription="managing feeds"

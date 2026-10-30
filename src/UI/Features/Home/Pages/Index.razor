@@ -47,32 +47,28 @@ else
     <DescriptionContent>
         <LibrarySummary Wanted="_wantlistCount" Feeds="_feeds.Count" Blocklisted="_blocklistCount"/>
     </DescriptionContent>
-    <HeaderActions>
+    <Actions>
         <ProtectedSection GuardState="IsSignedIn" ShowFallback="false">
-            <div class="flex items-center gap-2">
-                @if (_feeds.Count > 0)
-                {
-                    <BbButton Variant="ButtonVariant.Outline" OnClick="@(() => _isRunOpen = true)">
-                        <LucideIcon Name="play" Size="16" Class="mr-2"/>
-                        Run feeds
-                    </BbButton>
-                }
-                <ProtectedComponent GuardState="IsConnected"
-                                    Sink="@_settings.Sink"
-                                    DeniedActionDescription="sync your wantlist">
-                    <WantlistSyncButton @ref="_syncControl"
-                                         OnSynced="SyncFinishedAsync"
-                                         OnStatusRefresh="LoadOutboxAsync"
-                                         OnSyncStarted="StartSync"
-                                         IsSyncing="_syncing"
-                                         BrandColor="@BrandColor"
-                                         Sink="_settings.Sink"
-                                         ProviderName="@ProviderName"
-                                         OutboxEntries="_outbox"/>
-                </ProtectedComponent>
-            </div>
+            <PageAction Icon="play" Label="Run feeds" OnClick="@(() => _isRunOpen = true)" Visible="_feeds.Count > 0"/>
+            <PageAction Icon="refresh-cw" Label="Sync">
+                <Desktop>
+                    <ProtectedComponent GuardState="IsConnected"
+                                        Sink="@_settings.Sink"
+                                        DeniedActionDescription="sync your wantlist">
+                        <WantlistSyncButton @ref="_syncControl"
+                                             OnSynced="SyncFinishedAsync"
+                                             OnStatusRefresh="LoadOutboxAsync"
+                                             OnSyncStarted="StartSync"
+                                             IsSyncing="_syncing"
+                                             BrandColor="@BrandColor"
+                                             Sink="_settings.Sink"
+                                             ProviderName="@ProviderName"
+                                             OutboxEntries="_outbox"/>
+                    </ProtectedComponent>
+                </Desktop>
+            </PageAction>
         </ProtectedSection>
-    </HeaderActions>
+    </Actions>
     <ChildContent>
         <ProtectedSection GuardState="IsSignedIn"
                           DeniedActionDescription="viewing your library"
