@@ -7,6 +7,8 @@ public class PageFitTests(Device device) : E2ETests(device)
 	[Arguments(Routes.SignIn, Viewer.Guest)]
 	[Arguments(Routes.Browse, Viewer.Admin)]
 	[Arguments(Routes.Feeds, Viewer.Admin)]
+	[Arguments(Routes.Wantlist, Viewer.Admin)]
+	[Arguments(Routes.Blocklist, Viewer.Admin)]
 	public async Task Page_RunsNothingPastTheRightEdge(string route, Viewer viewer)
 	{
 		var page = viewer switch

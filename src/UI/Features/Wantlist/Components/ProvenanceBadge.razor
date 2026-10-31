@@ -34,11 +34,11 @@ else
 
     private RenderFragment Badge =>
         @<BbBadge Variant="@ProvenanceBadgeVariant(Provenance)" Class="wl-badge">
-            <DetailTip Title="Where it came from" TriggerClass="p-0">
+            <DetailTip Title="Where it came from" TriggerClass="p-0" PhoneClass="relative after:absolute after:-inset-4">
                 <Trigger>
                     <span class="flex items-center gap-1 wl-badge-content">
                         <LucideIcon Name="@ProvenanceView.Icon(Provenance)" Size="14" Color="@IconColor"/>
-                        <span class="wl-badge-label">@ProvenanceView.Label(Provenance, Branding, Type)</span>
+                        <span class="wl-badge-label max-md:sr-only">@ProvenanceView.Label(Provenance, Branding, Type)</span>
                     </span>
                 </Trigger>
                 <Detail>

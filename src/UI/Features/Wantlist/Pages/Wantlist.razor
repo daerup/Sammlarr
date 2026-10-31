@@ -113,18 +113,18 @@
                     <Overlay Context="item">
                         @if (_removedIds.Contains(item.Media.Identity.Id))
                         {
-                            <div class="absolute top-2 right-2 z-10">
+                            <div class="absolute top-2 right-2 z-10 max-md:top-1.5 max-md:right-1.5">
                                 <PushStatusDot State="PushDotState.Removed" LastError="@LastErrorOf(item.Media.Identity.Id)" ProviderName="@SinkName"/>
                             </div>
                         }
                         else
                         {
-                            <div class="absolute top-2 left-2 z-10 flex flex-col gap-1">
+                            <div class="absolute top-2 left-2 z-10 flex flex-col gap-1 max-md:top-1.5 max-md:left-1.5">
                                 <ProvenanceBadge Provenance="item.Provenance" AddedAt="item.AddedAt" ItemId="item.Media.Identity.Id" Type="item.Media.Identity.Type"/>
                             </div>
                             @if (PushDotFor(item.Media.Identity.Id) is { } dot)
                             {
-                                <div class="absolute top-2 right-2 z-10">
+                                <div class="absolute top-2 right-2 z-10 max-md:top-1.5 max-md:right-1.5">
                                     <PushStatusDot State="dot.State" Attempts="dot.Attempts" LastError="dot.LastError" ProviderName="@SinkName"/>
                                 </div>
                             }

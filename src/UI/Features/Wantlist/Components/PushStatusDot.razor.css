@@ -17,3 +17,20 @@
 .push-badge-content {
     line-height: 0;
 }
+
+@media (width < 48rem) {
+    ::deep .push-badge {
+        width: 28px;
+        height: 28px;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 9999px !important;
+        background-color: rgb(0 0 0 / 0.45) !important;
+        backdrop-filter: blur(6px);
+    }
+
+    ::deep .push-badge svg {
+        width: 13px;
+        height: 13px;
+    }
+}

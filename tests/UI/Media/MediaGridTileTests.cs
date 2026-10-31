@@ -54,6 +54,58 @@ public class MediaGridTileTests : BunitContext
 	}
 
 	[Test]
+	public async Task Render_WithAPoster_OffersItToPhonesThroughASource()
+	{
+		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Movie()));
+
+		var source = cut.Find("picture > source");
+		await Assert.That(source.GetAttribute("media")).IsEqualTo("(width < 48rem)");
+		await Assert.That(source.GetAttribute("srcset")).IsEqualTo($"{Poster}?width=185 185w, {Poster}?width=342 342w, {Poster}?width=500 500w");
+	}
+
+	[Test]
+	public async Task Render_WithoutAPoster_OffersPhonesNoSource()
+	{
+		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Movie(poster: null)));
+
+		await Assert.That(cut.FindAll("picture > source")).IsEmpty();
+	}
+
+	[Test]
+	public async Task ImageError_OnAPhone_DropsThePosterSourceBeforeTheBackdrop()
+	{
+		var cut = this.RenderOnPhone<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Movie())).Component;
+
+		await cut.Find("img.media-card-poster").TriggerEventAsync("onerror", new ErrorEventArgs());
+
+		await Assert.That(cut.FindAll("picture > source")).IsEmpty();
+		await Assert.That(cut.Find("img.media-card-poster").GetAttribute("srcset")).IsEqualTo($"{Backdrop}?width=780 780w, {Backdrop}?width=1280 1280w");
+	}
+
+	[Test]
+	public async Task ImageError_BeforeThePhoneIsKnown_DropsThePosterSourceAndTheSizedBackdrop()
+	{
+		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Movie()));
+
+		await cut.Find("img.media-card-poster").TriggerEventAsync("onerror", new ErrorEventArgs());
+
+		var image = cut.Find("img.media-card-poster");
+		await Assert.That(cut.FindAll("picture > source")).IsEmpty();
+		await Assert.That(image.GetAttribute("src")).IsEqualTo(Backdrop);
+		await Assert.That(image.HasAttribute("srcset")).IsFalse();
+	}
+
+	[Test]
+	public async Task Render_WhenNoResizerTakesThePoster_OffersPhonesTheOriginal()
+	{
+		Services.AddSingleton(ArtworkStub.Sources(ArtworkStub.Declining(), ArtworkStub.Declining()));
+
+		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Movie()));
+
+		await Assert.That(cut.Find("picture > source").GetAttribute("srcset")).IsEqualTo(Poster);
+	}
+
+	[Test]
 	public async Task Render_WhenTheArtworkFails_SwapsTheImageForTheNoImageState()
 	{
 		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Movie(backdrop: null)));
@@ -100,7 +152,8 @@ public class MediaGridTileTests : BunitContext
 
 		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, media));
 
-		await Assert.That(cut.Markup).Contains("Mar 28, 1999");
+		await Assert.That(cut.Find(".tile-date-full").TextContent).IsEqualTo("Mar 28, 1999");
+		await Assert.That(cut.Find(".tile-year").TextContent).IsEqualTo("1999");
 	}
 
 	[Test]
