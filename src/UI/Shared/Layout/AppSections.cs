@@ -13,7 +13,7 @@ namespace UI.Shared.Layout;
 
 internal sealed record NavPage(string Label, string Href, string Icon);
 
-internal sealed record SettingsSection(string Label, string Icon, Type ComponentType, UserRole? RequiredRole = null, MagpieStarVariant? Mark = null)
+internal sealed record SettingsSection(string Label, string Icon, Type ComponentType, UserRole? RequiredRole = null, SammlarrLogoForm? Mark = null)
 {
 	internal string Slug => string.Join("-", Label.Split(' ')).ToLowerInvariant();
 }
@@ -31,7 +31,7 @@ internal static class AppSections
 	private static readonly IReadOnlyList<SettingsSection> Settings =
 	[
 		new("Providers", "plug", typeof(ProvidersSection)),
-		new("Ratings", "star", typeof(RatingsSection), Mark: MagpieStarVariant.Outline),
+		new("Ratings", "star", typeof(RatingsSection), Mark: SammlarrLogoForm.StarOutline),
 		new("Notifications", "bell", typeof(NotificationsSection)),
 		new("Housekeeping", "database", typeof(HousekeepingSection), UserRole.Admin),
 		new("Usage", "chart-column", typeof(UsageSection), UserRole.Admin),

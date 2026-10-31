@@ -1,7 +1,11 @@
-<DemoCard Title="Sammlarr logo" Where="Nav bar, version card, sign in" Note="SammlarrLogo at the version card, nav bar and a larger size.">
+<DemoCard Title="Sammlarr logo" Where="Nav bar, version card, sign in, ratings" Note="SammlarrLogo at the version card, nav bar and a larger size, then its star on its own, filled and outlined.">
     <div class="flex flex-col items-start gap-4">
         <SammlarrLogo Size="24" WordSize="14"/>
         <SammlarrLogo/>
         <SammlarrLogo Size="48" WordSize="28"/>
+        <div class="flex items-center gap-3">
+            <SammlarrLogo Form="SammlarrLogoForm.Star" Size="16"/>
+            <SammlarrLogo Form="SammlarrLogoForm.StarOutline" Size="16"/>
+        </div>
     </div>
 </DemoCard>

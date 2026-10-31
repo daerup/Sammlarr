@@ -123,3 +123,9 @@ a.active .sammlarr-tilt {
         }
     }
 }
+
+.magpie-star {
+    display: block;
+    flex: none;
+    overflow: visible;
+}
