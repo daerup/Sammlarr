@@ -34,7 +34,7 @@ public class CountdownTests : BunitContext
 	}
 
 	[Test]
-	public async Task Tooltip_OnHover_ShowsTheTimeLeftToTheSecondAndKeepsTicking()
+	public async Task Tooltip_OnHover_ShowsTheTimeLeftToTheSecondKeepsTickingAndStaysOffTouch()
 	{
 		var clock = UseClock();
 		var cut = Render<Harness>();
@@ -45,6 +45,7 @@ public class CountdownTests : BunitContext
 
 		cut.WaitForState(() => Tooltip(cut) == "in 1 min 55 s", TimeSpan.FromSeconds(3));
 		await Assert.That(atFirst).IsEqualTo("in 2 min");
+		await Assert.That(cut.Find("[role=tooltip]").HasAttribute("data-label-tip")).IsTrue();
 	}
 
 	private FakeTimeProvider UseClock()

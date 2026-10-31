@@ -83,6 +83,14 @@
     font-size: 11.5px;
 }
 
+@media (width < 48rem) {
+    .change-subtitle {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
 .change-context {
     flex: none;
     color: var(--muted-foreground);

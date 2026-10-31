@@ -20,7 +20,7 @@ else if (Overview.LastRun is Some<FeedRun>(var run))
                 <BbTooltipTrigger Focusable="false">
                     @Pill(run)
                 </BbTooltipTrigger>
-                <BbTooltipContent Class="w-[300px] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg" data-testid="last-run-tip">
+                <BbTooltipContent Class="w-[300px] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg" data-testid="last-run-tip" data-label-tip>
                     <div class="flex justify-between gap-2.5">
                         <b class="font-semibold text-foreground">Run of @Heading(run)</b>
                         <span class="tabular-nums">@run.Duration.Humanize(2, Notation.Symbols) · @("title".ToQuantity(run.Counts.Total, "N0"))</span>

@@ -14,14 +14,20 @@
             {
                 <BbTooltip>
                     <BbTooltipTrigger Focusable="false">@option.Humanize()</BbTooltipTrigger>
-                    <BbTooltipContent>@TooltipProvider(option)</BbTooltipContent>
+                    <BbTooltipContent data-label-tip="@IsPhone">@TooltipProvider(option)</BbTooltipContent>
                 </BbTooltip>
             }
         </BbToggleGroupItem>
     }
 </BbToggleGroup>
+@if (IsPhone && TooltipProvider is not null && Value is { } chosen)
+{
+    <BbFieldDescription Class="mt-1.5">@TooltipProvider(chosen)</BbFieldDescription>
+}
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     [Parameter] public required Func<TEnum, string>? TooltipProvider { get; set; }
 
     [Parameter] [EditorRequired] public TEnum? Value { get; set; }

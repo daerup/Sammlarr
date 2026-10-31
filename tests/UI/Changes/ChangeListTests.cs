@@ -12,6 +12,14 @@ namespace UI.Tests.Changes;
 
 public class ChangeListTests : BunitContext
 {
+	[Before(Test)]
+	public void Setup()
+	{
+		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(ArtworkStub.Sizing());
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
 	[Test]
 	public async Task Render_ForAMixedChangeset_PutsRemovalsBeforeAdditions()
 	{
@@ -32,6 +40,17 @@ public class ChangeListTests : BunitContext
 
 		await Assert.That(cut.FindAll(".change-context")).Count().IsEqualTo(1);
 		await Assert.That(cut.Find(".change-row").TextContent).DoesNotContain("Absent from");
+	}
+
+	[Test]
+	public async Task Phone_ForARowWithContext_WritesItUnderTheTitleAndKeepsTheTooltipOffTouch()
+	{
+		var item = Removed("Gone") with { ContextIcon = "log-out", ContextTooltip = "Absent from 3 of 3 runs" };
+
+		var cut = this.RenderOnPhone<ChangeList>(parameters => parameters.Add(list => list.Items, [item]).Add(list => list.Chips, []));
+
+		await Assert.That(cut.Component.Find(".change-subtitle").TextContent).IsEqualTo("Absent from 3 of 3 runs");
+		await Assert.That(cut.Component.FindComponent<BbTooltipContent>().Instance.AdditionalAttributes!["data-label-tip"] is true).IsTrue();
 	}
 
 	[Test]
@@ -416,10 +435,7 @@ public class ChangeListTests : BunitContext
 
 	private IRenderedComponent<BbPortalHost> OpenDialog(bool withActions = true)
 	{
-		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
-		Services.AddSingleton(ArtworkStub.Sizing());
-		JSInterop.Mode = JSRuntimeMode.Loose;
 
 		var portal = Render<BbPortalHost>();
 		Render<ChangeDialog>(parameters =>
@@ -505,10 +521,6 @@ public class ChangeListTests : BunitContext
 		ChangeFold? fold = null
 	)
 	{
-		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton(ArtworkStub.Sizing());
-		JSInterop.Mode = JSRuntimeMode.Loose;
-
 		return Render<ChangeList>(parameters =>
 		{
 			parameters.Add(list => list.Items, items);
