@@ -38,6 +38,14 @@
 }
 
 @media (width < 48rem) {
+  body:has(.page-toolbar > *) :is(.toast-viewport, #blazor-error-ui) {
+    bottom: calc(65px + env(safe-area-inset-bottom));
+  }
+
+  body:has(:is(input:not([type="checkbox"], [type="radio"]), textarea, [contenteditable]):focus) .page-toolbar {
+    display: none;
+  }
+
   .as-sheet {
     position: fixed !important;
     inset: 0 !important;

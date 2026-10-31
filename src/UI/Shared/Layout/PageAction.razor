@@ -1,23 +1,41 @@
 @if (Visible)
 {
-    @if (Desktop is not null)
+    @if (Placement is ActionPlacement.Toolbar && HasSlot)
     {
-        @Desktop
-    }
-    else
-    {
-        <BbButton Variant="Variant" OnClick="OnClick" Class="@(Active ? "bg-accent" : null)">
-            <LucideIcon Name="@Icon" Size="IconSize" Class="@IconClass"/>
-            @(DesktopLabel ?? Label)
+        <button type="button" class="toolbar-slot @(Active ? "is-on" : null)" @onclick="OnClick">
+            <LucideIcon Name="@Icon" Size="20"/>
+            <span class="toolbar-slot-label">@Label</span>
             @if (Badge > 0)
             {
-                <span class="action-badge">@Badge</span>
+                <span class="toolbar-badge">@Badge</span>
             }
-        </BbButton>
+        </button>
+    }
+    else if (Placement is ActionPlacement.Header)
+    {
+        <div class="contents @(HasSlot ? "max-md:hidden" : null)">
+            @if (Desktop is not null)
+            {
+                @Desktop
+            }
+            else
+            {
+                <BbButton Variant="Variant" OnClick="OnClick" Class="@(Active ? "bg-accent" : null)">
+                    <LucideIcon Name="@Icon" Size="IconSize" Class="@IconClass"/>
+                    @(DesktopLabel ?? Label)
+                    @if (Badge > 0)
+                    {
+                        <span class="action-badge">@Badge</span>
+                    }
+                </BbButton>
+            }
+        </div>
     }
 }
 
 @code {
+    [CascadingParameter] private ActionPlacement Placement { get; set; }
+
     [Parameter, EditorRequired] public required string Icon { get; set; }
     [Parameter] public int IconSize { get; set; } = 16;
     [Parameter] public string IconClass { get; set; } = "mr-2";
@@ -29,4 +47,6 @@
     [Parameter] public bool Visible { get; set; } = true;
     [Parameter] public EventCallback OnClick { get; set; }
     [Parameter] public RenderFragment? Desktop { get; set; }
+
+    private bool HasSlot => OnClick.HasDelegate;
 }

@@ -44,18 +44,7 @@ public class PageContainerTests : BunitContext
 	[Arguments("Run history", "Run history")]
 	public async Task PhoneTitle_FillsThePhoneBarWithTheHeadingUnlessSet(string? phoneTitle, string shown)
 	{
-		var cut = Render(builder =>
-		{
-			builder.OpenElement(0, "output");
-			builder.OpenComponent<SectionOutlet>(1);
-			builder.AddAttribute(2, nameof(SectionOutlet.SectionName), PhoneLayout.TitleSection);
-			builder.CloseComponent();
-			builder.CloseElement();
-			builder.OpenComponent<PageContainer>(3);
-			builder.AddAttribute(4, nameof(PageContainer.Heading), "Feeds");
-			builder.AddAttribute(5, nameof(PageContainer.PhoneTitle), phoneTitle);
-			builder.CloseComponent();
-		});
+		var cut = Render(BesideOutlet(PhoneLayout.TitleSection, nameof(PageContainer.PhoneTitle), phoneTitle));
 
 		await Assert.That(cut.Find("output").TextContent).IsEqualTo(shown);
 	}
@@ -68,5 +57,42 @@ public class PageContainerTests : BunitContext
 		var cut = Render<PageContainer>(parameters => parameters.Add(page => page.Heading, "Settings").Add(page => page.PhoneHeader, phoneHeader));
 
 		await Assert.That(cut.FindAll(@"div.max-md\:hidden")).Count().IsEqualTo(phoneHeader ? 0 : 1);
+	}
+
+	[Test]
+	[Arguments(true, 1)]
+	[Arguments(false, 0)]
+	public async Task Actions_FillTheToolbarOnlyOnAPhone(bool phone, int slots)
+	{
+		RenderTree.TryAdd<CascadingValue<bool>>(cascade => cascade.Add(value => value.Name, PhoneLayout.IsPhoneCascade).Add(value => value.Value, phone));
+		RenderFragment actions = builder =>
+		{
+			builder.OpenComponent<PageAction>(0);
+			builder.AddAttribute(1, nameof(PageAction.Icon), "play");
+			builder.AddAttribute(2, nameof(PageAction.Label), "Run");
+			builder.AddAttribute(3, nameof(PageAction.OnClick), EventCallback.Factory.Create(this, () => { }));
+			builder.CloseComponent();
+		};
+
+		var cut = Render(BesideOutlet(PhoneLayout.ToolbarSection, nameof(PageContainer.Actions), actions));
+
+		await Assert.That(cut.Find("output").QuerySelectorAll(".toolbar-slot").Length).IsEqualTo(slots);
+		await Assert.That(cut.FindAll(@"div.max-md\:hidden > button")).HasSingleItem();
+	}
+
+	private static RenderFragment BesideOutlet(string section, string parameter, object? value)
+	{
+		return builder =>
+		{
+			builder.OpenElement(0, "output");
+			builder.OpenComponent<SectionOutlet>(1);
+			builder.AddAttribute(2, nameof(SectionOutlet.SectionName), section);
+			builder.CloseComponent();
+			builder.CloseElement();
+			builder.OpenComponent<PageContainer>(3);
+			builder.AddAttribute(4, nameof(PageContainer.Heading), "Feeds");
+			builder.AddAttribute(5, parameter, value);
+			builder.CloseComponent();
+		};
 	}
 }

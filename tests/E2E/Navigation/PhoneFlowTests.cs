@@ -95,7 +95,7 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	{
 		var (page, _) = await FeedsWithOneAsync();
 
-		await page.Button("Run feeds").TapAsync();
+		await page.Toolbar.Button("Run").TapAsync();
 
 		var dialog = page.GetByRole(AriaRole.Dialog);
 		var cancel = dialog.Locator("[data-dialog-cancel]");
@@ -198,6 +198,34 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 
 		await Expect(page.Modal("Menu")).ToHaveCountAsync(0);
 		await page.ShouldBeAtAsync(Routes.Browse);
+	}
+
+	[Test]
+	public async Task Wantlist_OnAPhone_ShowsItsActionsInTheFooter()
+	{
+		string[] slots = ["Select", "Filter"];
+		string[] selecting = ["Filter"];
+		var page = await E2EApp.AdminAt(Routes.Browse);
+		var tile = TrendingTiles.Resolved(page, TrendingTiles.Title);
+		await Expect(tile).ToBeVisibleAsync(Wait.Settle);
+		await tile.TapAsync();
+		var add = page.ButtonContaining("Add to Wantlist");
+		await add.TapAsync();
+		await Expect(add).ToBeHiddenAsync(Wait.Settle);
+
+		await page.VisitAsync(Routes.Wantlist);
+		var labels = page.Toolbar.Locator(".toolbar-slot-label");
+		var search = page.GetByRole(AriaRole.Searchbox);
+
+		await Expect(labels).ToHaveTextAsync(slots, Wait.Settle);
+		await Expect(page.ButtonContaining("Bulk edit")).ToBeHiddenAsync();
+		await Expect(page.GetByRole(AriaRole.Group, new PageGetByRoleOptions { Name = "Wantlist sync", Exact = true })).ToBeVisibleAsync();
+		await search.FocusAsync();
+		await Expect(page.Toolbar).ToBeHiddenAsync();
+		await search.BlurAsync();
+		await Expect(page.Toolbar).ToBeVisibleAsync();
+		await page.Toolbar.Button("Select").TapAsync();
+		await Expect(labels).ToHaveTextAsync(selecting);
 	}
 
 	private static async Task<(IPage Page, ILocator Card)> FeedsWithOneAsync()

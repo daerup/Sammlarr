@@ -74,6 +74,22 @@ header ::deep nav > ul[data-underline-ready="true"]::after {
     display: block;
 }
 
+.page-toolbar {
+    flex: none;
+    position: relative;
+    z-index: 20;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-around;
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: var(--background);
+}
+
+.page-toolbar:not(:has(*)) {
+    display: none;
+}
+
 .phone-title {
     flex: 1;
     min-width: 0;

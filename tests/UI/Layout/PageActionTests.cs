@@ -77,6 +77,63 @@ public class PageActionTests : BunitContext
 		await Assert.That(clicked).IsTrue();
 	}
 
+	[Test]
+	public async Task Header_ForAnActionWithAToolbarSlot_HidesItselfOnPhones()
+	{
+		var cut = Render(parameters => parameters.Add(action => action.OnClick, () => { }));
+
+		await Assert.That(cut.Find("button").ParentElement!.ClassList).Contains("max-md:hidden");
+	}
+
+	[Test]
+	public async Task Header_ForDesktopMarkupWithoutAToolbarSlot_StaysOnPhones()
+	{
+		RenderFragment desktop = builder => builder.AddMarkupContent(0, "<span class=\"own\">Sync</span>");
+
+		var cut = Render(parameters => parameters.Add(action => action.Desktop, desktop));
+
+		await Assert.That(cut.Find(".own").ParentElement!.ClassList).DoesNotContain("max-md:hidden");
+	}
+
+	[Test]
+	public async Task Toolbar_ShowsTheShortLabelAndTheBadge()
+	{
+		var cut = RenderInToolbar(parameters =>
+			parameters.Add(action => action.DesktopLabel, "Bulk edit").Add(action => action.Badge, 2).Add(action => action.OnClick, () => { })
+		);
+
+		await Assert.That(cut.Find(".toolbar-slot-label").TextContent).IsEqualTo("Select");
+		await Assert.That(cut.Find(".toolbar-badge").TextContent).IsEqualTo("2");
+	}
+
+	[Test]
+	public async Task Toolbar_WhenTapped_InvokesOnClickAndMarksAnActiveSlot()
+	{
+		var clicked = false;
+		var cut = RenderInToolbar(parameters => parameters.Add(action => action.Active, true).Add(action => action.OnClick, () => clicked = true));
+
+		await cut.Find(".toolbar-slot").ClickAsync(new());
+
+		await Assert.That(clicked).IsTrue();
+		await Assert.That(cut.Find(".toolbar-slot").ClassList).Contains("is-on");
+	}
+
+	[Test]
+	public async Task Toolbar_ForAnActionWithNothingToDoThere_RendersNoSlot()
+	{
+		RenderFragment desktop = builder => builder.AddMarkupContent(0, "<span class=\"own\">Sync</span>");
+
+		var cut = RenderInToolbar(parameters => parameters.Add(action => action.Desktop, desktop));
+
+		await Assert.That(cut.Markup.Trim()).IsEmpty();
+	}
+
+	private IRenderedComponent<PageAction> RenderInToolbar(Action<ComponentParameterCollectionBuilder<PageAction>> configure)
+	{
+		RenderTree.Add<CascadingValue<ActionPlacement>>(cascade => cascade.Add(value => value.Value, ActionPlacement.Toolbar));
+		return Render(configure);
+	}
+
 	private IRenderedComponent<PageAction> Render(Action<ComponentParameterCollectionBuilder<PageAction>> configure)
 	{
 		return Render<PageAction>(parameters =>

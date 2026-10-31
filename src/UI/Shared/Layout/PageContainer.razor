@@ -2,6 +2,12 @@
 
 <div class="h-full flex flex-col pt-4 pb-2 max-md:overflow-y-auto max-md:pt-0 max-md:pb-0">
     <SectionContent SectionName="@PhoneLayout.TitleSection">@(PhoneTitle ?? Heading)</SectionContent>
+    @if (IsPhone && Actions is not null)
+    {
+        <SectionContent SectionName="@PhoneLayout.ToolbarSection">
+            <CascadingValue Value="ActionPlacement.Toolbar" IsFixed="true">@Actions</CascadingValue>
+        </SectionContent>
+    }
     @if (Heading is not null || HeaderSearch is not null || Actions is not null)
     {
         <PageHeader Heading="@Heading"
@@ -16,6 +22,8 @@
 </div>
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     [Parameter] public string? Heading { get; set; }
     [Parameter] public string? Description { get; set; }
     [Parameter] public RenderFragment? DescriptionContent { get; set; }

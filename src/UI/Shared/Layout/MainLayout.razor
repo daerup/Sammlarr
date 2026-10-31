@@ -64,13 +64,19 @@
             @Body
         </main>
 
+        <PhoneOnly>
+            <nav class="page-toolbar" aria-label="Page actions">
+                <SectionOutlet SectionName="@PhoneLayout.ToolbarSection"/>
+            </nav>
+        </PhoneOnly>
+
         <AppFooter Version="Versions.Current" Update="_update" Class="max-md:hidden"/>
     </div>
 
     <PhoneOnly>
         <PhoneMenu @bind-Open="_isMenuOpen" Version="Versions.Current" Update="_update"/>
     </PhoneOnly>
-    <BbToastProvider Position="ToastPosition.BottomRight"/>
+    <BbToastProvider Position="ToastPosition.BottomRight" Class="toast-viewport"/>
     <WebUiToastListener/>
     <BbDialogProvider/>
     <BbPortalHost/>

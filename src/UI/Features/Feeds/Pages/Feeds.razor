@@ -57,7 +57,7 @@
         <ProtectedSection GuardState="IsSignedIn" ShowFallback="false">
             <PageAction Icon="square-check" Label="Select" DesktopLabel="Bulk edit" OnClick="() => _isSelecting = true" Visible="HasFeeds && !_isSelecting"/>
             <PageAction Icon="sliders-horizontal" Label="Filter" DesktopLabel="View" Active="_showFilters" Badge="_filter.ActiveCount" OnClick="() => _showFilters = !_showFilters" Visible="HasFeeds"/>
-            <PageAction Icon="play" Label="Run feeds" OnClick="OpenRunFeeds" Visible="HasFeeds && !_isSelecting"/>
+            <PageAction Icon="play" Label="Run" DesktopLabel="Run feeds" OnClick="OpenRunFeeds" Visible="HasFeeds && !_isSelecting"/>
             <PageAction Icon="plus" IconSize="15" IconClass="mr-2.5 shrink-0" Label="Add feed" Variant="ButtonVariant.Secondary" OnClick="@(() => NavigationManager.NavigateTo("/feeds/create"))"/>
         </ProtectedSection>
     </Actions>
