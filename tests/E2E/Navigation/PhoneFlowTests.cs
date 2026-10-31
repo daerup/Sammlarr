@@ -253,6 +253,21 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 		await page.WaitForFunctionAsync("() => history.state?.sheet === undefined");
 	}
 
+	[Test]
+	public async Task Browse_ScrolledToTheEnd_LoadsTheNextPage()
+	{
+		var page = await E2EApp.AdminAt(Routes.Browse);
+		var tiles = page.Locator("[data-testid='media-tile']");
+		await Expect(tiles.First).ToBeVisibleAsync(Wait.Settle);
+		await Expect(page.Locator(".pager-pill")).ToBeHiddenAsync();
+		await Expect(page.Heading("Second Page 1")).ToHaveCountAsync(0);
+
+		await page.Locator(".pager-end").ScrollIntoViewIfNeededAsync();
+
+		await Expect(tiles).ToHaveCountAsync(24, Wait.Settle);
+		await Expect(page.Heading("Second Page 4")).ToHaveCountAsync(1);
+	}
+
 	private static async Task<IPage> WantlistWithTheTrendingTitleAsync()
 	{
 		var page = await E2EApp.AdminAt(Routes.Browse);

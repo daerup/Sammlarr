@@ -33,6 +33,44 @@ public class PaginationControlsTests : BunitContext
 	}
 
 	[Test]
+	public async Task Phone_ReachingTheEnd_AsksForMore()
+	{
+		var reached = 0;
+		var cut = this.RenderOnPhone<PaginationControls>(parameters =>
+			parameters.Add(pager => pager.TotalPages, 4).Add(pager => pager.OnReachEnd, () => reached++)
+		).Component;
+
+		await cut.InvokeAsync(() => cut.Instance.OnEndInView(true));
+
+		await Assert.That(reached).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task Phone_ReachingTheEndOfTheLastPage_AsksForNothing()
+	{
+		var reached = 0;
+		var cut = this.RenderOnPhone<PaginationControls>(parameters =>
+			parameters.Add(pager => pager.CurrentPage, 4).Add(pager => pager.TotalPages, 4).Add(pager => pager.OnReachEnd, () => reached++)
+		).Component;
+
+		await cut.InvokeAsync(() => cut.Instance.OnEndInView(true));
+
+		await Assert.That(reached).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task Desktop_ReachingTheEnd_OnlyDocksThePill()
+	{
+		var reached = 0;
+		var cut = Render<PaginationControls>(parameters => parameters.Add(pager => pager.TotalPages, 4).Add(pager => pager.OnReachEnd, () => reached++));
+
+		await cut.InvokeAsync(() => cut.Instance.OnEndInView(true));
+
+		await Assert.That(reached).IsEqualTo(0);
+		await Assert.That(cut.Find(".pager-pill").ClassList).Contains("is-docked");
+	}
+
+	[Test]
 	public async Task Dispose_WhileItsModuleIsStillLoading_ReportsNoError()
 	{
 		var import = new TaskCompletionSource<IJSObjectReference>();

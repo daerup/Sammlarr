@@ -82,8 +82,9 @@ recorded list's titles into the admin's wantlist, and every later preview of tha
 count what a filter culls or read the badge's own number, never a fixed included count.
 
 Provider traffic is served by WireMock from committed fixtures under `tests/E2E/wiremock`: `mappings/<provider>/` holds the request matchers and
-`responses/<provider>/` the bodies, which are bind-mounted as WireMock's `__files` (the hand-written `arr-stubs`, `newznab` and `plex-stubs` mappings
-carry their bodies inline; `plex-stubs` acknowledges Plex watchlist adds and removals, which a switch back to Plex sends for every title on the stack). Fixtures are committed and `*.verified.json` is pinned to LF by `.gitattributes`.
+`responses/<provider>/` the bodies, which are bind-mounted as WireMock's `__files` (the hand-written `arr-stubs`, `newznab`, `plex-stubs` and `tmdb-stubs` mappings
+carry their bodies inline; `plex-stubs` acknowledges Plex watchlist adds and removals, which a switch back to Plex sends for every title on the stack, and with
+`tmdb-stubs` answers a second trending page, whose made-up titles Plex does not know, for the phone's endless list). Fixtures are committed and `*.verified.json` is pinned to LF by `.gitattributes`.
 
 **Replay** is the default: offline, deterministic, no secrets. **Live** (`E2E_LIVE=true`) makes the main pool proxy the real providers, capture what it
 sees, and compare it against what is committed. Each endpoint has a policy in `wiremock/fixture-policy.json`:

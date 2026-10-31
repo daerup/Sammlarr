@@ -189,10 +189,11 @@
                         }
                     </div>
 
-                    <PaginationControls CurrentPage="_currentPage"
+                    <PaginationControls CurrentPage="@(IsPhone ? _shownPages : _currentPage)"
                                         TotalPages="FeedPaging.PageCount(_visible.Count)"
                                         IsDisabled="_isLoading"
-                                        PageChanged="page => _currentPage = page"/>
+                                        PageChanged="page => _currentPage = page"
+                                        OnReachEnd="() => _shownPages++"/>
                 }
             }
         </ProtectedSection>
@@ -319,6 +320,7 @@
 
     private bool _isLoading = true;
     private int _currentPage = 1;
+    private int _shownPages = 1;
     private int _runVersion;
     private bool _confirmOpen;
     private bool _isPreviewing;
@@ -339,7 +341,10 @@
 
     private bool ShowsLiveView => _live.Match(_ => true, () => !_isLoading && _watching && HasFeeds);
 
-    private IReadOnlyList<FeedRow> PageRows => FeedPaging.Slice(_visible, FeedPaging.PageWithin(_currentPage, _visible.Count));
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)]
+    private bool IsPhone { get; set; }
+
+    private IReadOnlyList<FeedRow> PageRows => IsPhone ? FeedPaging.Head(_visible, _shownPages) : FeedPaging.Slice(_visible, FeedPaging.PageWithin(_currentPage, _visible.Count));
 
     private IReadOnlyList<FeedRow> Chosen => [.. _visible.Where(row => _selection.Contains(row.Feed.Id))];
 
@@ -464,6 +469,7 @@
     {
         _filter = filter;
         _currentPage = 1;
+        _shownPages = 1;
         _visible = _filter.Apply(_rows);
     }
 

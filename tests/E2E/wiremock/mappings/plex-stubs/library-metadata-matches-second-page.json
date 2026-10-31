@@ -1,0 +1,27 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/library/metadata/matches",
+    "queryParameters": {
+      "type": {
+        "equalTo": "2"
+      },
+      "guid": {
+        "matches": "tmdb://99000\\d\\d"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "jsonBody": {
+      "MediaContainer": {
+        "librarySectionID": "home",
+        "size": 0,
+        "Metadata": []
+      }
+    }
+  }
+}

@@ -37,3 +37,9 @@
 .pager-end {
     height: 16px;
 }
+
+@media (width < 48rem) {
+    .pager-float {
+        display: none;
+    }
+}

@@ -1,0 +1,96 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/trending/all/week",
+    "queryParameters": {
+      "page": {
+        "equalTo": "2"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json;charset=utf-8"
+    },
+    "jsonBody": {
+      "page": 2,
+      "results": [
+        {
+          "adult": false,
+          "backdrop_path": "/yG1wltFmkX5c5ocACKfpX0tp3SY.jpg",
+          "id": 9900001,
+          "name": "Second Page 1",
+          "original_name": "Second Page 1",
+          "overview": "A title from the second trending page.",
+          "poster_path": "/tw3tzfXaSpmUZIB8ZNqNEGzMBCy.jpg",
+          "media_type": "tv",
+          "original_language": "en",
+          "genre_ids": [
+            18
+          ],
+          "popularity": 10.0,
+          "first_air_date": "2026-01-01",
+          "vote_average": 7.0,
+          "vote_count": 10
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/kgaQnDdDaPqvGN7i8LLz1aWJdjP.jpg",
+          "id": 9900002,
+          "name": "Second Page 2",
+          "original_name": "Second Page 2",
+          "overview": "A title from the second trending page.",
+          "poster_path": "/vozJZjHv0Yyv4PjoOxF5tVMUGFI.jpg",
+          "media_type": "tv",
+          "original_language": "en",
+          "genre_ids": [
+            18
+          ],
+          "popularity": 10.0,
+          "first_air_date": "2026-01-01",
+          "vote_average": 7.0,
+          "vote_count": 10
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/2rmK7mnchw9Xr3XdiTFSxTTLXqv.jpg",
+          "id": 9900003,
+          "name": "Second Page 3",
+          "original_name": "Second Page 3",
+          "overview": "A title from the second trending page.",
+          "poster_path": "/dB4EDhre2dsC2kxYDavyKWqLQwi.jpg",
+          "media_type": "tv",
+          "original_language": "en",
+          "genre_ids": [
+            18
+          ],
+          "popularity": 10.0,
+          "first_air_date": "2026-01-01",
+          "vote_average": 7.0,
+          "vote_count": 10
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/lmtTtOjsIBxwKD7LsAD5eeyhq1g.jpg",
+          "id": 9900004,
+          "name": "Second Page 4",
+          "original_name": "Second Page 4",
+          "overview": "A title from the second trending page.",
+          "poster_path": "/jkPZW1iHNvlI6077NxSxwITa1tj.jpg",
+          "media_type": "tv",
+          "original_language": "en",
+          "genre_ids": [
+            18
+          ],
+          "popularity": 10.0,
+          "first_air_date": "2026-01-01",
+          "vote_average": 7.0,
+          "vote_count": 10
+        }
+      ],
+      "total_pages": 2,
+      "total_results": 24
+    }
+  }
+}

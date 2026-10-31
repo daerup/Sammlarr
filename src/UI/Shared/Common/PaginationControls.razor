@@ -73,27 +73,44 @@
     [Parameter]
     public EventCallback<int> PageChanged { get; set; }
 
+    [Parameter]
+    public EventCallback OnReachEnd { get; set; }
+
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)]
+    private bool IsPhone { get; set; }
+
     private ElementReference _end;
     private IJSObjectReference? _module;
     private IJSObjectReference? _watcher;
     private DotNetObjectReference<PaginationControls>? _self;
     private bool _docked;
-    private bool _watching;
+    private (bool Shown, bool Phone) _watching;
+    private (int Current, int Total) _seen;
     private bool _disposed;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var shown = TotalPages > 1;
-        if (shown == _watching)
+        var wanted = (TotalPages > 1, IsPhone);
+        if (wanted != _watching)
         {
+            _watching = wanted;
+            _seen = (CurrentPage, TotalPages);
+            await WatchAsync();
             return;
         }
 
-        _watching = shown;
-
-        if (!shown)
+        if (IsPhone && _watcher is not null && (CurrentPage, TotalPages) != _seen)
         {
-            await StopWatchingAsync();
+            _seen = (CurrentPage, TotalPages);
+            await _watcher.InvokeVoidAsync("recheck");
+        }
+    }
+
+    private async Task WatchAsync()
+    {
+        await StopWatchingAsync();
+        if (!_watching.Shown)
+        {
             _docked = false;
             return;
         }
@@ -102,7 +119,7 @@
         {
             _self ??= DotNetObjectReference.Create(this);
             _module ??= await Js.InvokeAsync<IJSObjectReference>("import", "./js/pager.js");
-            _watcher = await _module.InvokeAsync<IJSObjectReference>("watchEnd", _end, _self);
+            _watcher = await _module.InvokeAsync<IJSObjectReference>("watchEnd", _end, _self, _watching.Phone);
         }
         catch (ObjectDisposedException) when (_disposed) { }
     }
@@ -125,16 +142,20 @@
     }
 
     [JSInvokable]
-    public Task OnDockedChanged(bool docked)
+    public async Task OnEndInView(bool inView)
     {
-        if (docked == _docked)
+        if (inView && IsPhone && CurrentPage < TotalPages)
         {
-            return Task.CompletedTask;
+            await OnReachEnd.InvokeAsync();
         }
 
-        _docked = docked;
+        if (inView == _docked)
+        {
+            return;
+        }
+
+        _docked = inView;
         StateHasChanged();
-        return Task.CompletedTask;
     }
 
     public async ValueTask DisposeAsync()

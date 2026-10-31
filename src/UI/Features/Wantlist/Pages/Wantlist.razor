@@ -65,7 +65,8 @@
                        Statuses="StatusOptions"
                        CurrentPage="@PageWithin(gridItems.Count)"
                        PageCount="@PageCount(gridItems.Count)"
-                       PageChanged="GoToPageAsync">
+                       PageChanged="GoToPageAsync"
+                       OnReachEnd="ShowMoreAsync">
             <EmptyState>
                 <MediaListEmptyState Icon="inbox" Heading="Your wantlist is empty.">
                     <ChildContent>@(Settings is { } settings ? ListTexts.EmptyWantlist(settings.Sink) : null)</ChildContent>

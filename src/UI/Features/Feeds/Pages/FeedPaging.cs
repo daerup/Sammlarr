@@ -9,4 +9,6 @@ internal static class FeedPaging
 	internal static int PageWithin(int page, int feedCount) => Math.Clamp(page, 1, PageCount(feedCount));
 
 	internal static IReadOnlyList<T> Slice<T>(IReadOnlyList<T> feeds, int page) => [.. feeds.Skip((page - 1) * PageSize).Take(PageSize)];
+
+	internal static IReadOnlyList<T> Head<T>(IReadOnlyList<T> feeds, int pages) => [.. feeds.Take(pages * PageSize)];
 }

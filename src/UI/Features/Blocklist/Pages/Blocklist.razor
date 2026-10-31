@@ -51,7 +51,8 @@
                        FilterChanged="ApplyFilterAsync"
                        CurrentPage="@PageWithin(gridItems.Count)"
                        PageCount="@PageCount(gridItems.Count)"
-                       PageChanged="GoToPageAsync">
+                       PageChanged="GoToPageAsync"
+                       OnReachEnd="ShowMoreAsync">
             <EmptyState>
                 <MediaListEmptyState Icon="shield-off" Heading="Nothing blocklisted.">
                     <ChildContent>@ListTexts.EmptyBlocklist</ChildContent>
