@@ -10,13 +10,28 @@
 @inject Notifier Notifier
 
 <BbDialog Open="Open" OpenChanged="OnOpenChanged">
-    <BbDialogContent Class="gap-0 overflow-hidden bg-card p-0 sm:max-w-[960px]" ShowClose="false" InitialFocus="FocusTrapInitialFocus.Container">
+    <BbDialogContent Class="gap-0 overflow-hidden bg-card p-0 sm:max-w-[960px] max-md:h-dvh max-md:max-h-dvh! max-md:grid-rows-[auto_1fr] max-md:rounded-none!" ShowClose="false" InitialFocus="FocusTrapInitialFocus.Container">
         <div class="st-head">
-            <BbDialogTitle As="h4" Class="m-0 text-lg font-semibold">Titles stored twice</BbDialogTitle>
-            <span class="st-progress" data-testid="stored-twice-progress">@Progress</span>
-            <BbDialogClose AsChild="false" class="inline-flex rounded-md p-1 text-muted-foreground hover:bg-foreground/5 hover:text-foreground" aria-label="Close" data-testid="stored-twice-close">
-                <LucideIcon Name="x" Size="16"/>
-            </BbDialogClose>
+            @if (IsPhone)
+            {
+                @CloseButton
+                @Title
+                <span class="st-steps">
+                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Previous pair" Disabled="@(!CanGoBack)" OnClick="Back">
+                        <LucideIcon Name="chevron-left" Size="18"/>
+                    </BbButton>
+                    @ProgressLine
+                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Next pair" Disabled="@(!CanGoOn)" OnClick="Next">
+                        <LucideIcon Name="chevron-right" Size="18"/>
+                    </BbButton>
+                </span>
+            }
+            else
+            {
+                @Title
+                @ProgressLine
+                @CloseButton
+            }
         </div>
         @if (_pairs is not { } pairs)
         {
@@ -43,7 +58,7 @@
                         <div class="st-pair" data-testid="stored-twice-pair">
                             @Column(pair, pair.Held)
                             <div class="st-divider">
-                                <span class="st-seam" title="@TitlesStoredTwiceView.Claim(pair.Note, Branding)">
+                                <span class="st-seam" title="@(IsPhone ? null : TitlesStoredTwiceView.Claim(pair.Note, Branding))">
                                     @Claimant(pair.Note, 18)
                                     <LucideIcon Name="arrow-left-right" Size="13"/>
                                 </span>
@@ -58,9 +73,12 @@
                             <span class="text-muted-foreground">@TitlesStoredTwiceView.Reason(pair, CurrentUser.Id, Branding)</span>
                         </div>
                         <div class="st-foot" data-testid="stored-twice-actions" data-dialog-actions>
-                            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="_index == 0" OnClick="Back">
-                                <LucideIcon Name="chevron-left" Size="13" Class="mr-1"/>Back
-                            </BbButton>
+                            @if (!IsPhone)
+                            {
+                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="_index == 0" OnClick="Back">
+                                    <LucideIcon Name="chevron-left" Size="13" Class="mr-1"/>Back
+                                </BbButton>
+                            }
                             @if (Mark(pair) is Some<ConflictChoice>(var chosen))
                             {
                                 <span class="st-chosen" data-dialog-lead>
@@ -133,9 +151,12 @@
                             <span class="text-muted-foreground">Nothing has changed yet. A merge can't be undone; closing now discards these choices.</span>
                         </div>
                         <div class="st-foot" data-dialog-actions>
-                            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="_applying" OnClick="Back">
-                                <LucideIcon Name="chevron-left" Size="13" Class="mr-1"/>Back
-                            </BbButton>
+                            @if (!IsPhone)
+                            {
+                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="_applying" OnClick="Back">
+                                    <LucideIcon Name="chevron-left" Size="13" Class="mr-1"/>Back
+                                </BbButton>
+                            }
                             @if (_applying && _waits)
                             {
                                 <span class="st-cant" data-dialog-lead>Waits for the job that is running…</span>
@@ -156,6 +177,8 @@
 </BbDialog>
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     private static readonly ArtworkSize Thumb = new(30, 45);
 
     [Parameter]
@@ -220,6 +243,10 @@
     private async Task LoadAsync()
     {
         _pairs = null;
+        _toDecide = [];
+        _keptApart = [];
+        _inKept = false;
+        _index = 0;
         _marks.Clear();
         _applied = new None();
         await Task.Yield();
@@ -245,9 +272,32 @@
         Next();
     }
 
-    private void Next() => _index++;
+    private void Next()
+    {
+        _index++;
+        if (IsPhone && !_inKept && _index == _toDecide.Count && _keptApart.Count > 0)
+        {
+            _inKept = true;
+            _index = 0;
+        }
+    }
 
-    private void Back() => _index = Math.Max(0, Math.Min(_index, Queue.Count) - 1);
+    private void Back()
+    {
+        if (IsPhone && _inKept && _index == 0 && _toDecide.Count > 0)
+        {
+            _inKept = false;
+            _index = _toDecide.Count - 1;
+        }
+        else
+        {
+            _index = Math.Max(0, Math.Min(_index, Queue.Count) - 1);
+        }
+    }
+
+    private bool CanGoOn => Current is { } pair && (_inKept || Mark(pair).IsSome());
+
+    private bool CanGoBack => !Applied && !_applying && (_index > 0 || (_inKept && _toDecide.Count > 0));
 
     private void Go(bool kept, int index)
     {
@@ -285,6 +335,15 @@
     private string Dot(StoredTwice pair) => Mark(pair).Map(_ => "is-chosen").GetValueOr(() => TitlesStoredTwiceView.Tried(pair.Note) ? "is-tried" : string.Empty);
 
     private bool IsOn(bool kept, int index) => _applied.Match(_ => false, () => kept == _inKept && index == _index);
+
+    private static RenderFragment Title => @<BbDialogTitle As="h4" Class="m-0 text-lg font-semibold max-md:min-w-0 max-md:truncate max-md:text-base">Titles stored twice</BbDialogTitle>;
+
+    private RenderFragment ProgressLine => @<span class="st-progress" aria-live="polite" data-testid="stored-twice-progress">@Progress</span>;
+
+    private static RenderFragment CloseButton =>
+        @<BbDialogClose AsChild="false" class="inline-flex rounded-md p-1 text-muted-foreground hover:bg-foreground/5 hover:text-foreground max-md:p-3" aria-label="Close" data-testid="stored-twice-close">
+            <LucideIcon Name="x" Size="16"/>
+        </BbDialogClose>;
 
     private RenderFragment Claimant(IdentityConflict note, int size)
     {

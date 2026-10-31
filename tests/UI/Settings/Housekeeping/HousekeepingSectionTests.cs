@@ -14,6 +14,7 @@ using Shared.Options;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Housekeeping;
 using UI.Shared.Bars;
+using UI.Shared.Layout;
 using UI.Shared.Services;
 using UI.Tests.Media;
 
@@ -358,6 +359,26 @@ public class HousekeepingSectionTests : BunitContext
 
 		_unmatched.Clear().WasCalled(Times.Once);
 		await Assert.That(Toasts).HasSingleItem();
+	}
+
+	[Test]
+	public async Task Phone_TasksAndCaches_FoldToTheirNameAndTheValueThatMatters()
+	{
+		_tasks.OverviewAsync(Any()).Returns(Overview(new PassTask(Some.Of(EarlierToday.AddDays(1)), new None(), new None())));
+		RenderTree.TryAdd<CascadingValue<bool>>(cascade => cascade.Add(value => value.Name, PhoneLayout.IsPhoneCascade).Add(value => value.Value, true));
+
+		var cut = RenderLoaded();
+
+		await Assert.That(cut.FindAll("table")).IsEmpty();
+		await Assert.That(cut.FindAll(".unfold-row[data-testid=housekeeping-task] .unfold-row-trigger [data-testid=housekeeping-when]").Count).IsEqualTo(3);
+		var pass = cut.Find(".unfold-row[data-task=pass]");
+		await Assert.That(pass.QuerySelector("dl")!.TextContent).Contains("Does").And.Contains("trims history and the cache").And.Contains("What it did");
+		await Assert.That(pass.QuerySelector("[data-testid=housekeeping-run]")!.TextContent).Contains("Run now");
+		await Assert.That(cut.FindAll(".unfold-row[data-testid=housekeeping-task] a").Select(link => link.TextContent.Trim())).Contains("Open IMDb ratings");
+		var details = cut.Find(".unfold-row[data-testid=housekeeping-clear-details]");
+		await Assert.That(details.QuerySelector(".unfold-row-trigger")!.TextContent).Contains("Cached details").And.Contains("3.3 MB");
+		await Assert.That(details.QuerySelector("dl")!.TextContent).Contains("Holds").And.Contains("Next trim");
+		await Assert.That(cut.Find("[data-testid=housekeeping-caches-band]").Children.Select(cell => cell.TextContent)).IsEquivalentTo(["Caches"]);
 	}
 
 	private IReadOnlyList<ToastData> Toasts => Services.GetRequiredService<ToastService>().Toasts;
