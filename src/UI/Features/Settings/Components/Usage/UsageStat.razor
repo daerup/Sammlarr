@@ -3,7 +3,7 @@
         <LucideIcon Name="@Icon" Size="13"/>
         @Label
     </div>
-    <div class="flex items-baseline gap-2 text-2xl font-semibold leading-tight tracking-tight">
+    <div class="flex items-baseline gap-2 text-2xl font-semibold leading-tight tracking-tight max-md:flex-wrap max-md:gap-x-1.5 max-md:gap-y-0">
         <span data-testid="usage-stat-value">@Value</span>
         @if (Unit is not null)
         {

@@ -212,6 +212,67 @@ public class UsageCallsCardTests : BunitContext
 		await Assert.That(rightNow["Tmdb"]).IsEqualTo($"Last call {clock}");
 	}
 
+	[Test]
+	public async Task Phone_EachServiceIsOneLineThatPicksItsServiceWhenUnfolded()
+	{
+		Optional<RemoteService> raised = new None();
+		var cut = RenderCard(UsageSamples.Snapshot().Current, changed: picked => raised = picked, phone: true);
+
+		await Assert.That(cut.FindAll(".usage-service")).IsEmpty();
+		await Assert.That(PhoneRow(cut, "Plex").QuerySelector(".unfold-row-trigger")!.TextContent).Contains("45 calls");
+		await PhoneRow(cut, "Plex").QuerySelector(".unfold-row-trigger")!.ClickAsync();
+
+		await Assert.That(raised).IsSome().And.IsEqualTo(RemoteService.Plex);
+	}
+
+	[Test]
+	public async Task Phone_ServiceWithoutTimedCalls_LeavesOutTheAnswerTimeAndTheSubtitleSaysTap()
+	{
+		var untimed = new UsageTally(new Dictionary<UsageOutcome, long> { [UsageOutcome.Cancelled] = 3 }, new Dictionary<int, long>());
+		var cut = RenderCard(UsageSamples.Period([UsageSamples.Line(RemoteService.Tmdb, untimed)], []), phone: true);
+
+		await Assert.That(PhoneRow(cut, "Tmdb").QuerySelector("dl")!.TextContent).DoesNotContain("Answer time");
+		await Assert.That(cut.FindComponent<BbCardDescription>().Find("p").TextContent).Contains("Tap a service");
+	}
+
+	[Test]
+	public async Task Phone_WithoutServices_DrawsNoList()
+	{
+		var cut = RenderCard(UsageSamples.Period([], []), phone: true);
+
+		await Assert.That(cut.FindAll("[data-testid=usage-services]")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Phone_PickedServiceTappedAgain_ShowsEveryServiceAgain()
+	{
+		Optional<RemoteService> raised = Some.Of(RemoteService.Plex);
+		var cut = RenderCard(UsageSamples.Snapshot().Current, Some.Of(RemoteService.Plex), picked => raised = picked, phone: true);
+
+		await PhoneRow(cut, "Plex").QuerySelector(".unfold-row-trigger")!.ClickAsync();
+
+		await Assert.That(raised).IsNone();
+	}
+
+	[Test]
+	public async Task Phone_PickedService_UnfoldsItsFiguresItsAnswerTimesAndItsQuota()
+	{
+		var period = UsageSamples.Period(
+			[UsageSamples.Line(RemoteService.Tmdb, UsageSamples.Tally(answered: 90)), UsageSamples.Line(RemoteService.Mdblist, UsageSamples.Tally(answered: 40))],
+			[]
+		);
+
+		var cut = RenderCard(period, Some.Of(RemoteService.Mdblist), quotas: [UsageSamples.Quota(UsageSamples.Allowance(191))], phone: true);
+
+		var row = PhoneRow(cut, "Mdblist");
+		await Assert.That(row.QuerySelector(".unfold-row-trigger")!.GetAttribute("aria-expanded")).IsEqualTo("true");
+		await Assert.That(row.QuerySelector("dl")!.TextContent).Contains("Errors").And.Contains("Limited").And.Contains("Right now").And.Contains("Answer time");
+		await Assert.That(row.QuerySelector("[data-testid=usage-strip-list]")!.TextContent).Contains("≤100 ms").And.Contains("40 calls").And.Contains("median");
+		await Assert.That(row.QuerySelector("[data-testid=usage-quota-panel]")).IsNotNull();
+		await Assert.That(row.QuerySelector("[data-testid=usage-quota-notes]")!.TextContent).Contains("Title lookups wait at");
+		await Assert.That(PhoneRow(cut, "Tmdb").QuerySelector("[data-testid=usage-quota-panel]")).IsNull();
+	}
+
 	private static AngleSharp.Dom.IElement Row(IRenderedComponent<UsageCallsCard> cut, string name)
 	{
 		return cut.FindAll("[data-testid=usage-service]").Single(row => row.TextContent.Contains(name));
@@ -225,20 +286,23 @@ public class UsageCallsCardTests : BunitContext
 		return columns.EnumerateArray().Sum(column => column.GetProperty("Answered").GetInt64());
 	}
 
+	private static AngleSharp.Dom.IElement PhoneRow(IRenderedComponent<UsageCallsCard> cut, string service) => cut.Find($".unfold-row[data-service={service}]");
+
 	private IRenderedComponent<UsageCallsCard> RenderCard(
 		UsagePeriod period,
 		Optional<RemoteService>? picked = null,
 		Action<Optional<RemoteService>>? changed = null,
-		IReadOnlyList<UsageQuota>? quotas = null
+		IReadOnlyList<UsageQuota>? quotas = null,
+		bool phone = false
 	)
 	{
-		return Render<UsageCallsCard>(parameters =>
-			parameters
+		Action<ComponentParameterCollectionBuilder<UsageCallsCard>> parameters = builder =>
+			builder
 				.Add(card => card.Period, period)
 				.Add(card => card.Range, UsageRange.Day)
 				.Add(card => card.Quotas, quotas ?? [])
 				.Add(card => card.Picked, picked ?? new None())
-				.Add(card => card.PickedChanged, changed ?? (_ => { }))
-		);
+				.Add(card => card.PickedChanged, changed ?? (_ => { }));
+		return phone ? this.RenderOnPhone(parameters).Component : Render(parameters);
 	}
 }

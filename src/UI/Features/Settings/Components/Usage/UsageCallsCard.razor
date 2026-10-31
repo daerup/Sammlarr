@@ -65,61 +65,76 @@
                 }
             </div>
         }
-        <div class="mt-1.5">
-            <div class="usage-service pl-3 pr-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                <span>Service</span>
-                <span>How they ended</span>
-                <span class="text-right">Calls</span>
-                <span class="text-right">Errors</span>
-                <UsageAnswerTimeHead/>
-                <span class="text-right">Limited</span>
-                <span>Right now</span>
-            </div>
-            @foreach (var line in Period.Services)
+        @if (IsPhone)
+        {
+            @if (Period.Services.Count > 0)
             {
-                var tally = line.Tally;
-                var now = UsageView.RightNow(line.RightNow, Clock.GetUtcNow());
-                var picked = IsPicked(line.Service);
-                var open = Panel(line.Service).When(_ => picked);
-                <div class="@($"usage-service cursor-pointer rounded-md pl-3 pr-1 text-[12.5px] hover:bg-foreground/5 {(picked ? "usage-service-picked" : string.Empty)}")"
-                     data-testid="usage-service" data-service="@line.Service" data-picked="@(picked ? "true" : "false")" role="button" tabindex="0" aria-pressed="@(picked ? "true" : "false")"
-                     @onclick="() => PickAsync(line.Service)" @onkeydown="args => KeyAsync(args, line.Service)">
-                    <span class="flex min-w-0 items-center gap-2 whitespace-nowrap font-medium">
-                        <BrandedLogo Brand="Branding.GetBrandingInfo(line.Service)" Size="18" Decorative="true"/>
-                        @Branding.GetBrandingInfo(line.Service).NickName
-                        @if (open is Some<UsageQuota>)
-                        {
-                            <LucideIcon Name="chevron-up" Size="14" Class="ml-auto text-muted-foreground"/>
-                        }
-                    </span>
-                    <span>
-                        <UsageOutcomeBar Tally="tally" Busiest="Busiest" TapOpens="false">
-                            <Title>
-                                <BrandedLogo Brand="Branding.GetBrandingInfo(line.Service)" Size="14" Decorative="true"/>
-                                @Branding.GetBrandingInfo(line.Service).NickName
-                            </Title>
-                        </UsageOutcomeBar>
-                    </span>
-                    <span class="text-right tabular-nums">@UsageView.Count(tally.Total)</span>
-                    <span class="@UsageView.Tone(tally.Errors, tally.Total, "text-[var(--usage-failed)] font-medium")">@Shares.Of(tally.Errors, tally.Total)</span>
-                    <span>
-                        <UsageAnswerStrip Service="line.Service" Tally="tally"/>
-                    </span>
-                    <span class="@UsageView.Tone(tally.RateLimited, tally.Total, "text-[var(--usage-gave-up)] font-medium")">@Shares.Of(tally.RateLimited, tally.Total)</span>
-                    <span class="@($"flex min-w-0 items-center gap-1.5 overflow-hidden text-xs text-ellipsis whitespace-nowrap {NowColour(now.Tone)}")" data-testid="usage-right-now">
-                        @if (now.Icon is Some<string>(var icon))
-                        {
-                            <LucideIcon Name="@icon" Size="12"/>
-                        }
-                        @now.Text
-                    </span>
+                <div class="-mx-[18px] mt-1.5 border-t" data-testid="usage-services">
+                    @foreach (var line in Period.Services)
+                    {
+                        @PhoneService(line)
+                    }
                 </div>
-                @if (open is Some<UsageQuota>(var quota))
-                {
-                    @QuotaPanel((quota, line.Slots))
-                }
             }
-        </div>
+        }
+        else
+        {
+            <div class="mt-1.5">
+                <div class="usage-service pl-3 pr-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                    <span>Service</span>
+                    <span>How they ended</span>
+                    <span class="text-right">Calls</span>
+                    <span class="text-right">Errors</span>
+                    <UsageAnswerTimeHead/>
+                    <span class="text-right">Limited</span>
+                    <span>Right now</span>
+                </div>
+                @foreach (var line in Period.Services)
+                {
+                    var tally = line.Tally;
+                    var now = UsageView.RightNow(line.RightNow, Clock.GetUtcNow());
+                    var picked = IsPicked(line.Service);
+                    var open = Panel(line.Service).When(_ => picked);
+                    <div class="@($"usage-service cursor-pointer rounded-md pl-3 pr-1 text-[12.5px] hover:bg-foreground/5 {(picked ? "usage-service-picked" : string.Empty)}")"
+                         data-testid="usage-service" data-service="@line.Service" data-picked="@(picked ? "true" : "false")" role="button" tabindex="0" aria-pressed="@(picked ? "true" : "false")"
+                         @onclick="() => PickAsync(line.Service)" @onkeydown="args => KeyAsync(args, line.Service)">
+                        <span class="flex min-w-0 items-center gap-2 whitespace-nowrap font-medium">
+                            <BrandedLogo Brand="Branding.GetBrandingInfo(line.Service)" Size="18" Decorative="true"/>
+                            @Branding.GetBrandingInfo(line.Service).NickName
+                            @if (open is Some<UsageQuota>)
+                            {
+                                <LucideIcon Name="chevron-up" Size="14" Class="ml-auto text-muted-foreground"/>
+                            }
+                        </span>
+                        <span>
+                            <UsageOutcomeBar Tally="tally" Busiest="Busiest" TapOpens="false">
+                                <Title>
+                                    <BrandedLogo Brand="Branding.GetBrandingInfo(line.Service)" Size="14" Decorative="true"/>
+                                    @Branding.GetBrandingInfo(line.Service).NickName
+                                </Title>
+                            </UsageOutcomeBar>
+                        </span>
+                        <span class="text-right tabular-nums">@UsageView.Count(tally.Total)</span>
+                        <span class="@UsageView.Tone(tally.Errors, tally.Total, "text-[var(--usage-failed)] font-medium")">@Shares.Of(tally.Errors, tally.Total)</span>
+                        <span>
+                            <UsageAnswerStrip Service="line.Service" Tally="tally"/>
+                        </span>
+                        <span class="@UsageView.Tone(tally.RateLimited, tally.Total, "text-[var(--usage-gave-up)] font-medium")">@Shares.Of(tally.RateLimited, tally.Total)</span>
+                        <span class="@($"flex min-w-0 items-center gap-1.5 overflow-hidden text-xs text-ellipsis whitespace-nowrap {NowColour(now.Tone)}")" data-testid="usage-right-now">
+                            @if (now.Icon is Some<string>(var icon))
+                            {
+                                <LucideIcon Name="@icon" Size="12"/>
+                            }
+                            @now.Text
+                        </span>
+                    </div>
+                    @if (open is Some<UsageQuota>(var quota))
+                    {
+                        @QuotaPanel((quota, line.Slots))
+                    }
+                }
+            </div>
+        }
         @if (Silent.Count > 0)
         {
             <div class="flex flex-wrap items-center gap-2 border-t pt-2 text-xs text-muted-foreground" data-testid="usage-silent">
@@ -137,6 +152,8 @@
 </UsageCard>
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     private const int PlotLeft = 48;
 
     private const int PlotRight = 4;
@@ -159,6 +176,8 @@
 
     private CallsTab _tab = CallsTab.Calls;
 
+    private string Verb => IsPhone ? "Tap" : "Click";
+
     private Optional<UsageServiceLine> PickedLine => Picked.Map(service => Period.Services.FirstOrNone(line => line.Service == service));
 
     private Optional<RemoteService> Missing => Picked.When(service => Period.Services.All(line => line.Service != service));
@@ -167,7 +186,7 @@
     {
         get
         {
-            return Picked.Match(service => $"{Name(service)}: {Described}. Click {Name(service)} again, or the × on its chip, for every service.", () => Everyone);
+            return Picked.Match(service => $"{Name(service)}: {Described}. {Verb} {Name(service)} again, or the × on its chip, for every service.", () => Everyone);
         }
     }
 
@@ -184,8 +203,8 @@
         get
         {
             return _tab is CallsTab.Calls
-                ? $"All services: {Described}. Click a service to show only its calls, click it again for all."
-                : $"All but datasets: {Described}. Click a service to show only its answers.";
+                ? $"All services: {Described}. {Verb} a service to show only its calls, {Verb.ApplyCase(LetterCasing.LowerCase)} it again for all."
+                : $"All but datasets: {Described}. {Verb} a service to show only its answers.";
         }
     }
 
@@ -246,6 +265,57 @@
                     <UsageQuotaDays Quota="shown.Quota" Range="Range"/>
                 }
             </div>;
+
+    private RenderFragment PhoneService(UsageServiceLine line)
+    {
+        var tally = line.Tally;
+        var now = UsageView.RightNow(line.RightNow, Clock.GetUtcNow());
+        var picked = IsPicked(line.Service);
+        var brand = Branding.GetBrandingInfo(line.Service);
+        return @<UnfoldRow Columns="grid-cols-[15px_minmax(0,1fr)_auto]" Divided="true" TriggerClass="py-2" Edge="@(picked ? UsageView.Accent : null)" Open="picked" OpenChanged="_ => PickAsync(line.Service)"
+                           data-testid="usage-service" data-service="@line.Service" data-picked="@(picked ? "true" : "false")">
+            <Summary>
+                <span class="flex min-w-0 items-center gap-2 text-[13px] font-medium">
+                    <BrandedLogo Brand="brand" Size="18" Decorative="true"/>
+                    <span class="truncate">@brand.NickName</span>
+                </span>
+                <span class="text-xs whitespace-nowrap tabular-nums text-muted-foreground">@UsageView.Calls(tally.Total)</span>
+            </Summary>
+            <Details>
+                <div class="flex flex-col gap-3 pt-2 pr-4 pb-3 pl-[43px] text-xs">
+                    <UsageOutcomeBar Tally="tally" Busiest="Busiest" Label="@($"{brand.NickName} calls")">
+                        <Title>
+                            <BrandedLogo Brand="brand" Size="14" Decorative="true"/>
+                            @brand.NickName
+                        </Title>
+                    </UsageOutcomeBar>
+                    <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5">
+                        <dt class="text-muted-foreground">Errors</dt>
+                        <dd><span class="@UsageView.Tone(tally.Errors, tally.Total, "text-[var(--usage-failed)] font-medium")">@Shares.Of(tally.Errors, tally.Total)</span></dd>
+                        <dt class="text-muted-foreground">Limited</dt>
+                        <dd><span class="@UsageView.Tone(tally.RateLimited, tally.Total, "text-[var(--usage-gave-up)] font-medium")">@Shares.Of(tally.RateLimited, tally.Total)</span></dd>
+                        <dt class="text-muted-foreground">Right now</dt>
+                        <dd class="@($"flex min-w-0 items-center gap-1.5 {NowColour(now.Tone)}")" data-testid="usage-right-now">
+                            @if (now.Icon is Some<string>(var icon))
+                            {
+                                <LucideIcon Name="@icon" Size="12"/>
+                            }
+                            @now.Text
+                        </dd>
+                        @if (tally.Durations.Values.Any(count => count > 0))
+                        {
+                            <dt class="text-muted-foreground">Answer time</dt>
+                            <dd><UsageAnswerStrip Service="line.Service" Tally="tally" Listed="true"/></dd>
+                        }
+                    </dl>
+                </div>
+                @if (Panel(line.Service).When(_ => picked) is Some<UsageQuota>(var quota))
+                {
+                    @QuotaPanel((quota, line.Slots))
+                }
+            </Details>
+        </UnfoldRow>;
+    }
 
     private static string LeftOf(double milliseconds)
     {

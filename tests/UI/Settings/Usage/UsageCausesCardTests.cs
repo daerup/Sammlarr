@@ -86,6 +86,22 @@ public class UsageCausesCardTests : BunitContext
 	}
 
 	[Test]
+	public async Task Phone_PickedCauseWithAHint_WritesTheHintUnderItsRow()
+	{
+		var cut = this.RenderOnPhone<UsageCausesCard>(parameters =>
+			parameters
+				.Add(card => card.Period, Period(new UsageCauseLine(UsageCause.Other, UsageSamples.Tally(answered: 25), [])))
+				.Add(card => card.Range, UsageRange.Day)
+		).Component;
+
+		await Assert.That(cut.FindAll("[data-testid=usage-cause-hinted]")).IsEmpty();
+		await Assert.That(cut.FindAll("[data-testid=usage-cause-hint]")).IsEmpty();
+		await cut.FindAll("[data-testid=usage-cause]").Single(row => row.TextContent.Contains("Untagged")).ClickAsync();
+
+		await Assert.That(cut.Find("[data-testid=usage-cause-hint]").TextContent).IsEqualTo(UsageView.CauseHint(UsageCause.Other).GetValueOr(string.Empty));
+	}
+
+	[Test]
 	public async Task Cause_PickedButAbsentFromTheNextWindow_FallsBackToAllCauses()
 	{
 		var cut = RenderCard(UsageSamples.Snapshot().Current);

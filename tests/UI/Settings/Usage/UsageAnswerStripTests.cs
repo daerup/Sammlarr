@@ -39,6 +39,30 @@ public class UsageAnswerStripTests : BunitContext
 	}
 
 	[Test]
+	public async Task Listed_WritesOutEveryBucketWithCallsAndTheMedianAndP95()
+	{
+		var cut = Render<UsageAnswerStrip>(parameters =>
+			parameters.Add(strip => strip.Service, RemoteService.Tmdb).Add(strip => strip.Tally, Answers).Add(strip => strip.Listed, true)
+		);
+
+		var list = cut.Find("[data-testid=usage-strip-list]").TextContent;
+		await Assert
+			.That(list)
+			.Contains("≤100 ms")
+			.And.Contains("90 calls")
+			.And.Contains("≤500 ms")
+			.And.Contains("5 calls")
+			.And.Contains("median")
+			.And.Contains("p95");
+		await Assert
+			.That(cut.FindAll("[data-testid=usage-strip-list] b").Select(bucket => bucket.TextContent).Where(text => text.StartsWith('≤')))
+			.Count()
+			.IsEqualTo(2);
+		await Assert.That(cut.FindAll("[data-testid=usage-strip-square]")).Count().IsEqualTo(15);
+		await Assert.That(cut.FindComponents<BbTooltip>()).IsEmpty();
+	}
+
+	[Test]
 	public async Task Square_PointedAt_NamesItsRangeCallsAndShareWithTheMedianAndP95()
 	{
 		var cut = RenderStrip(Answers);

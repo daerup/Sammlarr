@@ -1,5 +1,5 @@
 <BbCard Class="flex min-w-0 flex-col gap-2.5 rounded-xl px-[18px] pt-4 pb-3.5 section-card max-md:-mx-4 max-md:rounded-none max-md:border-x-0 max-md:shadow-none" style="@Style" data-testid="@TestId">
-    <div class="flex items-start gap-3">
+    <div class="flex items-start gap-3 max-md:flex-wrap">
         <div>
             <div class="flex items-center gap-2">
                 <BbCardTitle As="h4" Class="text-sm font-semibold">@Title</BbCardTitle>
@@ -12,7 +12,7 @@
         </div>
         @if (Right is not null)
         {
-            <div class="ml-auto shrink-0">@Right</div>
+            <div class="ml-auto shrink-0 max-md:ml-0">@Right</div>
         }
     </div>
     @ChildContent

@@ -2,19 +2,19 @@
 @inject IUsageReport Report
 
 <div class="flex flex-col gap-4 max-md:gap-3">
-    <div class="flex items-start gap-4">
+    <div class="flex items-start gap-4 max-md:flex-wrap max-md:gap-3">
         <div>
             <h3 class="text-lg font-semibold">Usage</h3>
             <p class="text-sm text-muted-foreground">How often Sammlarr calls each service, how those calls ended, and what made them.</p>
         </div>
-        <div class="ml-auto">
+        <div class="ml-auto max-md:ml-0">
             <UsageSegments TValue="UsageRange" Value="_range" Options="Ranges" OnChange="SelectAsync" Label="Window"/>
         </div>
     </div>
 
     @if (_shown is not { } shown)
     {
-        <div class="grid grid-cols-4 gap-3" data-testid="usage-loading">
+        <div class="grid grid-cols-4 gap-3 max-md:grid-cols-2" data-testid="usage-loading">
             @for (var card = 0; card < 4; card++)
             {
                 <BbSkeleton Class="h-[118px] rounded-xl"/>

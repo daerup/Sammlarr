@@ -83,6 +83,23 @@ public class UsageQuotaLineTests : BunitContext
 	}
 
 	[Test]
+	public async Task Phone_WritesTheResetTheReserveTheWaitsTheOutsideUseAndTheMissingDayUnderThePlot()
+	{
+		var allowance = UsageSamples.Allowance(71) with { Outside = Some.Of(120L), DayBefore = new None() };
+
+		var cut = this.RenderOnPhone<UsageQuotaLine>(parameters =>
+			parameters.Add(line => line.Quota, UsageSamples.Quota(allowance)).Add(line => line.Window, UsageSamples.Hours)
+		).Component;
+
+		var notes = cut.FindAll("[data-testid=usage-quota-notes] li").Select(note => note.TextContent.Trim()).ToList();
+		await Assert.That(notes[0]).StartsWith("Resets at ");
+		await Assert.That(notes).Contains("Title lookups wait at 50 left, feed list pages may use the rest");
+		await Assert.That(notes).Contains("120 used outside Sammlarr, time not known");
+		await Assert.That(notes).Contains("Sammlarr did not see how the day before ended: its hours show after the next reset");
+		await Assert.That(cut.Find("[data-testid=usage-quota-line]").TextContent).DoesNotContain("Title lookups wait").And.DoesNotContain("used outside");
+	}
+
+	[Test]
 	public async Task Render_WithoutAnAnswer_DrawsNothing()
 	{
 		var cut = RenderLine(UsageSamples.Unanswered());

@@ -96,7 +96,75 @@
                     }
                 </div>
             }
-            @if (Shown.Count > 0)
+            @if (Shown.Count > 0 && IsPhone)
+            {
+                <div class="-mx-[18px] border-t" data-testid="usage-feed-list">
+                    @foreach (var (line, _) in Keyed)
+                    {
+                        var stats = Stats(line);
+                        <UnfoldRow @key="line.Feed" Columns="grid-cols-[15px_minmax(0,1fr)_auto]" Divided="true" TriggerClass="py-2" data-testid="usage-feed" data-feed="@line.Name">
+                            <Summary>
+                                <span class="flex min-w-0 items-center gap-2 text-[13px] font-medium">
+                                    @FeedName(line)
+                                </span>
+                                <span class="text-xs whitespace-nowrap tabular-nums text-muted-foreground" data-testid="usage-feed-headline">@Headline(line, stats)</span>
+                            </Summary>
+                            <Details>
+                                <div class="flex flex-col items-start gap-3 pt-2 pr-4 pb-3 pl-[43px] text-xs">
+                                    @if (stats.Calls > 0)
+                                    {
+                                        <div class="w-full">
+                                            <UsageOutcomeBar Tally="Tally(line)" Busiest="Busiest" Label="@($"{line.Name} calls")">
+                                                <Title>@BarTitle(line)</Title>
+                                            </UsageOutcomeBar>
+                                        </div>
+                                    }
+                                    <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5">
+                                        <dt class="text-muted-foreground">Calls</dt>
+                                        <dd class="tabular-nums">@UsageView.Count(stats.Calls)</dd>
+                                        @if (line.Gone is not Some<UsageFeedGone>)
+                                        {
+                                            <dt class="text-muted-foreground">Runs</dt>
+                                            <dd class="tabular-nums">@line.Runs.Count(Called)</dd>
+                                            <dt class="text-muted-foreground">Per title</dt>
+                                            <dd class="tabular-nums">@FormattableString.Invariant($"{stats.CallsPerTitle:0.0}")</dd>
+                                            <dt class="text-muted-foreground">Unmatched</dt>
+                                            <dd data-testid="usage-feed-unmatched">
+                                                <span class="@(line.Stats.CouldNotLookUp > 0 ? "font-medium text-[var(--fate-couldnot)]" : null)">
+                                                    @if (line.Stats.CouldNotLookUp > 0)
+                                                    {
+                                                        <LucideIcon Name="rotate-cw" Size="11" Class="mr-0.5 inline"/>
+                                                    }
+                                                    @UsageView.Count(line.Stats.Unmatched) <span class="text-muted-foreground">· @FormattableString.Invariant($"{line.Stats.UnmatchedShare * 100:0.#}%")</span>
+                                                </span>
+                                                @if (line.Stats.Unmatched > 0 || line.Stats.CouldNotLookUp > 0)
+                                                {
+                                                    <span class="block text-muted-foreground">@UnmatchedTitle(line)</span>
+                                                }
+                                            </dd>
+                                            <dt class="text-muted-foreground">Took</dt>
+                                            <dd class="tabular-nums">@(line.Runs.Count > 0 ? line.Stats.Took.Humanize(2, Notation.Symbols) : "n/a")</dd>
+                                            <dt class="text-muted-foreground">Last run</dt>
+                                            <dd class="flex items-center gap-1.5" data-testid="usage-feed-last">
+                                                @if (!line.Enabled)
+                                                {
+                                                    <LucideIcon Name="pause" Size="12"/>
+                                                }
+                                                @line.LastRun.Map(at => UsageView.Clock(at, Clock.GetUtcNow())).GetValueOr("Never ran")
+                                            </dd>
+                                        }
+                                    </dl>
+                                    @if (line.Gone is not Some<UsageFeedGone>)
+                                    {
+                                        <AppLink Href="@RunsOf(line.Feed)" data-testid="usage-feed-runs">Open the run history</AppLink>
+                                    }
+                                </div>
+                            </Details>
+                        </UnfoldRow>
+                    }
+                </div>
+            }
+            else if (Shown.Count > 0)
             {
                 <div>
                     <div class="usage-feed text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
@@ -119,30 +187,13 @@
                              style="@($"--edge: {Branding.Color(line.Provider.Service)}")" data-testid="usage-feed" data-feed="@line.Name"
                              data-f="@(line.Runs.Count > 0 ? key : null)" @onclick="() => Pick(line)" @onmouseleave="Settle">
                             <span class="flex min-w-0 items-center gap-2 font-medium">
-                                @if (line.Gone is Some<UsageFeedGone>)
-                                {
-                                    <LucideIcon Name="ghost" Size="18" Class="shrink-0 text-muted-foreground"/>
-                                }
-                                else
-                                {
-                                    @foreach (var brand in Branding.Brands(line.Provider.Service).Take(1))
-                                    {
-                                        <BrandedLogo Brand="brand" Size="18" Decorative="true"/>
-                                    }
-                                }
-                                <span class="@($"truncate {line.Gone.Match(_ => "text-muted-foreground line-through", () => string.Empty)}")">@line.Name</span>
+                                @FeedName(line)
                             </span>
                             @if (stats.Calls > 0)
                             {
                                 <span>
                                     <UsageOutcomeBar Tally="Tally(line)" Busiest="Busiest" TapOpens="@(line.Runs.Count == 0)" Label="@($"{line.Name} calls")">
-                                        <Title>
-                                            @foreach (var brand in Branding.Brands(line.Provider.Service).Take(1))
-                                            {
-                                                <BrandedLogo Brand="brand" Size="14" Decorative="true"/>
-                                            }
-                                            @line.Name
-                                        </Title>
+                                        <Title>@BarTitle(line)</Title>
                                     </UsageOutcomeBar>
                                 </span>
                             }
@@ -196,6 +247,8 @@
 </UsageCard>
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     private const int PlotLeft = 46;
 
     private const int PlotHeight = 170;
@@ -234,8 +287,17 @@
     {
         get
         {
-            return Picked.Match(service => $"{Name(service)} calls only, picked in the Calls table. ", () => string.Empty)
-                + $"Point at a feed or its line to pick it out, click to keep only its runs, click again for all. A dot opens that run. Per run and per title are the typical run over the {UsageView.Window(Range)}.";
+            return Picked.Match(service => $"{Name(service)} calls only, picked in the Calls table. ", () => string.Empty) + $"{Picking} Per run and per title are the typical run over the {UsageView.Window(Range)}.";
+        }
+    }
+
+    private string Picking
+    {
+        get
+        {
+            return IsPhone
+                ? "Tap a feed's line to keep only its runs, tap it again for all. A dot opens that run."
+                : "Point at a feed or its line to pick it out, click to keep only its runs, click again for all. A dot opens that run.";
         }
     }
 
@@ -412,6 +474,38 @@
         return line.Stats.CouldNotLookUp > 0
             ? $"{typical} Over the {UsageView.Window(Range)}, {UsageView.Count(line.Stats.CouldNotLookUp)} could not even be looked up."
             : $"{typical} Every one was not found by any service.";
+    }
+
+    private RenderFragment FeedName(UsageFeedLine line) =>
+        @<text>
+            @if (line.Gone is Some<UsageFeedGone>)
+            {
+                <LucideIcon Name="ghost" Size="18" Class="shrink-0 text-muted-foreground"/>
+            }
+            else
+            {
+                @foreach (var brand in Branding.Brands(line.Provider.Service).Take(1))
+                {
+                    <BrandedLogo Brand="brand" Size="18" Decorative="true"/>
+                }
+            }
+            <span class="@($"truncate {line.Gone.Match(_ => "text-muted-foreground line-through", () => string.Empty)}")">@line.Name</span>
+        </text>;
+
+    private RenderFragment BarTitle(UsageFeedLine line) =>
+        @<text>
+            @foreach (var brand in Branding.Brands(line.Provider.Service).Take(1))
+            {
+                <BrandedLogo Brand="brand" Size="14" Decorative="true"/>
+            }
+            @line.Name
+        </text>;
+
+    private string Headline(UsageFeedLine line, UsageFeedStats stats)
+    {
+        return line
+            .Gone.Map(gone => $"deleted {UsageView.Clock(gone.DeletedAt, Clock.GetUtcNow())}")
+            .GetValueOr(() => stats.Calls > 0 ? $"{UsageView.Count(stats.CallsPerRun)} per run" : "No runs");
     }
 
     private static string RunsOf(FeedId feed) => $"/feeds/{UrlGuid.Encode(feed.Value)}/runs";

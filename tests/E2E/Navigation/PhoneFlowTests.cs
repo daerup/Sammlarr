@@ -224,6 +224,23 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	}
 
 	[Test]
+	public async Task Usage_OnAPhone_ListsTheServicesWithinTheScreenAndUnfoldsThePickedOne()
+	{
+		var page = await E2EApp.AdminAt(Routes.CreateFeed);
+		await FeedEditor.ConfigureAsync(page, TestData.Name("Usage"));
+		await FeedEditor.LoadAsync(page);
+		await FeedEditor.PreviewLoadedAsync(page);
+		await UsagePickTests.UntilCountedAsync(page, "Feed editor");
+		var mdblist = page.Locator(".unfold-row[data-testid=usage-service][data-service=Mdblist] .unfold-row-trigger");
+
+		await mdblist.TapAsync();
+
+		await Expect(mdblist).ToHaveAttributeAsync("aria-expanded", "true");
+		await Expect(page.Locator("[data-testid=usage-calls] [data-testid=usage-pick-chip][data-service=Mdblist]")).ToBeVisibleAsync(Wait.Settle);
+		await Assert.That(await page.OverflowingAsync()).IsEmpty();
+	}
+
+	[Test]
 	[Arguments("users", ".person-row", Viewer.Admin)]
 	[Arguments("account", "[data-you]", Viewer.Member)]
 	[Arguments("about", ".unfold-row[data-source]", Viewer.Admin)]

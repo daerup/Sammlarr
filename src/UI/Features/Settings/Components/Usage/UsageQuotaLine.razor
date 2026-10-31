@@ -54,22 +54,25 @@
         {
             <span class="absolute -translate-x-1/2 whitespace-nowrap" style="@($"left: {At(Middle(slot))}; top: {Height - 14}px")">@label</span>
         }
-        <span class="@($"absolute whitespace-nowrap text-[var(--usage-gave-up)] {(Share(Reset) > 0.62 ? "-translate-x-full" : string.Empty)}")"
-              style="@($"left: calc({At(Share(Reset))} {(Share(Reset) > 0.62 ? "- 8px" : "+ 8px")}); {TopAt(Y(allowance.Reserve, top) - 14)}")"
-              data-testid="usage-quota-reserve-label">Title lookups wait at @UsageView.Count(allowance.Reserve) left, feed list pages may use the rest</span>
-        <span class="absolute whitespace-nowrap" style="@($"left: calc({At(Share(Reset))} + 5px); top: {PlotTop - 16}px")">reset @UsageView.Time(Reset)</span>
-        @foreach (var wait in Shaded(day).Where(wait => wait.Wait.Until <= Now))
+        @if (!IsPhone)
         {
-            <span class="absolute -translate-x-full whitespace-nowrap text-[var(--usage-gave-up)]" style="@($"left: calc({At(Share(wait.Until))} - 6px); {TopAt(Y(allowance.Reserve, top) - 29)}")"
-                  data-testid="usage-quota-waited">Title lookups waited @UsageView.Time(wait.Wait.From) - @UsageView.Time(wait.Wait.Until)</span>
+            <span class="@($"absolute whitespace-nowrap text-[var(--usage-gave-up)] {(Share(Reset) > 0.62 ? "-translate-x-full" : string.Empty)}")"
+                  style="@($"left: calc({At(Share(Reset))} {(Share(Reset) > 0.62 ? "- 8px" : "+ 8px")}); {TopAt(Y(allowance.Reserve, top) - 14)}")"
+                  data-testid="usage-quota-reserve-label">Title lookups wait at @UsageView.Count(allowance.Reserve) left, feed list pages may use the rest</span>
+            <span class="absolute whitespace-nowrap" style="@($"left: calc({At(Share(Reset))} + 5px); top: {PlotTop - 16}px")">reset @UsageView.Time(Reset)</span>
+            @foreach (var wait in Shaded(day).Where(wait => wait.Wait.Until <= Now))
+            {
+                <span class="absolute -translate-x-full whitespace-nowrap text-[var(--usage-gave-up)]" style="@($"left: calc({At(Share(wait.Until))} - 6px); {TopAt(Y(allowance.Reserve, top) - 29)}")"
+                      data-testid="usage-quota-waited">Title lookups waited @UsageView.Time(wait.Wait.From) - @UsageView.Time(wait.Wait.Until)</span>
+            }
+            @if (Gap(allowance) is Some<long>(var gap))
+            {
+                <span class="absolute -translate-x-full whitespace-nowrap text-[11px] text-foreground" style="@($"left: calc({At(Share(Reset))} - 10px); {TopAt(Y(top - gap / 2.0, top) - 5)}")">
+                    @UsageView.Count(gap) used outside Sammlarr, time not known
+                </span>
+            }
         }
-        @if (Gap(allowance) is Some<long>(var gap))
-        {
-            <span class="absolute -translate-x-full whitespace-nowrap text-[11px] text-foreground" style="@($"left: calc({At(Share(Reset))} - 10px); {TopAt(Y(top - gap / 2.0, top) - 5)}")">
-                @UsageView.Count(gap) used outside Sammlarr, time not known
-            </span>
-        }
-        @if (Unknown(day) is Some<double>(var before))
+        @if (!IsPhone && Unknown(day) is Some<double>(var before))
         {
             <span class="absolute -translate-x-1/2 text-center text-[11px] leading-snug text-foreground"
                   style="@($"left: {At(before / 2)}; width: calc((100% - {PlotLeft + PlotRight}px) * {UsageView.Number(before)}); {TopAt(Y(top * 0.7, top) - 9)}")"
@@ -108,9 +111,30 @@
             </div>
         }
     </div>
+    @if (IsPhone)
+    {
+        <ul class="flex flex-col gap-1 text-[11.5px] leading-snug text-muted-foreground" data-testid="usage-quota-notes">
+            <li>Resets at @UsageView.Time(Reset)</li>
+            <li class="text-[var(--usage-gave-up)]" data-testid="usage-quota-reserve-label">Title lookups wait at @UsageView.Count(allowance.Reserve) left, feed list pages may use the rest</li>
+            @foreach (var wait in Shaded(day).Where(wait => wait.Wait.Until <= Now))
+            {
+                <li class="text-[var(--usage-gave-up)]" data-testid="usage-quota-waited">Title lookups waited @UsageView.Time(wait.Wait.From) - @UsageView.Time(wait.Wait.Until)</li>
+            }
+            @if (Gap(allowance) is Some<long>(var used))
+            {
+                <li class="text-foreground">@UsageView.Count(used) used outside Sammlarr, time not known</li>
+            }
+            @if (Unknown(day) is Some<double>)
+            {
+                <li class="text-foreground" data-testid="usage-quota-unknown">Sammlarr did not see how the day before ended: its hours show after the next reset</li>
+            }
+        </ul>
+    }
 }
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     private const int Height = 150;
 
     private const int PlotTop = 20;
