@@ -1,3 +1,4 @@
+@using Microsoft.AspNetCore.Components.Sections
 @using Microsoft.Extensions.Logging
 @using global::Shared.Options
 @using global::Observability.Diagnostics
@@ -5,7 +6,46 @@
 @inject LogCaptureService Capture
 @inject IJSRuntime JS
 
-<div class="w-full flex flex-col gap-3" style="height: calc(100vh - 230px); min-height: 480px;">
+@if (IsPhone)
+{
+    <SectionContent SectionName="@PhoneLayout.ToolbarSection">
+        <CascadingValue Value="ActionPlacement.Toolbar" IsFixed="true">
+            <PageAction Icon="@(Capture.IsCapturing ? "square" : "play")"
+                        Label="@(Capture.IsCapturing ? "Stop" : "Start")"
+                        Tone="@(Capture.IsCapturing ? ActionTone.Danger : ActionTone.Default)"
+                        OnClick="ToggleCapture"/>
+            <PageAction Icon="@(Capture.IsPaused ? "play" : "pause")" Label="@(Capture.IsPaused ? "Resume" : "Pause")" Visible="Capture.IsCapturing" OnClick="TogglePause"/>
+            <PageAction Icon="eraser" Label="Clear" Disabled="@(_stats.LogCount == 0)" OnClick="HandleClear"/>
+            <PageAction Icon="download" Label="Export" Disabled="@(_stats.LogCount == 0 && _stats.SpanCount == 0)" OnClick="HandleExport"/>
+            <PageAction Icon="sliders-horizontal" Label="Options" OnClick="() => _optionsOpen = true"/>
+        </CascadingValue>
+    </SectionContent>
+
+    <BbDialog Open="_optionsOpen" OpenChanged="open => _optionsOpen = open">
+        <BbDialogContent>
+            <BbDialogHeader>
+                <BbDialogTitle>Options</BbDialogTitle>
+            </BbDialogHeader>
+            <BbField>
+                <BbFieldLabel>Verbosity</BbFieldLabel>
+                <BbFieldContent>@VerbositySelect</BbFieldContent>
+            </BbField>
+            <BbField>
+                <BbFieldLabel>Buffer size</BbFieldLabel>
+                <BbFieldContent>@BufferSelect</BbFieldContent>
+            </BbField>
+            <BbDialogFooter data-dialog-actions>
+                <BbButton OnClick="() => _optionsOpen = false" data-dialog-commit>Done</BbButton>
+            </BbDialogFooter>
+        </BbDialogContent>
+    </BbDialog>
+
+    <InfoSheet Open="_detail is not null" OpenChanged="@(open => _detail = open ? _detail : null)" Title="@(_detail?.Title ?? string.Empty)">
+        <pre class="whitespace-pre-wrap break-all pb-4 font-mono text-xs">@_detail?.Text</pre>
+    </InfoSheet>
+}
+
+<div class="w-full flex flex-col gap-3 h-[calc(100vh-230px)] min-h-[480px] max-md:h-[calc(100dvh-146px)] max-md:min-h-0">
     <div>
         <h2 class="text-lg font-semibold tracking-tight">Live log stream</h2>
         <p class="text-muted-foreground mt-1 text-sm leading-relaxed max-w-2xl">
@@ -14,68 +54,64 @@
     </div>
 
     <div class="flex flex-wrap items-center gap-3">
-        <div class="w-36">
-            <BbSelect TValue="LogVerbosity"
-                      Value="_verbosity"
-                      ValueChanged="HandleVerbosityChanged"
-                      Options="VerbosityOptions"/>
+        <div class="contents max-md:hidden">
+            <div class="w-36">
+                @VerbositySelect
+            </div>
+
+            <div class="w-28">
+                @BufferSelect
+            </div>
+
+            @if (!Capture.IsCapturing)
+            {
+                <BbButton Variant="ButtonVariant.Default" OnClick="HandleStart">
+                    <LucideIcon Name="play" Size="14" Class="mr-1.5"/>
+                    Start
+                </BbButton>
+            }
+            else
+            {
+                <HoverButton Preset="HoverButtonPreset.Destructive"
+                             Icon="square"
+                             Text="Stop"
+                             OnClick="HandleStop"/>
+            }
+
+            @if (Capture.IsCapturing && !Capture.IsPaused)
+            {
+                <BbButton Variant="ButtonVariant.Outline" OnClick="HandlePause">
+                    <LucideIcon Name="pause" Size="14" Class="mr-1.5"/>
+                    Pause
+                </BbButton>
+            }
+            else if (Capture.IsPaused)
+            {
+                <BbButton Variant="ButtonVariant.Outline" OnClick="HandleResume">
+                    <LucideIcon Name="play" Size="14" Class="mr-1.5"/>
+                    Resume
+                </BbButton>
+            }
+
+            <BbButton Variant="ButtonVariant.Outline" OnClick="HandleClear" Disabled="@(_stats.LogCount == 0)">
+                <LucideIcon Name="eraser" Size="14" Class="mr-1.5"/>
+                Clear
+            </BbButton>
+
+            <BbButton Variant="ButtonVariant.Secondary" OnClick="HandleExport" Disabled="@(_stats.LogCount == 0 && _stats.SpanCount == 0)">
+                <LucideIcon Name="download" Size="14" Class="mr-1.5"/>
+                Export
+            </BbButton>
         </div>
 
-        <div class="w-28">
-            <BbSelect TValue="int"
-                      Value="_bufferSize"
-                      ValueChanged="HandleBufferSizeChanged"
-                      Options="BufferSizeOptions"/>
-        </div>
-
-        @if (!Capture.IsCapturing)
-        {
-            <BbButton Variant="ButtonVariant.Default" OnClick="HandleStart">
-                <LucideIcon Name="play" Size="14" Class="mr-1.5"/>
-                Start
-            </BbButton>
-        }
-        else
-        {
-            <HoverButton Preset="HoverButtonPreset.Destructive"
-                         Icon="square"
-                         Text="Stop"
-                         OnClick="HandleStop"/>
-        }
-
-        @if (Capture.IsCapturing && !Capture.IsPaused)
-        {
-            <BbButton Variant="ButtonVariant.Outline" OnClick="HandlePause">
-                <LucideIcon Name="pause" Size="14" Class="mr-1.5"/>
-                Pause
-            </BbButton>
-        }
-        else if (Capture.IsPaused)
-        {
-            <BbButton Variant="ButtonVariant.Outline" OnClick="HandleResume">
-                <LucideIcon Name="play" Size="14" Class="mr-1.5"/>
-                Resume
-            </BbButton>
-        }
-
-        <BbButton Variant="ButtonVariant.Outline" OnClick="HandleClear" Disabled="@(_stats.LogCount == 0)">
-            <LucideIcon Name="eraser" Size="14" Class="mr-1.5"/>
-            Clear
-        </BbButton>
-
-        <BbButton Variant="ButtonVariant.Secondary" OnClick="HandleExport" Disabled="@(_stats.LogCount == 0 && _stats.SpanCount == 0)">
-            <LucideIcon Name="download" Size="14" Class="mr-1.5"/>
-            Export
-        </BbButton>
-
-        <div class="ml-auto flex items-center gap-3 text-sm text-muted-foreground">
-            <span class="tabular-nums"><span class="text-foreground font-semibold">@_stats.LogCount.ToString("N0")</span> entries</span>
-            <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-5"/>
-            <span class="tabular-nums"><span class="text-foreground font-semibold">@_stats.SpanCount.ToString("N0")</span> spans</span>
-            <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-5"/>
-            <span class="tabular-nums"><span class="text-foreground font-semibold">@_stats.EstimatedBytes.Bytes().Humanize("0.#", Notation.Symbols)</span> memory</span>
-            <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-5"/>
-            <span class="tabular-nums">
+        <div class="ml-auto flex items-center gap-3 text-sm text-muted-foreground max-md:w-full max-md:flex-wrap max-md:justify-between max-md:gap-x-3 max-md:gap-y-1 max-md:text-xs">
+            <span class="tabular-nums max-md:whitespace-nowrap"><span class="text-foreground font-semibold">@_stats.LogCount.ToString("N0")</span> entries</span>
+            <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-5 max-md:hidden"/>
+            <span class="tabular-nums max-md:whitespace-nowrap"><span class="text-foreground font-semibold">@_stats.SpanCount.ToString("N0")</span> spans</span>
+            <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-5 max-md:hidden"/>
+            <span class="tabular-nums max-md:whitespace-nowrap"><span class="text-foreground font-semibold">@_stats.EstimatedBytes.Bytes().Humanize("0.#", Notation.Symbols)</span> memory</span>
+            <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-5 max-md:hidden"/>
+            <span class="tabular-nums max-md:whitespace-nowrap">
                 <span class="text-foreground font-semibold">
                     @if (_stats is { Oldest: Some<DateTimeOffset>(var oldest), Newest: Some<DateTimeOffset>(var newest) })
                     {
@@ -128,25 +164,32 @@
         else
         {
             <VirtualizeGuard>
-                <Virtualize Items="_filteredLogs" Context="entry" ItemSize="68" OverscanCount="10">
+                <Virtualize Items="_filteredLogs" Context="entry" ItemSize="@(IsPhone ? 96 : 68)" OverscanCount="10">
                     <ItemContent>
-                        <div class="px-5 py-3 border-b border-border/40 hover:bg-accent/40 transition-colors space-y-1.5">
-                            <div class="flex items-center gap-3 text-xs">
-                                <span class="text-muted-foreground tabular-nums shrink-0 font-mono">@entry.Timestamp.ToLocalTime().ToString("HH:mm:ss.fff")</span>
-                                <BbBadge Variant="@LevelVariant(entry.Level)" Class="@($"w-24 justify-center {LevelClass(entry.Level)}")">@entry.Level</BbBadge>
-                                <span class="text-muted-foreground truncate font-mono min-w-0 flex-1" title="@entry.Category">@entry.Category</span>
-                                @if (entry.TraceId is not null)
-                                {
-                                    <span title="@entry.TraceId" class="shrink-0">
-                                        <BbBadge Variant="BadgeVariant.Outline" Class="font-mono text-[10px] tabular-nums">
-                                            <LucideIcon Name="git-branch" Size="10" Class="mr-1 opacity-60"/>
-                                            @entry.TraceId.AsSpan(0, Math.Min(8, entry.TraceId.Length)).ToString()
-                                        </BbBadge>
-                                    </span>
-                                }
+                        @if (IsPhone)
+                        {
+                            @PhoneEntry(entry)
+                        }
+                        else
+                        {
+                            <div class="px-5 py-3 border-b border-border/40 hover:bg-accent/40 transition-colors space-y-1.5">
+                                <div class="flex items-center gap-3 text-xs">
+                                    <span class="text-muted-foreground tabular-nums shrink-0 font-mono">@entry.Timestamp.ToLocalTime().ToString("HH:mm:ss.fff")</span>
+                                    <BbBadge Variant="@LevelVariant(entry.Level)" Class="@($"w-24 justify-center {LevelClass(entry.Level)}")">@entry.Level</BbBadge>
+                                    <span class="text-muted-foreground truncate font-mono min-w-0 flex-1" title="@entry.Category">@entry.Category</span>
+                                    @if (entry.TraceId is not null)
+                                    {
+                                        <span title="@entry.TraceId" class="shrink-0">
+                                            <BbBadge Variant="BadgeVariant.Outline" Class="font-mono text-[10px] tabular-nums">
+                                                <LucideIcon Name="git-branch" Size="10" Class="mr-1 opacity-60"/>
+                                                @entry.TraceId.AsSpan(0, Math.Min(8, entry.TraceId.Length)).ToString()
+                                            </BbBadge>
+                                        </span>
+                                    }
+                                </div>
+                                <div class="text-sm font-mono break-words text-foreground/90" title="@(entry.Exception ?? entry.Message)">@entry.Message</div>
                             </div>
-                            <div class="text-sm font-mono break-words text-foreground/90" title="@(entry.Exception ?? entry.Message)">@entry.Message</div>
-                        </div>
+                        }
                     </ItemContent>
                 </Virtualize>
             </VirtualizeGuard>
@@ -155,6 +198,8 @@
 </div>
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     private static readonly TimeSpan RenderInterval = TimeSpan.FromMilliseconds(200);
 
     private static readonly IReadOnlyList<SelectOption<LogVerbosity>> VerbosityOptions =
@@ -175,12 +220,29 @@
     private bool _dirty;
     private bool _scrollPending;
     private int _lastRenderedCount;
+    private bool _optionsOpen;
+    private LogDetail? _detail;
+
+    private const string TraceTitle = "Trace id";
+
+    private const string ExceptionTitle = "Exception";
+
+    private sealed record LogDetail(string Title, string Text);
 
     private DiagnosticsStats _stats = new(0, 0, 0, new None(), new None());
     private List<DiagnosticsLogEntry> _filteredLogs = [];
     private ElementReference _scrollRef;
     private IJSObjectReference? _jsModule;
     private Task? _renderLoop;
+
+    protected override void OnParametersSet()
+    {
+        if (!IsPhone)
+        {
+            _optionsOpen = false;
+            _detail = null;
+        }
+    }
 
     protected override void OnInitialized()
     {
@@ -273,6 +335,28 @@
 
     private void HandleStop() => Capture.Stop();
 
+    private void ToggleCapture()
+    {
+        if (Capture.IsCapturing)
+        {
+            HandleStop();
+            return;
+        }
+
+        HandleStart();
+    }
+
+    private void TogglePause()
+    {
+        if (Capture.IsPaused)
+        {
+            HandleResume();
+            return;
+        }
+
+        HandlePause();
+    }
+
     private void HandlePause() => Capture.Pause();
 
     private void HandleResume() => Capture.Resume();
@@ -291,6 +375,41 @@
         }
         await _jsModule.InvokeVoidAsync("downloadFile", "/diagnostics/export");
     }
+
+    private RenderFragment VerbositySelect => @<BbSelect TValue="LogVerbosity" Value="_verbosity" ValueChanged="HandleVerbosityChanged" Options="VerbosityOptions" AriaLabel="Verbosity"/>;
+
+    private RenderFragment BufferSelect => @<BbSelect TValue="int" Value="_bufferSize" ValueChanged="HandleBufferSizeChanged" Options="BufferSizeOptions" AriaLabel="Buffer size"/>;
+
+    private RenderFragment PhoneEntry(DiagnosticsLogEntry entry) =>
+        @<div class="flex flex-col gap-1 border-b border-border/40 px-4 py-3" data-log-entry>
+            <div class="flex items-center gap-2 text-xs">
+                <span class="shrink-0 font-mono tabular-nums text-muted-foreground">@entry.Timestamp.ToLocalTime().ToString("HH:mm:ss.fff")</span>
+                <BbBadge Variant="@LevelVariant(entry.Level)" Class="@LevelClass(entry.Level)">@entry.Level</BbBadge>
+                @if (entry.TraceId is { } trace)
+                {
+                    var shortTrace = trace[..Math.Min(8, trace.Length)];
+                    <button type="button" class="relative ml-auto shrink-0 after:absolute after:-inset-2.5" aria-haspopup="dialog" aria-label="@($"Trace id, {shortTrace}")"
+                            @onclick="() => _detail = new LogDetail(TraceTitle, trace)">
+                        <BbBadge Variant="BadgeVariant.Outline" Class="font-mono text-[10px] tabular-nums">
+                            <LucideIcon Name="git-branch" Size="10" Class="mr-1 opacity-60"/>
+                            @shortTrace
+                        </BbBadge>
+                    </button>
+                }
+            </div>
+            <div class="break-all font-mono text-xs text-muted-foreground">@entry.Category</div>
+            @if (entry.Exception is { } exception)
+            {
+                <button type="button" class="text-left" aria-haspopup="dialog" @onclick="() => _detail = new LogDetail(ExceptionTitle, exception)">
+                    <span class="break-words font-mono text-sm text-foreground/90 underline decoration-dotted underline-offset-4">@entry.Message</span>
+                    <span class="sr-only">, show the exception</span>
+                </button>
+            }
+            else
+            {
+                <div class="break-words font-mono text-sm text-foreground/90">@entry.Message</div>
+            }
+        </div>;
 
     private static LogLevel MapToLogLevel(LogVerbosity verbosity) =>
         verbosity switch

@@ -33,7 +33,7 @@ public class DiagnosticsTests
 		await StopAsync(page);
 	}
 
-	private static async Task CaptureEntriesAsync(IPage page)
+	internal static async Task CaptureEntriesAsync(IPage page)
 	{
 		var unknownList = $"e2e/diagnostics-{Guid.NewGuid():N}";
 		await using var stub = await E2EApp.StubAsync($"/lists/{unknownList}/items", 404, "{}");
@@ -48,7 +48,7 @@ public class DiagnosticsTests
 		await Expect(page.GetByText(unknownList)).ToBeVisibleAsync(Wait.Preview);
 	}
 
-	private static async Task StopAsync(IPage page)
+	internal static async Task StopAsync(IPage page)
 	{
 		await page.Button("Stop").ClickAsync();
 		await Expect(page.Button("Start")).ToBeVisibleAsync();

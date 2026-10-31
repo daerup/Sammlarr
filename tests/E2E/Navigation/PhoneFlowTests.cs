@@ -184,6 +184,45 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	}
 
 	[Test]
+	public async Task Diagnostics_OptionsSheet_PicksALevelWithoutClosingTheSheet()
+	{
+		var page = await E2EApp.AdminAt(SettingsPage.Section("diagnostics"));
+		var options = page.Modal("Options");
+		var verbosity = options.GetByRole(AriaRole.Combobox, new() { Name = "Verbosity" });
+		await page.Toolbar.Button("Options").TapAsync();
+		await Expect(options).ToBeVisibleAsync(Wait.Settle);
+
+		await verbosity.TapAsync();
+		await page.Option("Verbose").TapAsync();
+		await Expect(options).ToBeVisibleAsync();
+		await Expect(verbosity).ToContainTextAsync("Verbose");
+		await options.Button("Done").TapAsync();
+		await Expect(options).ToHaveCountAsync(0);
+		await page.WaitForFunctionAsync("() => history.state?.sheet === undefined");
+		await page.Toolbar.Button("Options").TapAsync();
+		await Expect(options).ToBeVisibleAsync(Wait.Settle);
+		await page.WaitForFunctionAsync("() => history.state?.sheet !== undefined");
+		await page.GoBackAsync();
+		await Expect(options).ToHaveCountAsync(0);
+		await Expect(page.Toolbar.Button("Options")).ToBeVisibleAsync();
+	}
+
+	[Test]
+	public async Task Diagnostics_OnAPhone_ListsEntriesWithinTheScreen()
+	{
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		await DiagnosticsTests.CaptureEntriesAsync(page);
+
+		await Expect(page.Locator("[data-log-entry]").First).ToBeVisibleAsync(Wait.Settle);
+		var log = await page.Locator("[data-log-entry]").First.Locator("xpath=ancestor::div[contains(@class,'overflow-auto')][1]").BoundingBoxAsync();
+		var toolbar = await page.Locator(".toolbar-slot").First.BoundingBoxAsync();
+
+		await Assert.That(await page.OverflowingAsync()).IsEmpty();
+		await Assert.That(log!.Y + log.Height).IsLessThanOrEqualTo(toolbar!.Y);
+		await DiagnosticsTests.StopAsync(page);
+	}
+
+	[Test]
 	public async Task OptionList_OpensAsASheetAcrossTheScreen()
 	{
 		var page = await E2EApp.AdminAt(Routes.CreateFeed);

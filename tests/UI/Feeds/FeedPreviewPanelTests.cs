@@ -215,12 +215,11 @@ public class FeedPreviewPanelTests : BunitContext
 	[Test]
 	public async Task Preview_WhenTheViewportIsMeasuredOnlyAfterTheListGrew_ShowsTheRows()
 	{
-		JSInterop.SetupVoid("Blazor._internal.Virtualize.init", _ => true).SetVoidResult();
-		JSInterop.SetupVoid("Blazor._internal.Virtualize.restoreAnchor", _ => true);
+		this.MeasureVirtualizeByHand();
 		var cut = RenderPanel(new NewestFirstPlanner(), resolved: 5, unmatched: 0);
 
 		await ApplyAsync(cut, new Append());
-		await ReportViewportAsync(cut);
+		await this.ReportViewportAsync(cut);
 
 		await Assert.That(cut.FindAll(".preview-main-results .search-result-row")).Count().IsEqualTo(5);
 	}
@@ -505,15 +504,6 @@ public class FeedPreviewPanelTests : BunitContext
 				visit
 			)
 		);
-	}
-
-	private Task ReportViewportAsync(IRenderedComponent<FeedPreviewPanel> cut)
-	{
-		const int viewportFill = 2;
-		var reference = JSInterop.Invocations["Blazor._internal.Virtualize.init"][^1].Arguments[0]!;
-		var virtualize = reference.GetType().GetProperty("Value")!.GetValue(reference)!;
-		var report = virtualize.GetType().GetMethod("OnSpacerBeforeVisible")!;
-		return cut.InvokeAsync(() => report.Invoke(virtualize, [0f, 0f, 800f, viewportFill]));
 	}
 
 	private static List<int> BadgeCounts(IRenderedComponent<FeedPreviewPanel> cut) =>
