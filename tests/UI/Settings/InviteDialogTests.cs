@@ -62,6 +62,24 @@ public class InviteDialogTests : BunitContext
 		await Assert.That(close.TextContent).Contains("Close");
 	}
 
+	[Test]
+	public async Task Trigger_WhenCompact_IsAPlusThatOpensTheDialog()
+	{
+		var cut = Render(builder =>
+		{
+			builder.OpenComponent<BbPortalHost>(0);
+			builder.CloseComponent();
+			builder.OpenComponent<InviteDialog>(1);
+			builder.AddComponentParameter(2, nameof(InviteDialog.Compact), true);
+			builder.CloseComponent();
+		});
+
+		await Assert.That(cut.FindAll("button").Select(button => button.TextContent.Trim())).DoesNotContain("Invite member");
+		await cut.Find("button[aria-label='Invite member']").ClickAsync();
+
+		await Assert.That(cut.WaitForElement("#invite-username")).IsNotNull();
+	}
+
 	private async Task<IRenderedComponent<IComponent>> OpenAsync(string username)
 	{
 		var cut = await OpenDialogAsync();

@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using E2E.Tests.Browse;
+using E2E.Tests.Common;
 using E2E.Tests.Feeds;
 using E2E.Tests.Settings;
 using Microsoft.Playwright;
@@ -220,6 +221,18 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 		await Assert.That(await page.OverflowingAsync()).IsEmpty();
 		await Assert.That(log!.Y + log.Height).IsLessThanOrEqualTo(toolbar!.Y);
 		await DiagnosticsTests.StopAsync(page);
+	}
+
+	[Test]
+	[Arguments("users", ".person-row", Viewer.Admin)]
+	[Arguments("account", "[data-you]", Viewer.Member)]
+	public async Task SettingsSection_OnAPhone_FitsTheScreen(string section, string content, Viewer viewer)
+	{
+		var route = SettingsPage.Section(section);
+		var page = viewer is Viewer.Member ? await E2EApp.MemberAt(route) : await E2EApp.AdminAt(route);
+		await Expect(page.Locator(content).First).ToBeVisibleAsync(Wait.Settle);
+
+		await Assert.That(await page.OverflowingAsync()).IsEmpty();
 	}
 
 	[Test]
