@@ -1,4 +1,4 @@
-<StackedBar Total="Busiest">
+<StackedBar Total="Busiest" TapOpens="TapOpens" Label="@Label">
     <Title>
         <span class="flex items-center gap-2">
             @Title
@@ -19,4 +19,8 @@
     [Parameter] [EditorRequired] public required long Busiest { get; set; }
 
     [Parameter] [EditorRequired] public required RenderFragment Title { get; set; }
+
+    [Parameter] public bool TapOpens { get; set; } = true;
+
+    [Parameter] public string Label { get; set; } = "Calls";
 }

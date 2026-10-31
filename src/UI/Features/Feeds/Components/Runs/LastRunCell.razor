@@ -29,7 +29,7 @@ else if (Overview.LastRun is Some<FeedRun>(var run))
                     {
                     <div class="mt-2 text-[10px] font-semibold uppercase tracking-[.07em]">Finding the titles</div>
                     <div class="mt-1">
-                        <StackedBar Format="Count">@Parts(segments)</StackedBar>
+                        <StackedBar Format="Count" TapOpens="false">@Parts(segments)</StackedBar>
                     </div>
                     <div class="mt-1.5 grid grid-cols-[1fr_auto] gap-x-4 gap-y-0.5" data-testid="last-run-tip-found">
                         @foreach (var segment in RunBar.Legend(segments))
@@ -63,7 +63,7 @@ else if (Overview.LastRun is Some<FeedRun>(var run))
                 </BbTooltipContent>
             </BbTooltip>
             <button type="button" class="foot-bar" aria-label="See what this run changed" data-testid="last-run-bar" @onclick="() => OpenAsync(run)">
-                <StackedBar Format="Count">
+                <StackedBar Format="Count" TapOpens="false">
                     <Title>Run of @Heading(run)</Title>
                     <ChildContent>@Parts(segments)</ChildContent>
                 </StackedBar>

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using TUnit.Assertions.Enums;
 using UI.Shared.Bars;
+using UI.Shared.Layout;
 
 namespace UI.Tests.Bars;
 
@@ -215,6 +216,47 @@ public class StackedBarTests : BunitContext
 		await Assert.That(Segments(cut)[1].GetAttribute("style")).EndsWith("background: oklch(from #F5C518 var(--bar-auto-l) var(--bar-auto-c) calc(h + 137.5))");
 	}
 
+	[Test]
+	public async Task Phone_TappingTheBar_OpensItsTableInASheet()
+	{
+		var cut = RenderBar(Run, phone: true);
+
+		await Assert.That(cut.Find(".sb-open").GetAttribute("aria-label")).IsEqualTo("Breakdown");
+		await cut.Find(".sb-open").ClickAsync(new());
+
+		cut.WaitForElement("[role=dialog] [data-testid=stacked-bar-tip]");
+		await Assert.That(cut.FindAll("[role=dialog] [data-testid=stacked-bar-tip-row]")).Count().IsEqualTo(2);
+		await Assert.That(cut.FindAll("[data-sb-anchor]")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Phone_WhenTheBarSitsInsideSomethingTappable_OffersNoTable()
+	{
+		var cut = RenderBar(Run, phone: true, tapOpens: false);
+
+		await Assert.That(cut.FindAll(".sb-open")).IsEmpty();
+		await Assert.That(cut.FindAll("[data-sb-anchor]")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Phone_WithALegend_LeavesTheValuesToIt()
+	{
+		var cut = RenderBar(Run, legend: true, phone: true);
+
+		await Assert.That(cut.FindAll(".sb-open")).IsEmpty();
+		await Assert.That(cut.FindAll("[data-testid=stacked-bar-legend] .sb-key")).Count().IsEqualTo(2);
+	}
+
+	[Test]
+	public async Task Phone_ATapOnAPart_DimsNothing()
+	{
+		var cut = RenderBar(Run, phone: true);
+
+		await Segments(cut)[0].TriggerEventAsync("onmouseenter", new MouseEventArgs());
+
+		await Assert.That(cut.FindAll(".sb-part.is-dim")).IsEmpty();
+	}
+
 	private sealed record Part(string Name, long Value, string? Color = null);
 
 	private static IReadOnlyList<IElement> Segments(IRenderedComponent<IComponent> cut) => cut.FindAll("[data-testid=stacked-bar-track] .sb-part");
@@ -238,9 +280,12 @@ public class StackedBarTests : BunitContext
 		long? total = null,
 		string? rest = null,
 		bool legend = false,
-		string? title = null
+		string? title = null,
+		bool phone = false,
+		bool tapOpens = true
 	)
 	{
+		RenderTree.TryAdd<CascadingValue<bool>>(cascade => cascade.Add(value => value.Name, PhoneLayout.IsPhoneCascade).Add(value => value.Value, phone));
 		return Render(builder =>
 		{
 			builder.OpenComponent<BbPortalHost>(0);
@@ -255,9 +300,10 @@ public class StackedBarTests : BunitContext
 				EventCallback.Factory.Create<IReadOnlySet<string>>(this, hidden => _hidden.Add([.. hidden]))
 			);
 			builder.AddComponentParameter(6, nameof(StackedBar.ChildContent), Parts(parts));
+			builder.AddComponentParameter(7, nameof(StackedBar.TapOpens), tapOpens);
 			if (title is not null)
 			{
-				builder.AddComponentParameter(7, nameof(StackedBar.Title), (RenderFragment)(content => content.AddContent(0, title)));
+				builder.AddComponentParameter(8, nameof(StackedBar.Title), (RenderFragment)(content => content.AddContent(0, title)));
 			}
 			builder.CloseComponent();
 		});

@@ -135,7 +135,7 @@
                             @if (stats.Calls > 0)
                             {
                                 <span>
-                                    <UsageOutcomeBar Tally="Tally(line)" Busiest="Busiest">
+                                    <UsageOutcomeBar Tally="Tally(line)" Busiest="Busiest" TapOpens="@(line.Runs.Count == 0)" Label="@($"{line.Name} calls")">
                                         <Title>
                                             @foreach (var brand in Branding.Brands(line.Provider.Service).Take(1))
                                             {
