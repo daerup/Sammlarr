@@ -62,35 +62,63 @@
 </SectionCard>
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     private static readonly RenderFragment Nothing = _ => { };
 
     private DataSources _sources = null!;
 
     protected override void OnInitialized() => _sources = new DataSources(Converters, Enrichers, Branding);
 
-    private static RenderFragment Row(SourceRow row, RenderFragment note)
+    private RenderFragment Row(SourceRow row, RenderFragment note) => IsPhone ? PhoneRow(row, note) : DesktopRow(row, note);
+
+    private static RenderFragment PhoneRow(SourceRow row, RenderFragment note)
+    {
+        return @<UnfoldRow Columns="grid-cols-[15px_minmax(0,1fr)]" Divided="true" TriggerClass="py-2.5" data-source="@row.Key">
+            <Summary>
+                <span class="flex min-w-0 items-center gap-3">
+                    <span class="source-logo shrink-0"><BrandedLogo Brand="row.Brand" Form="ProviderLogoForm.Logo" Size="20"/></span>
+                    <span class="source-use">@string.Join(", ", row.Chips.Select(chip => chip.Name))</span>
+                </span>
+            </Summary>
+            <Details>
+                <div class="source-details">
+                    @Chips(row)
+                    @note
+                    <AppLink Href="@row.Home" External="true">Open @row.Brand.DisplayName</AppLink>
+                </div>
+            </Details>
+        </UnfoldRow>;
+    }
+
+    private static RenderFragment Chips(SourceRow row)
+    {
+        return @<div class="source-chips">
+            @foreach (var chip in row.Chips)
+            {
+                <DetailTip Title="@chip.Name" Delay="150" Focusable="false" ContentClass="max-w-[320px]">
+                    <Trigger>
+                        <BbBadge Variant="BadgeVariant.Secondary" Class="h-[22px] cursor-default gap-[5px] rounded-md border-0 pl-1.5 pr-2 text-[11.5px] font-normal text-foreground/80 hover:bg-secondary" data-chip="@chip.Name">
+                            <BbBadgeIcon Name="@chip.Icon" Class="text-muted-foreground"/>@chip.Name
+                        </BbBadge>
+                    </Trigger>
+                    <Detail>
+                        @chip.Tip
+                    </Detail>
+                </DetailTip>
+            }
+            @row.Via.Match(Via, () => Nothing)
+        </div>;
+    }
+
+    private static RenderFragment DesktopRow(SourceRow row, RenderFragment note)
     {
         return @<div class="source-row" data-source="@row.Key">
             <span class="source-logo">
                 <BrandedLogo Brand="row.Brand" Form="ProviderLogoForm.Logo" Size="22"/>
             </span>
             <div class="source-cell">
-                <div class="source-chips">
-                    @foreach (var chip in row.Chips)
-                    {
-                        <DetailTip Title="@chip.Name" Delay="150" Focusable="false" ContentClass="max-w-[320px]">
-                            <Trigger>
-                                <BbBadge Variant="BadgeVariant.Secondary" Class="h-[22px] cursor-default gap-[5px] rounded-md border-0 pl-1.5 pr-2 text-[11.5px] font-normal text-foreground/80 hover:bg-secondary" data-chip="@chip.Name">
-                                    <BbBadgeIcon Name="@chip.Icon" Class="text-muted-foreground"/>@chip.Name
-                                </BbBadge>
-                            </Trigger>
-                            <Detail>
-                                @chip.Tip
-                            </Detail>
-                        </DetailTip>
-                    }
-                    @row.Via.Match(Via, () => Nothing)
-                </div>
+                @Chips(row)
                 @note
             </div>
             <a class="source-open" href="@row.Home" target="_blank" rel="noopener noreferrer" aria-label="@($"Open {row.Brand.DisplayName}")">

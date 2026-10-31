@@ -213,6 +213,21 @@ public class DataSourcesCardTests : BunitContext
 			.IsEquivalentTo(["www.rottentomatoes.com", "file"], CollectionOrdering.Matching);
 	}
 
+	[Test]
+	public async Task Phone_EachSourceIsOneLineOfLogoAndUseThatUnfoldsTheChipsTheNoteAndTheLink()
+	{
+		var cut = this.RenderOnPhone<DataSourcesCard>(_ => { }).Component;
+		var tmdb = cut.Find(".unfold-row[data-source='Tmdb']");
+
+		await Assert.That(cut.FindAll(".source-row")).IsEmpty();
+		await Assert.That(tmdb.QuerySelector(".unfold-row-trigger .source-use")!.TextContent).IsEqualTo("Search, Trending, Feeds, Ratings");
+		await Assert.That(Chips(cut, "Tmdb")).IsEquivalentTo(["Search", "Trending", "Feeds", "Ratings"], CollectionOrdering.Matching);
+		await Assert.That(tmdb.QuerySelector(".source-details")!.TextContent).Contains("not endorsed").And.Contains("Open The Movie Database");
+		await Assert.That(cut.FindAll("a img")).IsEmpty();
+		await cut.Find(".unfold-row[data-source='Tmdb'] .unfold-row-trigger").ClickAsync();
+		await Assert.That(cut.Find(".unfold-row[data-source='Tmdb'] .unfold-row-trigger").GetAttribute("aria-expanded")).IsEqualTo("true");
+	}
+
 	private static async Task OpenCreditsAsync(IRenderedComponent<DataSourcesCard> cut)
 	{
 		await cut.FindAll("button").Single(button => button.TextContent.Contains("Logo credits")).ClickAsync();

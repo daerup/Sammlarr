@@ -226,6 +226,7 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	[Test]
 	[Arguments("users", ".person-row", Viewer.Admin)]
 	[Arguments("account", "[data-you]", Viewer.Member)]
+	[Arguments("about", ".unfold-row[data-source]", Viewer.Admin)]
 	public async Task SettingsSection_OnAPhone_FitsTheScreen(string section, string content, Viewer viewer)
 	{
 		var route = SettingsPage.Section(section);

@@ -1,5 +1,5 @@
 <SectionCard Icon="tag" Title="Version">
-    <div class="flex items-center gap-3 px-[15px] py-3">
+    <div class="flex items-center gap-3 px-[15px] py-3 max-md:flex-wrap">
         <SammlarrLogo Size="24" WordSize="14"/>
         <div class="flex min-w-0 flex-col gap-0.5">
             <div class="flex items-center gap-2">
@@ -17,7 +17,7 @@
         </div>
         @if (!string.IsNullOrWhiteSpace(Repository))
         {
-            <div class="ml-auto flex shrink-0 items-center gap-4 whitespace-nowrap text-xs">
+            <div class="ml-auto flex shrink-0 items-center gap-4 whitespace-nowrap text-xs max-md:ml-0 max-md:basis-full max-md:flex-wrap max-md:gap-y-1.5">
                 @if (Update is Some<AppUpdate>(var newer))
                 {
                     <AppLink Href="@newer.Page.ToString()" External="true">What is new in @newer.Version</AppLink>

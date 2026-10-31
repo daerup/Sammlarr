@@ -29,6 +29,23 @@
     min-width: 0;
 }
 
+.source-use {
+    overflow: hidden;
+    font-size: 12px;
+    color: var(--muted-foreground);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.source-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 4px 16px 12px 43px;
+    font-size: 12.5px;
+}
+
 .source-chips {
     display: flex;
     flex-wrap: wrap;
@@ -188,7 +205,15 @@
     color: color-mix(in oklch, var(--foreground) 85%, transparent);
 }
 
-@media (max-width: 640px) {
+@media (width < 48rem) {
+    .source-band {
+        padding-inline: 0;
+    }
+
+    .source-band-head {
+        padding-inline: 14px;
+    }
+
     .credit-group {
         grid-template-columns: minmax(0, 1fr);
         gap: 4px;
