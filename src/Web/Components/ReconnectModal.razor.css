@@ -1,0 +1,72 @@
+.reconnect {
+    width: 20rem;
+    max-width: calc(100% - 32px);
+    margin: auto;
+    padding: 24px 22px 20px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--background);
+    color: var(--foreground);
+    box-shadow: 0 16px 48px rgb(0 0 0 / 0.25);
+    font-size: 14px;
+    text-align: center;
+}
+
+.reconnect[open] {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+.reconnect::backdrop {
+    background: rgb(0 0 0 / 0.45);
+}
+
+.reconnect p,
+.reconnect button,
+.reconnect-spinner {
+    display: none;
+}
+
+.reconnect.components-reconnect-show .reconnect-spinner,
+.reconnect.components-reconnect-rejected .reconnect-spinner,
+.reconnect.components-reconnect-show:not(.reconnect-waiting) .reconnect-first,
+.reconnect.reconnect-waiting .reconnect-retrying,
+.reconnect.components-reconnect-failed .reconnect-failed,
+.reconnect.components-reconnect-paused .reconnect-paused,
+.reconnect.components-reconnect-resume-failed .reconnect-resume-failed {
+    display: block;
+}
+
+.reconnect p {
+    margin: 0;
+    line-height: 1.45;
+}
+
+.reconnect button {
+    height: 36px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: var(--radius);
+    background: var(--primary);
+    color: var(--primary-foreground);
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.reconnect-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--muted);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: reconnect-spin 0.8s linear infinite;
+}
+
+@keyframes reconnect-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

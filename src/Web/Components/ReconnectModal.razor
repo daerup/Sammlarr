@@ -1,0 +1,14 @@
+<script type="module" src="@Assets["Components/ReconnectModal.razor.js"]"></script>
+
+<dialog id="components-reconnect-modal" class="reconnect" aria-label="Connection to Sammlarr" data-nosnippet>
+    <div class="reconnect-spinner" aria-hidden="true"></div>
+    <div role="status">
+        <p class="reconnect-first">Reconnecting to Sammlarr…</p>
+        <p class="reconnect-retrying">Sammlarr is not answering. Trying again<span aria-hidden="true"> in <span id="components-seconds-to-next-attempt"></span> s</span>.</p>
+        <p class="reconnect-failed">Sammlarr is not answering.</p>
+        <p class="reconnect-paused">The server paused this session.</p>
+        <p class="reconnect-resume-failed">The session could not be resumed.</p>
+    </div>
+    <button type="button" id="components-reconnect-button" class="reconnect-failed">Retry</button>
+    <button type="button" id="components-resume-button" class="reconnect-paused reconnect-resume-failed">Resume</button>
+</dialog>

@@ -10,6 +10,19 @@ public class UiInvariantTests
 	private const string NameTooltipTrigger = "[id^=\"tooltip-\"][id$=\"-trigger\"]:has(.pipeline-name)";
 	private const string OpenTooltip = "[role=tooltip][data-state=open]";
 
+	private const string Backgrounds = """
+		() => {
+			const probe = document.createElement('div');
+			probe.style.background = 'var(--background)';
+			document.body.append(probe);
+			const theme = getComputedStyle(probe).backgroundColor;
+			probe.remove();
+			return [getComputedStyle(document.getElementById('components-reconnect-modal')).backgroundColor, theme];
+		}
+		""";
+
+	private static readonly Regex Circuit = new("/_blazor(/|\\?|$)");
+
 	[Test]
 	public async Task Tooltip_WhenItsTriggerTakesFocusWithoutTab_StaysClosed()
 	{
@@ -196,6 +209,45 @@ public class UiInvariantTests
 		await page.VisitAsync(Routes.Browse);
 
 		await ShouldBeDarkAsync(page);
+	}
+
+	[Test]
+	public async Task Reconnect_WhenTheSocketCloses_ShowsTheThemedOverlay()
+	{
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		var overlay = await DropTheCircuitAsync(page);
+
+		await Expect(overlay).ToBeVisibleAsync(Wait.Settle);
+		await page.EvaluateAsync("() => document.documentElement.classList.add('dark')");
+
+		var backgrounds = await page.EvaluateAsync<string[]>(Backgrounds);
+		await Assert.That(backgrounds[0]).IsEqualTo(backgrounds[1]);
+		await Expect(overlay)
+			.ToContainTextAsync(
+				new Regex("Reconnecting to Sammlarr|Sammlarr is not answering"),
+				new LocatorAssertionsToContainTextOptions { UseInnerText = true, Timeout = Wait.Settle }
+			);
+	}
+
+	internal static async Task<ILocator> DropTheCircuitAsync(IPage page)
+	{
+		List<IWebSocketRoute> sockets = [];
+		await page.RouteWebSocketAsync(
+			Circuit,
+			socket =>
+			{
+				sockets.Add(socket);
+				socket.ConnectToServer();
+			}
+		);
+		await page.VisitAsync(Routes.Feeds);
+		await page.RouteAsync(Circuit, route => route.AbortAsync());
+		foreach (var socket in sockets)
+		{
+			await socket.CloseAsync(new WebSocketRouteCloseOptions { Code = 1011 });
+		}
+
+		return page.Locator("#components-reconnect-modal");
 	}
 
 	private static async Task ShouldBeDarkAsync(IPage page)

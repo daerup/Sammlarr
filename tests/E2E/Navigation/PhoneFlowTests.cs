@@ -224,6 +224,18 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	}
 
 	[Test]
+	public async Task Reconnect_OnAPhone_KeepsTheOverlayInsideTheScreen()
+	{
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		var overlay = await UiInvariantTests.DropTheCircuitAsync(page);
+
+		await Expect(overlay).ToBeVisibleAsync(Wait.Settle);
+		var box = (await overlay.BoundingBoxAsync())!;
+		await Assert.That(box.X).IsGreaterThanOrEqualTo(16f);
+		await Assert.That(box.X + box.Width).IsLessThanOrEqualTo(page.ViewportSize!.Width - 16f);
+	}
+
+	[Test]
 	public async Task Usage_OnAPhone_ListsTheServicesWithinTheScreenAndUnfoldsThePickedOne()
 	{
 		var page = await E2EApp.AdminAt(Routes.CreateFeed);
