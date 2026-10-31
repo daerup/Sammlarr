@@ -4,6 +4,7 @@ using Bunit;
 using Domain.Providers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.Extensions.DependencyInjection;
 using UI.Shared.Guards;
 
 namespace UI.Tests.Guards;
@@ -42,5 +43,22 @@ public class ProtectedComponentTests : BunitContext
 		await cut.Find(".cursor-not-allowed").FirstElementChild!.TriggerEventAsync("onmouseenter", new MouseEventArgs());
 
 		await Assert.That(cut.WaitForElement("[role=tooltip]").TextContent).Contains(missing).And.Contains("sync your wantlist");
+	}
+
+	[Test]
+	[Arguments(SinkKind.Plex, "Settings", "/settings?section=providers&provider=plex")]
+	[Arguments(SinkKind.Arr, null, "/")]
+	public async Task Phone_WhenTheSinkIsNotReady_TapPointsToWhereToFixIt(SinkKind sink, string? action, string landing)
+	{
+		var cut = this.RenderOnPhone<ProtectedComponent>(parameters =>
+			parameters.Add(guard => guard.GuardState, () => false).Add(guard => guard.Sink, sink).Add(guard => guard.ChildContent, "<button>Sync</button>")
+		);
+
+		await cut.Component.Find(".reason-tip").ClickAsync();
+		var toast = Services.GetRequiredService<ToastService>().Toasts.Single();
+		toast.OnAction?.Invoke();
+
+		await Assert.That(toast.ActionText).IsEqualTo(action);
+		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).EndsWith(landing);
 	}
 }

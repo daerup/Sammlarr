@@ -7,14 +7,11 @@
 }
 else
 {
-    <BbTooltip>
-        <BbTooltipTrigger AsChild="false" Class="inline-block cursor-not-allowed" Focusable="false">
-            <div class="pointer-events-none opacity-50">
-                @ChildContent
-            </div>
-        </BbTooltipTrigger>
-        <BbTooltipContent>@GetDisabledMessage()</BbTooltipContent>
-    </BbTooltip>
+    <ReasonTip TriggerClass="inline-block cursor-not-allowed" Reason="@GetDisabledMessage()" ActionText="Settings" ActionHref="@GetSetupLink()">
+        <div class="pointer-events-none opacity-50">
+            @ChildContent
+        </div>
+    </ReasonTip>
 }
 
 @code {
@@ -24,6 +21,16 @@ else
     [Parameter] public SinkKind? Sink { get; set; }
     [Parameter] public ApiKeyProvider? ApiProvider { get; set; }
     [Parameter] public string DeniedActionDescription { get; set; } = "use this";
+
+    private string? GetSetupLink()
+    {
+        return Sink switch
+        {
+            SinkKind.Plex => SettingsLinks.Provider(RemoteService.Plex),
+            SinkKind.Arr => null,
+            null => ApiProvider is { } provider ? SettingsLinks.Provider(provider.Remote) : null,
+        };
+    }
 
     private string GetDisabledMessage()
     {

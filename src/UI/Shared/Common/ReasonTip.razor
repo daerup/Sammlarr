@@ -1,0 +1,53 @@
+@inject ToastService Toasts
+@inject NavigationManager Navigation
+
+@if (IsPhone)
+{
+    <span class="reason-tip @TriggerClass" @onclick="Explain">@ChildContent</span>
+}
+else
+{
+    <BbTooltip DelayDuration="Delay" Placement="Placement">
+        <BbTooltipTrigger AsChild="false" Class="@TriggerClass" Focusable="Focusable">
+            @ChildContent
+        </BbTooltipTrigger>
+        @if (Reason is not null)
+        {
+            <BbTooltipContent>@Reason</BbTooltipContent>
+        }
+    </BbTooltip>
+}
+
+@code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
+    [Parameter] public string? Reason { get; set; }
+    [Parameter] public int Delay { get; set; } = 300;
+    [Parameter] public PopoverPlacement Placement { get; set; } = PopoverPlacement.Top;
+    [Parameter] public string? TriggerClass { get; set; }
+    [Parameter] public bool Focusable { get; set; }
+    [Parameter] public string? ActionText { get; set; }
+    [Parameter] public string? ActionHref { get; set; }
+    [Parameter, EditorRequired] public required RenderFragment ChildContent { get; set; }
+
+    private readonly string _toastId = Guid.NewGuid().ToString();
+
+    private void Explain()
+    {
+        if (Reason is null)
+        {
+            return;
+        }
+
+        Toasts.Dismiss(_toastId);
+        Toasts.Show(
+            new ToastData
+            {
+                Id = _toastId,
+                Description = Reason,
+                ActionText = ActionHref is null ? null : ActionText,
+                OnAction = ActionHref is null ? null : () => Navigation.NavigateTo(ActionHref),
+            }
+        );
+    }
+}

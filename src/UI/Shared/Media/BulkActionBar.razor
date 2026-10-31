@@ -55,8 +55,7 @@
     <div class="flex items-center gap-1.5">
     @if (MarkLabel is not null)
     {
-        <BbTooltip>
-            <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
+        <ReasonTip TriggerClass="inline-flex" Reason="@(SelectedCount > 0 && MarkableCount == 0 ? AlreadyMarkedHint : null)">
                 <HoverButton Preset="@(MarkTint is null ? HoverButtonPreset.Destructive : HoverButtonPreset.Custom)"
                              Color="@MarkTint"
                              Size="ButtonSize.Small"
@@ -65,18 +64,12 @@
                     <LucideIcon Name="@MarkIcon" Size="14" Class="mr-1"/>
                     <span>@MarkLabel</span>
                 </HoverButton>
-            </BbTooltipTrigger>
-            @if (SelectedCount > 0 && MarkableCount == 0)
-            {
-                <BbTooltipContent>@AlreadyMarkedHint</BbTooltipContent>
-            }
-        </BbTooltip>
+        </ReasonTip>
     }
 
     <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-5"/>
 
-    <BbTooltip>
-        <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
+    <ReasonTip TriggerClass="inline-flex" Reason="@(SelectedCount > 0 && RemovableCount == 0 ? AlreadyRemovedHint : null)">
             <HoverButton Preset="HoverButtonPreset.Destructive"
                          Size="ButtonSize.Small"
                          OnClick="RemoveAsync"
@@ -92,12 +85,7 @@
                     <span>@RemoveLabel</span>
                 }
             </HoverButton>
-        </BbTooltipTrigger>
-        @if (SelectedCount > 0 && RemovableCount == 0)
-        {
-            <BbTooltipContent>@AlreadyRemovedHint</BbTooltipContent>
-        }
-    </BbTooltip>
+    </ReasonTip>
     </div>
     }
 
