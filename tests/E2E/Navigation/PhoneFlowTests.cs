@@ -205,15 +205,7 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	{
 		string[] slots = ["Select", "Filter"];
 		string[] selecting = ["Filter"];
-		var page = await E2EApp.AdminAt(Routes.Browse);
-		var tile = TrendingTiles.Resolved(page, TrendingTiles.Title);
-		await Expect(tile).ToBeVisibleAsync(Wait.Settle);
-		await tile.TapAsync();
-		var add = page.ButtonContaining("Add to Wantlist");
-		await add.TapAsync();
-		await Expect(add).ToBeHiddenAsync(Wait.Settle);
-
-		await page.VisitAsync(Routes.Wantlist);
+		var page = await WantlistWithTheTrendingTitleAsync();
 		var labels = page.Toolbar.Locator(".toolbar-slot-label");
 		var search = page.GetByRole(AriaRole.Searchbox);
 
@@ -226,6 +218,52 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 		await Expect(page.Toolbar).ToBeVisibleAsync();
 		await page.Toolbar.Button("Select").TapAsync();
 		await Expect(labels).ToHaveTextAsync(selecting);
+	}
+
+	[Test]
+	public async Task Filter_Applied_NarrowsTheList()
+	{
+		var page = await WantlistWithTheTrendingTitleAsync();
+		var title = page.Heading(TrendingTiles.Title);
+		var filter = page.Toolbar.ButtonContaining("Filter");
+		var sheet = page.Modal("Filter and sort");
+		var show = sheet.Locator("[data-dialog-commit]");
+		await Expect(title).ToBeVisibleAsync(Wait.Settle);
+
+		await filter.TapAsync();
+		await sheet.Radio("Shows").TapAsync();
+		await Expect(show).ToHaveTextAsync("Show 0 titles");
+		await page.GoBackAsync();
+		await Expect(sheet).ToHaveCountAsync(0);
+		await Expect(title).ToBeVisibleAsync();
+
+		await filter.TapAsync();
+		await Expect(show).ToHaveTextAsync("Show 1 title");
+		await page.WaitForFunctionAsync("() => Math.abs(document.querySelector('[role=dialog]').getBoundingClientRect().bottom - innerHeight) < 1");
+		var clearBox = (await sheet.Button("Clear all").BoundingBoxAsync())!;
+		var showBox = (await show.BoundingBoxAsync())!;
+		await Assert.That(showBox.Y).IsEqualTo(clearBox.Y);
+		await Assert.That(showBox.Height).IsGreaterThanOrEqualTo(52);
+		await Assert.That(clearBox.Width + showBox.Width).IsGreaterThanOrEqualTo(page.ViewportSize!.Width - 14);
+		await sheet.Radio("Shows").TapAsync();
+		await show.TapAsync();
+
+		await Expect(sheet).ToHaveCountAsync(0);
+		await Expect(title).ToBeHiddenAsync();
+		await page.WaitForFunctionAsync("() => history.state?.sheet === undefined");
+	}
+
+	private static async Task<IPage> WantlistWithTheTrendingTitleAsync()
+	{
+		var page = await E2EApp.AdminAt(Routes.Browse);
+		var tile = TrendingTiles.Resolved(page, TrendingTiles.Title);
+		await Expect(tile).ToBeVisibleAsync(Wait.Settle);
+		await tile.TapAsync();
+		var add = page.ButtonContaining("Add to Wantlist");
+		await add.TapAsync();
+		await Expect(add).ToBeHiddenAsync(Wait.Settle);
+		await page.VisitAsync(Routes.Wantlist);
+		return page;
 	}
 
 	private static async Task<(IPage Page, ILocator Card)> FeedsWithOneAsync()

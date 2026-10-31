@@ -2,7 +2,7 @@
 {
     @if (Placement is ActionPlacement.Toolbar && HasSlot)
     {
-        <button type="button" class="toolbar-slot @(Active ? "is-on" : null)" @onclick="OnClick">
+        <button type="button" class="toolbar-slot @(Active && !PhoneOnClick.HasDelegate ? "is-on" : null)" aria-label="@(Badge > 0 ? $"{Label}, {Badge}" : null)" @onclick="PhoneOnClick.HasDelegate ? PhoneOnClick : OnClick">
             <LucideIcon Name="@Icon" Size="20"/>
             <span class="toolbar-slot-label">@Label</span>
             @if (Badge > 0)
@@ -46,7 +46,8 @@
     [Parameter] public int Badge { get; set; }
     [Parameter] public bool Visible { get; set; } = true;
     [Parameter] public EventCallback OnClick { get; set; }
+    [Parameter] public EventCallback PhoneOnClick { get; set; }
     [Parameter] public RenderFragment? Desktop { get; set; }
 
-    private bool HasSlot => OnClick.HasDelegate;
+    private bool HasSlot => OnClick.HasDelegate || PhoneOnClick.HasDelegate;
 }

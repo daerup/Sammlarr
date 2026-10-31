@@ -1,0 +1,41 @@
+@using UI.Features.Feeds.Pages
+@using UI.Shared.Filters
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
+<FilterSheet TFilter="FeedFilter"
+             OpenChanged="OpenChanged"
+             Filter="Filter"
+             OnApply="OnApply"
+             Sorts="Sorts"
+             Groups="Groups"
+             Clear="filter => filter.ClearFilters()"
+             Count="Count"
+             Noun="feed"/>
+
+@code {
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+    [Parameter, EditorRequired] public required FeedFilter Filter { get; set; }
+    [Parameter] public EventCallback<FeedFilter> OnApply { get; set; }
+    [Parameter, EditorRequired] public required IReadOnlyList<ProviderCount> Providers { get; set; }
+    [Parameter, EditorRequired] public required Func<FeedFilter, int> Count { get; set; }
+
+    private static readonly FilterChoice<FeedFilter>[] Sorts =
+        [.. Enum.GetValues<FeedSort>().Select(sort => new FilterChoice<FeedFilter>(FeedFilterText.Label(sort), filter => filter.Sort == sort, filter => filter with { Sort = sort }))];
+
+    private static readonly FilterGroup<FeedFilter> Statuses =
+        new("Status", [.. Enum.GetValues<FeedStatus>().Select(status => FilterChoices<FeedFilter>.Toggle(FeedFilterText.Label(status), status, filter => filter.Statuses, (filter, statuses) => filter with { Statuses = statuses }))]);
+
+    private static readonly FilterGroup<FeedFilter> Triggers =
+        new("Trigger", [.. Enum.GetValues<FeedTriggerKind>().Select(trigger => FilterChoices<FeedFilter>.Toggle(FeedFilterText.Label(trigger), trigger, filter => filter.Triggers, (filter, triggers) => filter with { Triggers = triggers }))]);
+
+    private static readonly FilterGroup<FeedFilter> Strategies =
+        new("Strategy", [.. Enum.GetValues<FeedStrategyKind>().Select(strategy => FilterChoices<FeedFilter>.Toggle(FeedFilterText.Label(strategy), strategy, filter => filter.Strategies, (filter, strategies) => filter with { Strategies = strategies }))]);
+
+    private IReadOnlyList<FilterGroup<FeedFilter>> Groups => [Statuses, Triggers, Strategies, new("Provider", [.. Providers.Select(Provider)])];
+
+    private FilterChoice<FeedFilter> Provider(ProviderCount option)
+    {
+        return FilterChoices<FeedFilter>.Toggle(Branding.NickName(option.Provider.Service), option.Provider, filter => filter.Providers, (filter, providers) => filter with { Providers = providers }, option.Count);
+    }
+}

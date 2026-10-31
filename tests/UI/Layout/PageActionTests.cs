@@ -104,6 +104,7 @@ public class PageActionTests : BunitContext
 
 		await Assert.That(cut.Find(".toolbar-slot-label").TextContent).IsEqualTo("Select");
 		await Assert.That(cut.Find(".toolbar-badge").TextContent).IsEqualTo("2");
+		await Assert.That(cut.Find(".toolbar-slot").GetAttribute("aria-label")).IsEqualTo("Select, 2");
 	}
 
 	[Test]
@@ -116,6 +117,27 @@ public class PageActionTests : BunitContext
 
 		await Assert.That(clicked).IsTrue();
 		await Assert.That(cut.Find(".toolbar-slot").ClassList).Contains("is-on");
+	}
+
+	[Test]
+	public async Task Toolbar_WithAPhoneHandler_UsesItInsteadOfOnClick()
+	{
+		var tapped = string.Empty;
+		var cut = RenderInToolbar(parameters =>
+			parameters.Add(action => action.OnClick, () => tapped = "desktop").Add(action => action.PhoneOnClick, () => tapped = "phone")
+		);
+
+		await cut.Find(".toolbar-slot").ClickAsync(new());
+
+		await Assert.That(tapped).IsEqualTo("phone");
+	}
+
+	[Test]
+	public async Task Toolbar_WithOnlyAPhoneHandler_StillGetsASlotThatIsNeverTinted()
+	{
+		var cut = RenderInToolbar(parameters => parameters.Add(action => action.Active, true).Add(action => action.PhoneOnClick, () => { }));
+
+		await Assert.That(cut.Find(".toolbar-slot").ClassList).DoesNotContain("is-on");
 	}
 
 	[Test]

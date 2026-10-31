@@ -24,7 +24,7 @@
 
 @{
     var allItems = AllItems;
-    var gridItems = Visible(allItems);
+    var gridItems = Visible(Filter, allItems);
     var sources = SourcesFrom(allItems);
     var pageItems = Paged(gridItems);
 }
@@ -41,7 +41,7 @@
                 SearchChanged="ApplySearchAsync">
     <Actions>
         <PageAction Icon="square-check" Label="Select" DesktopLabel="Bulk edit" OnClick="EnterEditMode" Visible="HasItems && !IsEditMode"/>
-        <PageAction Icon="sliders-horizontal" Label="Filter" DesktopLabel="View" Active="ShowFilters" Badge="Filter.ActiveCount" OnClick="ToggleFilterBar" Visible="HasItems"/>
+        <PageAction Icon="sliders-horizontal" Label="Filter" DesktopLabel="View" Active="ShowFilters" Badge="Filter.ActiveCount" OnClick="ToggleFilterBar" PhoneOnClick="OpenFilterSheet" Visible="HasItems"/>
         <PageAction Icon="refresh-cw" Label="Sync">
             <Desktop>
                 <ProtectedComponent GuardState="IsConnected"
@@ -139,6 +139,11 @@
                   OnOpenChanged="SheetOpenChangedAsync"
                   Media="SelectedMedia"/>
 
+@if (IsFilterSheetOpen)
+{
+    <ListFilterSheet OpenChanged="open => IsFilterSheetOpen = open" Filter="Filter" OnApply="ApplySheetAsync" Sources="sources" Statuses="StatusOptions" Count="CountFor"/>
+}
+
 @code {
     private static readonly TimeSpan RenderCoalesceWindow = TimeSpan.FromMilliseconds(120);
     private bool _renderQueued;
@@ -172,14 +177,20 @@
 
     private IReadOnlyList<StatusOption> StatusOptions => WantlistStatusView.Options(_removedItems.Count);
 
-    private IReadOnlyList<WantlistedMedia> AllItems =>
-        _items is null ? [] : WantlistStatusView.Within(Filter, _items, _removedItems);
+    private IReadOnlyList<WantlistedMedia> AllItems => AllItemsFor(Filter);
 
-    private IReadOnlyList<WantlistedMedia> Visible(IReadOnlyList<WantlistedMedia> all) =>
+    private IReadOnlyList<WantlistedMedia> AllItemsFor(ListFilter filter) => _items is null ? [] : WantlistStatusView.Within(filter, _items, _removedItems);
+
+    private int CountFor(ListFilter filter) => Visible(filter, AllItemsFor(filter)).Count;
+
+    private Task ApplySheetAsync(ListFilter filter) =>
+        ApplyFilterAsync(filter with { Statuses = WantlistStatusView.Adjusted(filter.Statuses, _items?.Count ?? 0, _removedItems.Count) });
+
+    private static IReadOnlyList<WantlistedMedia> Visible(ListFilter filter, IReadOnlyList<WantlistedMedia> all) =>
         [
-            .. Filter.SortBy(
+            .. filter.SortBy(
                 all.Where(item =>
-                    Filter.MatchesSource(item.Provenance) && Filter.MatchesType(item.Media.Details.Type) && Filter.MatchesSearch(item.Media.Details.Title)
+                    filter.MatchesSource(item.Provenance) && filter.MatchesType(item.Media.Details.Type) && filter.MatchesSearch(item.Media.Details.Title)
                 ),
                 item => item.Media,
                 item => item.AddedAt

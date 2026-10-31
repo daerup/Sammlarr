@@ -29,7 +29,7 @@
                   Value="@(Filter.Type?.ToString())"
                   ValueChanged="OnTypeChangedAsync"
                   Options="@TypeOptions"
-                  Placeholder="Any type"
+                  Placeholder="@ListFilterText.AnyType"
                   Class="filter-control filter-type"/>
     </Filters>
     <Sort>
@@ -64,20 +64,12 @@
 
     private static readonly SelectOption<string>[] TypeOptions =
     [
-        new(string.Empty, "Any type"),
-        new(nameof(MediaType.Movie), MediaType.Movie.Plural),
-        new(nameof(MediaType.Show), MediaType.Show.Plural),
+        new(string.Empty, ListFilterText.AnyType),
+        new(nameof(MediaType.Movie), ListFilterText.Label(MediaType.Movie)),
+        new(nameof(MediaType.Show), ListFilterText.Label(MediaType.Show)),
     ];
 
-    private static readonly SelectOption<ListSort>[] SortOptions =
-    [
-        new(ListSort.RecentlyAdded, "Recently added"),
-        new(ListSort.OldestAdded, "Oldest added"),
-        new(ListSort.TitleAscending, "Title A to Z"),
-        new(ListSort.TitleDescending, "Title Z to A"),
-        new(ListSort.NewestRelease, "Newest release"),
-        new(ListSort.OldestRelease, "Oldest release"),
-    ];
+    private static readonly SelectOption<ListSort>[] SortOptions = [.. Enum.GetValues<ListSort>().Select(sort => new SelectOption<ListSort>(sort, ListFilterText.Label(sort)))];
 
     private IEnumerable<string> SelectedSourceKeys =>
         Filter.Sources.Select(KeyFor).Where(key => key is not null).Select(key => key!);

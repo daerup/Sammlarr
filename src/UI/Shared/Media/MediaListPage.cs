@@ -28,6 +28,7 @@ public abstract class MediaListPage : ComponentBase, IDisposable
 	protected string? ErrorMessage { get; set; }
 	protected bool IsEditMode { get; set; }
 	protected bool IsSheetOpen { get; set; }
+	protected bool IsFilterSheetOpen { get; set; }
 
 	private bool signedIn;
 	private bool connected;
@@ -72,6 +73,8 @@ public abstract class MediaListPage : ComponentBase, IDisposable
 	}
 
 	protected void ToggleFilterBar() => ShowFilters = !ShowFilters;
+
+	protected void OpenFilterSheet() => IsFilterSheetOpen = true;
 
 	protected Task ApplyFilterAsync(ListFilter filter)
 	{

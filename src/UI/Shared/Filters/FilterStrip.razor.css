@@ -43,3 +43,9 @@
     height: 22px;
     background: var(--border);
 }
+
+@media (width < 48rem) {
+    .filter-bar {
+        display: none;
+    }
+}

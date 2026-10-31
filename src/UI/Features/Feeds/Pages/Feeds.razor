@@ -56,7 +56,7 @@
     <Actions>
         <ProtectedSection GuardState="IsSignedIn" ShowFallback="false">
             <PageAction Icon="square-check" Label="Select" DesktopLabel="Bulk edit" OnClick="() => _isSelecting = true" Visible="HasFeeds && !_isSelecting"/>
-            <PageAction Icon="sliders-horizontal" Label="Filter" DesktopLabel="View" Active="_showFilters" Badge="_filter.ActiveCount" OnClick="() => _showFilters = !_showFilters" Visible="HasFeeds"/>
+            <PageAction Icon="sliders-horizontal" Label="Filter" DesktopLabel="View" Active="_showFilters" Badge="_filter.ActiveCount" OnClick="() => _showFilters = !_showFilters" PhoneOnClick="() => _filterSheetOpen = true" Visible="HasFeeds"/>
             <PageAction Icon="play" Label="Run" DesktopLabel="Run feeds" OnClick="OpenRunFeeds" Visible="HasFeeds && !_isSelecting"/>
             <PageAction Icon="plus" IconSize="15" IconClass="mr-2.5 shrink-0" Label="Add feed" Variant="ButtonVariant.Secondary" OnClick="@(() => NavigationManager.NavigateTo("/feeds/create"))"/>
         </ProtectedSection>
@@ -231,6 +231,11 @@
     </Actions>
 </ChangeDialog>
 
+@if (_filterSheetOpen)
+{
+    <FeedFilterSheet OpenChanged="open => _filterSheetOpen = open" Filter="_filter" OnApply="ApplyFilter" Providers="ProviderCounts" Count="filter => filter.Apply(_rows).Count"/>
+}
+
 <RunFeedsDialog Open="_isRunOpen"
                 OpenChanged="@(open => _isRunOpen = open)"
                 Candidates="_candidates"
@@ -305,6 +310,7 @@
     private (int Added, int Removed) _lastWeek;
     private FeedFilter _filter = FeedFilter.None;
     private bool _showFilters;
+    private bool _filterSheetOpen;
     private bool _isSelecting;
     private bool _isRunOpen;
     private bool _runFromSelection;
