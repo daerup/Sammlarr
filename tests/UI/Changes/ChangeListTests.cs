@@ -81,6 +81,8 @@ public class ChangeListTests : BunitContext
 
 		await Assert.That(chips[0].TagName).IsEqualTo("BUTTON");
 		await Assert.That(chips[1].TagName).IsNotEqualTo("BUTTON");
+		await Assert.That(chips[1].GetAttribute("aria-label")).IsEqualTo("Already yours: 178");
+		await Assert.That(chips[1].GetAttribute("role")).IsEqualTo("img");
 		await Assert.That(cut.FindAll(".change-chip-sep")).Count().IsEqualTo(1);
 	}
 
@@ -113,6 +115,8 @@ public class ChangeListTests : BunitContext
 		var chips = cut.FindAll(".change-chip");
 
 		await Assert.That(chips[1].TagName).IsNotEqualTo("BUTTON");
+		await Assert.That(chips[1].GetAttribute("aria-label")).IsEqualTo("Already yours: 178");
+		await Assert.That(chips[1].GetAttribute("role")).IsEqualTo("img");
 	}
 
 	[Test]

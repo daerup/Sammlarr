@@ -94,6 +94,7 @@ internal static class FeedRunView
 				Icon = "circle-alert",
 				Count = counts.Unmatched,
 				Tooltip = UnmatchedTooltip(counts),
+				Detailed = true,
 			},
 		];
 	}

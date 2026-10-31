@@ -2,16 +2,16 @@
           Note="MediaDetailTile with wantlist / blocklist toggles and status indicators, plus the preview stat badges. Toggles are visual-only.">
     <BbTooltipProvider>
         <div class="flex items-start text-xs font-medium">
-            <PreviewFilterBadge Icon="list" Count="3" Active="true" OnClick="() => {}">
+            <PreviewFilterBadge Icon="list" Label="All fetched" Count="3" Active="true" OnClick="() => {}">
                 <Tooltip>Total items fetched from the source list.</Tooltip>
             </PreviewFilterBadge>
-            <PreviewFilterBadge Icon="check" Count="2" Active="false" OnClick="() => {}">
+            <PreviewFilterBadge Icon="check" Label="Will import" Count="2" Active="false" OnClick="() => {}">
                 <Tooltip>Items that will be imported.</Tooltip>
             </PreviewFilterBadge>
-            <PreviewFilterBadge Icon="scissors" Count="1" Active="false" OnClick="() => {}">
+            <PreviewFilterBadge Icon="scissors" Label="Over the limit" Count="1" Active="false" OnClick="() => {}">
                 <Tooltip>Excluded by the import limit.</Tooltip>
             </PreviewFilterBadge>
-            <PreviewFilterBadge Icon="circle-alert" Count="1" Active="false" OnClick="() => {}">
+            <PreviewFilterBadge Icon="circle-alert" Label="Unmatched" Count="1" Active="false" OnClick="() => {}">
                 <Tooltip>Could not be matched in your media provider.</Tooltip>
             </PreviewFilterBadge>
         </div>

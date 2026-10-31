@@ -23,6 +23,12 @@
   }
 }
 
+@media not ((hover: hover) and (pointer: fine)) {
+  [data-bb-portal]:has(> [role="tooltip"][data-label-tip]) {
+    display: none !important;
+  }
+}
+
 @media (width < 48rem), (pointer: coarse) {
   input,
   textarea,

@@ -43,7 +43,7 @@
                                 <LucideIcon Name="refresh-cw" Size="16"/>
                             </BbButton>
                         </BbTooltipTrigger>
-                        <BbTooltipContent>Refresh assets</BbTooltipContent>
+                        <BbTooltipContent data-label-tip>Refresh assets</BbTooltipContent>
                     </BbTooltip>
                 </BbAlertDialogTrigger>
                 <BbAlertDialogContent>
@@ -90,36 +90,36 @@
                 <BbTooltipProvider>
                     <div class="flex items-start transition-opacity @DimClass">
                     <div class="stat-badges-row flex items-start text-xs font-medium">
-                        <PreviewFilterBadge Flash="_flash" Icon="list" Count="_rawResults.Count" Active="_activeFilters.Count == 0 && !_atRiskOnly" OnClick="ResetFilters">
+                        <PreviewFilterBadge Flash="_flash" Icon="list" Label="All fetched" Count="_rawResults.Count" Active="_activeFilters.Count == 0 && !_atRiskOnly" OnClick="ResetFilters">
                             <Tooltip>Total items fetched from the source list. Click to clear filters.</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Flash="_flash" Icon="check" Count="IncludedCount" Active="IsFilterActive(PreviewBucket.Added)" OnClick="() => ToggleFilter(PreviewBucket.Added)">
+                        <PreviewFilterBadge Flash="_flash" Icon="check" Label="Will import" Count="IncludedCount" Active="IsFilterActive(PreviewBucket.Added)" OnClick="() => ToggleFilter(PreviewBucket.Added)">
                             <Tooltip>Items that will be imported</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Flash="_flash" Icon="bookmark-check" Count="KeptCount" Active="IsFilterActive(PreviewBucket.Kept)" OnClick="() => ToggleFilter(PreviewBucket.Kept)">
+                        <PreviewFilterBadge Flash="_flash" Icon="bookmark-check" Label="Already added" Count="KeptCount" Active="IsFilterActive(PreviewBucket.Kept)" OnClick="() => ToggleFilter(PreviewBucket.Kept)">
                             <Tooltip>Items this feed already added and still wants. Nothing to import.</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Flash="_flash" Icon="redo-dot" Count="BypassedCount" Active="IsFilterActive(PreviewBucket.Bypassed)" OnClick="() => ToggleFilter(PreviewBucket.Bypassed)">
+                        <PreviewFilterBadge Flash="_flash" Icon="redo-dot" Label="Bypasses import" Detailed="true" Count="BypassedCount" Active="IsFilterActive(PreviewBucket.Bypassed)" OnClick="() => ToggleFilter(PreviewBucket.Bypassed)">
                             <Tooltip>
                                 <p class="font-medium mb-0.5">Bypasses import</p>
                                 <p>@WantlistCount in your wantlist · @BlocklistCount in your blocklist</p>
                                 <p class="opacity-70 mt-0.5">These will not be imported.</p>
                             </Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Flash="_flash" Icon="filter-x" Count="FilteredCount" Active="IsFilterActive(PreviewBucket.Filtered)" OnClick="() => ToggleFilter(PreviewBucket.Filtered)">
+                        <PreviewFilterBadge Flash="_flash" Icon="filter-x" Label="Filtered out" Count="FilteredCount" Active="IsFilterActive(PreviewBucket.Filtered)" OnClick="() => ToggleFilter(PreviewBucket.Filtered)">
                             <Tooltip>Items excluded by your filter rules</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Flash="_flash" Icon="scissors" Count="SkippedCount" Active="IsFilterActive(PreviewBucket.Skipped)" OnClick="() => ToggleFilter(PreviewBucket.Skipped)">
+                        <PreviewFilterBadge Flash="_flash" Icon="scissors" Label="Over the limit" Count="SkippedCount" Active="IsFilterActive(PreviewBucket.Skipped)" OnClick="() => ToggleFilter(PreviewBucket.Skipped)">
                             <Tooltip>Items excluded by the import limit</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Flash="_flash" Icon="circle-alert" Count="UnmatchedCount" Active="IsFilterActive(PreviewBucket.Unmatched)" OnClick="() => ToggleFilter(PreviewBucket.Unmatched)">
+                        <PreviewFilterBadge Flash="_flash" Icon="circle-alert" Label="Unmatched" Count="UnmatchedCount" Active="IsFilterActive(PreviewBucket.Unmatched)" OnClick="() => ToggleFilter(PreviewBucket.Unmatched)">
                             <Tooltip>Items that could not be matched in your media provider</Tooltip>
                         </PreviewFilterBadge>
                     </div>
                     @if (IsMirror && LeavingCount > 0)
                     {
                         <div class="leaving-badge-slot flex items-start text-xs font-medium ml-2 pl-2 border-l border-border">
-                            <PreviewFilterBadge Flash="_flash" Icon="log-out" Count="LeavingCount" Active="_atRiskOnly" OnClick="ToggleAtRiskOnly">
+                            <PreviewFilterBadge Flash="_flash" Icon="log-out" Label="On its way out" Detailed="true" Count="LeavingCount" Active="_atRiskOnly" OnClick="ToggleAtRiskOnly">
                                 <Tooltip>
                                     <p class="font-medium mb-0.5">On its way out</p>
                                     <p>@AtRiskCount no longer match your rules@(GoneCount > 0 ? $" · {GoneCount} no longer on the remote list" : null)</p>

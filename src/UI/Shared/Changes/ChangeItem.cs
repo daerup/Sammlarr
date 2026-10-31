@@ -41,4 +41,5 @@ public sealed record ChangeChip
 	public ChipTone Tone { get; init; } = ChipTone.Neutral;
 	public ChangeKind? Filters { get; init; }
 	public bool StartsCountsOnly { get; init; }
+	public bool Detailed { get; init; }
 }

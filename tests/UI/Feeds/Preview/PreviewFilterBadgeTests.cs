@@ -43,10 +43,19 @@ public class PreviewFilterBadgeTests : BunitContext
 		await Assert.That(Badge(cut).ClassList).DoesNotContain("is-flashing");
 	}
 
+	[Test]
+	public async Task Badge_IsNamedByItsLabelAndCountAndItsTooltipStaysOffTouch()
+	{
+		var cut = RenderBadge(count: 12, flash: 0);
+
+		await Assert.That(Badge(cut).GetAttribute("aria-label")).IsEqualTo("Will import: 12");
+		await Assert.That(cut.FindComponent<BbTooltipContent>().Instance.AdditionalAttributes!).ContainsKey("data-label-tip");
+	}
+
 	private IRenderedComponent<PreviewFilterBadge> RenderBadge(int count, int flash)
 	{
 		return Render<PreviewFilterBadge>(parameters =>
-			parameters.Add(badge => badge.Icon, "check").Add(badge => badge.Count, count).Add(badge => badge.Flash, flash)
+			parameters.Add(badge => badge.Icon, "check").Add(badge => badge.Label, "Will import").Add(badge => badge.Count, count).Add(badge => badge.Flash, flash)
 		);
 	}
 

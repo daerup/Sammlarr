@@ -14,13 +14,14 @@
                     <BbTooltipTrigger AsChild="false" Class="p-0" Focusable="false">
                         @if (countsOnly)
                         {
-                            <span class="change-chip is-count @ToneClass(chip.Tone)">
+                            <span class="change-chip is-count @ToneClass(chip.Tone)" role="img" aria-label="@($"{chip.Tooltip}: {chip.Count:N0}")">
                                 @ChipFace(chip)
                             </span>
                         }
                         else
                         {
                             <button type="button"
+                                    aria-label="@($"{chip.Tooltip}: {chip.Count:N0}")"
                                     class="change-chip @ToneClass(chip.Tone) @(IsActive(chip) ? "is-on" : null) @(Clickable(chip) ? null : "is-dim")"
                                     disabled="@(!Clickable(chip))"
                                     @onclick="() => ToggleAsync(chip)">
@@ -28,7 +29,7 @@
                             </button>
                         }
                     </BbTooltipTrigger>
-                    <BbTooltipContent>@chip.Tooltip</BbTooltipContent>
+                    <BbTooltipContent data-label-tip="@(!chip.Detailed)">@chip.Tooltip</BbTooltipContent>
                 </BbTooltip>
             }
         </BbTooltipProvider>
