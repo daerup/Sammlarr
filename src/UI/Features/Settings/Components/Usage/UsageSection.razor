@@ -1,7 +1,7 @@
 @using Contracts.Usage
 @inject IUsageReport Report
 
-<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-4 max-md:gap-3">
     <div class="flex items-start gap-4">
         <div>
             <h3 class="text-lg font-semibold">Usage</h3>
@@ -38,7 +38,7 @@
     }
     else
     {
-        <div class="@($"flex flex-col gap-4 transition-opacity {(shown.Range == _range ? string.Empty : "opacity-60")}")" aria-busy="@(shown.Range == _range ? "false" : "true")">
+        <div class="@($"flex flex-col gap-4 max-md:gap-3 transition-opacity {(shown.Range == _range ? string.Empty : "opacity-60")}")" aria-busy="@(shown.Range == _range ? "false" : "true")">
             <UsageStatCards Snapshot="shown.Snapshot" Range="shown.Range"/>
             <UsageCallsCard Period="shown.Snapshot.Current" Quotas="shown.Snapshot.Quotas" Range="shown.Range" @bind-Picked="_picked"/>
             <UsageCausesCard Period="shown.Snapshot.Current" Range="shown.Range" @bind-Picked="_picked"/>

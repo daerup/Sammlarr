@@ -1,5 +1,6 @@
 using E2E.Tests.Browse;
 using E2E.Tests.Feeds;
+using E2E.Tests.Settings;
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
@@ -127,6 +128,21 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 		await page.GoBackAsync();
 		await Expect(search).ToHaveCountAsync(0);
 		await page.ShouldBeAtAsync(Routes.Wantlist);
+	}
+
+	[Test]
+	public async Task SettingsCards_OnAPhone_RunFromEdgeToEdge()
+	{
+		var page = await E2EApp.AdminAt(SettingsPage.Section("about"));
+		var cards = page.Locator("main .section-card");
+		await Expect(cards.First).ToBeVisibleAsync(Wait.Settle);
+
+		var boxes = await cards.EvaluateAllAsync<double[][]>(
+			"cards => cards.map(card => { const box = card.getBoundingClientRect(); return [box.left, box.width - innerWidth]; })"
+		);
+
+		await Assert.That(boxes).IsNotEmpty();
+		await Assert.That(boxes.All(box => Math.Abs(box[0]) < 1 && Math.Abs(box[1]) < 1)).IsTrue();
 	}
 
 	[Test]
