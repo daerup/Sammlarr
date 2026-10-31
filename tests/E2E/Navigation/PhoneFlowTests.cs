@@ -186,6 +186,37 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	}
 
 	[Test]
+	public async Task RunHistory_RunTapped_OpensInASheet()
+	{
+		var (page, card) = await FeedsWithOneAsync();
+		var edit = await card.Locator("a.feed-card-link").GetAttributeAsync("href");
+		var name = await card.GetAttributeAsync("aria-label");
+		await card.Labelled("Run").TapAsync();
+		var confirm = page.GetByRole(AriaRole.Dialog).Locator("[data-dialog-commit]");
+		await Expect(confirm).ToBeEnabledAsync(Wait.Preview);
+		await confirm.TapAsync();
+		await Expect(card.GetByTestId("last-run-bar")).ToBeVisibleAsync(Wait.Preview);
+		var runs = edit!.Replace("/feeds/edit/", "/feeds/", StringComparison.Ordinal) + "/runs";
+		await page.VisitAsync(runs);
+		var item = page.Locator(".runs-item").First;
+		var sheet = page.Locator("[data-sheet]:has(.runs-sheet)");
+		await Expect(page.Locator("header .phone-title")).ToHaveTextAsync(name!, Wait.Settle);
+		await Expect(page.GetByRole(AriaRole.Link, new PageGetByRoleOptions { Name = "Back to Feeds" })).ToHaveAttributeAsync("href", "/feeds");
+		await Expect(page.Toolbar.Button("Edit feed")).ToBeVisibleAsync();
+		await Expect(item).ToBeVisibleAsync(Wait.Settle);
+		await Assert.That(await page.OverflowingAsync()).IsEmpty();
+
+		await item.TapAsync();
+
+		await Expect(sheet).ToBeVisibleAsync();
+		await page.ShouldBeAtAsync(runs);
+		await page.GoBackAsync();
+		await Expect(sheet).ToHaveCountAsync(0);
+		await page.WaitForFunctionAsync("() => history.state?.sheet === undefined");
+		await page.ShouldBeAtAsync(runs);
+	}
+
+	[Test]
 	public async Task DeleteConfirm_OnBack_ClosesWithoutDeleting()
 	{
 		var (page, card) = await FeedsWithOneAsync();

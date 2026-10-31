@@ -340,3 +340,40 @@
     margin-top: 5px;
     font-size: 12.5px;
 }
+
+.runs-sheet {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.runs-sheet .runs-detail-head {
+    padding: 0 20px 14px;
+}
+
+@media (width < 48rem) {
+    .runs-page {
+        height: auto;
+        overflow: visible;
+        border-width: 1px 0;
+        border-radius: 0;
+    }
+
+    .runs-crumbs {
+        display: none;
+    }
+
+    .runs-split {
+        grid-template-columns: 1fr;
+    }
+
+    .runs-divider,
+    .runs-detail {
+        display: none;
+    }
+
+    .runs-rail-body {
+        overflow: visible;
+    }
+}
