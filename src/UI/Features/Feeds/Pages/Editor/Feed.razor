@@ -28,7 +28,13 @@
                Description="@PageDescriptionText"
                HeaderClass="@(IsSignedIn() ? "border-b" : "")">
     <Actions>
-        <PageAction Icon="save" Label="Save">
+        <PageAction Icon="save"
+                    Label="Save"
+                    Order="3"
+                    Tone="ActionTone.Commit"
+                    PhoneOnClick="HandleSaveAsync"
+                    Disabled="@(!CanSave || _isSaving)"
+                    DisabledReason="@SaveProblem.ToNullable()">
             <Desktop>
                 @if (_isSaving)
                 {
@@ -51,11 +57,12 @@
                 }
             </Desktop>
         </PageAction>
-        <PageAction Icon="x" Label="Close">
+        <PageAction Icon="x" Label="Close" Order="1" PhoneOnClick="Close" Disabled="_isSaving">
             <Desktop>
                 <BbButton Variant="ButtonVariant.Outline" OnClick="Close" Disabled="_isSaving">Close</BbButton>
             </Desktop>
         </PageAction>
+        <PageAction Icon="@ViewIcon" Label="@ViewLabel" Order="2" Visible="IsPhone" OnClick="ToggleView"/>
     </Actions>
     <ChildContent>
         <ProtectedSection GuardState="IsSignedIn"
@@ -63,30 +70,35 @@
                           FallbackAction="() => AccountConnectionPrompt.RequestAsync()">
             @if (_loadingFeed)
             {
-                <div class="h-full flex flex-row gap-4 overflow-hidden" aria-busy="true">
+                <div class="h-full flex flex-row gap-4 overflow-hidden max-md:h-[70dvh]" aria-busy="true">
                     <BbSkeleton Class="flex-1 min-w-0 rounded-lg"/>
-                    <BbSkeleton Class="flex-1 min-w-0 rounded-lg"/>
+                    <BbSkeleton Class="flex-1 min-w-0 rounded-lg max-md:hidden"/>
                 </div>
             }
             else
             {
-                <div class="h-full flex flex-row gap-4 overflow-hidden"
+                <div class="editor-panes h-full flex flex-row gap-4 overflow-hidden"
+                     data-view="@_view"
                      data-preview-current="@(PreviewCaughtUp ? "true" : "false")"
                      @onkeydown="HandleContainerKeyDownAsync">
 
-                    <FeedConfigPanel @key="_configKey"
-                                     Value="@_config"
-                                     Pending="@Pending"
-                                     Check="@_identifierCheck"
-                                     OnChange="@OnConfigChanged"
-                                     OnCommit="@StartLoad"/>
+                    <div class="editor-pane is-settings">
+                        <FeedConfigPanel @key="_configKey"
+                                         Value="@_config"
+                                         Pending="@Pending"
+                                         Check="@_identifierCheck"
+                                         OnChange="@OnConfigChanged"
+                                         OnCommit="@StartLoad"/>
+                    </div>
 
-                    <FeedPreviewPanel @ref="_previewPanel"
-                                      Config="@_config"
-                                      SavedFeedId="@_savedFeedId"
-                                      DraftFeedId="@_draftId"
-                                      Updating="@(_pause is not null || _applying > 0)"
-                                      OnStatusChanged="@OnPreviewStatusChanged"/>
+                    <div class="editor-pane is-preview">
+                        <FeedPreviewPanel @ref="_previewPanel"
+                                          Config="@_config"
+                                          SavedFeedId="@_savedFeedId"
+                                          DraftFeedId="@_draftId"
+                                          Updating="@(_pause is not null || _applying > 0)"
+                                          OnStatusChanged="@OnPreviewStatusChanged"/>
+                    </div>
 
                 </div>
             }
@@ -98,6 +110,23 @@
 
     [Parameter] public string? EditFeedId { get; set; }
     [Parameter] public string? CloneFeedId { get; set; }
+
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
+    private enum EditorView
+    {
+        Settings,
+        Preview,
+    }
+
+    private EditorView _view = EditorView.Settings;
+
+    private string ViewIcon => _view is EditorView.Settings ? "eye" : "sliders-horizontal";
+
+    private string ViewLabel => _view is EditorView.Settings ? "Preview" : "Settings";
+
+    private void ToggleView() => _view = _view is EditorView.Settings ? EditorView.Preview : EditorView.Settings;
+
     private bool IsEditOrClone => EditFeedId is not null || CloneFeedId is not null;
 
     private string PageTitleText =>

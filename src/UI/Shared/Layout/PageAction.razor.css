@@ -40,6 +40,11 @@
     color: var(--destructive);
 }
 
+.toolbar-slot.is-commit:not(:disabled) {
+    background: var(--accent);
+    font-weight: 600;
+}
+
 .toolbar-slot:disabled {
     opacity: 0.45;
 }

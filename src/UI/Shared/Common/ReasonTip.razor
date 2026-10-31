@@ -3,7 +3,7 @@
 
 @if (IsPhone)
 {
-    <span class="reason-tip @TriggerClass" @onclick="Explain">@ChildContent</span>
+    <span class="reason-tip @TriggerClass" style="@TriggerStyle" @onclick="Explain">@ChildContent</span>
 }
 else
 {
@@ -25,6 +25,7 @@ else
     [Parameter] public int Delay { get; set; } = 300;
     [Parameter] public PopoverPlacement Placement { get; set; } = PopoverPlacement.Top;
     [Parameter] public string? TriggerClass { get; set; }
+    [Parameter] public string? TriggerStyle { get; set; }
     [Parameter] public bool Focusable { get; set; }
     [Parameter] public string? ActionText { get; set; }
     [Parameter] public string? ActionHref { get; set; }

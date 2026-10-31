@@ -66,7 +66,8 @@ internal static class FeedEditor
 		await Expect(preview).ToHaveAttributeAsync("data-preview-current", "true", new LocatorAssertionsToHaveAttributeOptions { Timeout = Wait.Preview });
 	}
 
-	internal static Task PreviewLoadedAsync(IPage page) => Expect(page.Locator("[data-preview-state='success']")).ToBeVisibleAsync(Wait.Preview);
+	internal static Task PreviewLoadedAsync(IPage page) =>
+		Expect(page.Locator("[data-preview-state='success']")).ToBeAttachedAsync(new LocatorAssertionsToBeAttachedOptions { Timeout = Wait.Preview });
 
 	internal static async Task SaveAndCloseAsync(IPage page)
 	{
@@ -79,7 +80,7 @@ internal static class FeedEditor
 
 	internal static async Task SavedAsync(IPage page)
 	{
-		await Expect(SavedStatus(page)).ToBeVisibleAsync(Wait.Settle);
+		await Expect(SavedStatus(page)).ToBeAttachedAsync(new LocatorAssertionsToBeAttachedOptions { Timeout = Wait.Settle });
 		await Expect(page.Heading("Edit feed")).ToBeVisibleAsync(Wait.Settle);
 	}
 

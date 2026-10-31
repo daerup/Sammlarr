@@ -259,6 +259,39 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	}
 
 	[Test]
+	public async Task Editor_PreviewSlot_ShowsThePreview()
+	{
+		var page = await E2EApp.AdminAt(Routes.CreateFeed);
+		var name = page.Locator("#name");
+		await FeedEditor.ConfigureAsync(page, TestData.Name("Preview"));
+		await FeedEditor.LoadAsync(page);
+
+		await page.Toolbar.Button("Preview").TapAsync();
+
+		await Expect(FeedEditor.Rows(page).First).ToBeVisibleAsync(Wait.Preview);
+		await Expect(name).ToBeHiddenAsync();
+		await Assert.That(await page.OverflowingAsync()).IsEmpty();
+		await page.Toolbar.Button("Settings").TapAsync();
+		await Expect(name).ToBeVisibleAsync();
+		await Expect(page.Toolbar.Button("Save")).ToBeEnabledAsync(Wait.Preview);
+	}
+
+	[Test]
+	public async Task Editor_FiltersAndLimit_FitTheScreen()
+	{
+		var page = await E2EApp.AdminAt(Routes.CreateFeed);
+		await FeedEditor.ConfigureAsync(page, TestData.Name("Fit"));
+
+		await FeedEditor.OpenOptionalSectionAsync(page, "Filters, Sorting & Limits");
+		await FeedEditor.Toggle(page, "Enable filters").TapAsync();
+		await FeedEditor.AddConditionAsync(page, "Title", "Matrix");
+		await FeedEditor.Toggle(page, "Enable limit").TapAsync();
+
+		await Expect(FeedEditor.Toggle(page, "Enable limit")).ToHaveAttributeAsync("aria-checked", "true");
+		await Assert.That(await page.OverflowingAsync()).IsEmpty();
+	}
+
+	[Test]
 	public async Task HelpTip_Tapped_OpensItsSheetWithoutFocusingTheField()
 	{
 		var page = await E2EApp.AdminAt(Routes.CreateFeed);

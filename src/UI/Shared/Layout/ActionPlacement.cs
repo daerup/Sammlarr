@@ -10,4 +10,5 @@ public enum ActionTone
 {
 	Default,
 	Danger,
+	Commit,
 }

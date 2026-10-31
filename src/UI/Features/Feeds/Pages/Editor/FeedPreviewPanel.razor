@@ -23,8 +23,8 @@
 @inject Notifier Notifier
 @inject RatingContext RatingContext
 
-<BbCard data-preview-state="@PreviewState" Class="flex-1 min-w-0 flex flex-col overflow-hidden rounded-lg bg-card border border-border shadow-sm">
-    <div class="shrink-0 sticky top-0 z-20 px-6 pt-6 pb-4 border-b flex items-center gap-2 bg-base-100 rounded-t-lg">
+<BbCard data-preview-state="@PreviewState" Class="flex-1 min-w-0 flex flex-col overflow-hidden rounded-lg bg-card border border-border shadow-sm max-md:-mx-4 max-md:overflow-visible max-md:rounded-none max-md:border-x-0 max-md:shadow-none">
+    <div class="shrink-0 sticky top-0 z-20 px-6 pt-6 pb-4 border-b flex items-center gap-2 bg-card rounded-t-lg max-md:rounded-none max-md:px-4">
         <BbInput Placeholder="Search media..."
                  Class="w-full"
                  Value="@_searchQuery"
@@ -63,10 +63,10 @@
             </BbAlertDialog>
         }
     </div>
-    <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 pb-4 pt-4 flex flex-col" style="scrollbar-gutter: stable;">
+    <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 pb-4 pt-4 flex flex-col max-md:overflow-visible max-md:px-4" style="scrollbar-gutter: stable;">
         @if (HasItems)
         {
-            <div class="mb-4 shrink-0 flex items-start justify-between gap-3">
+            <div class="mb-4 shrink-0 flex items-start justify-between gap-3 max-md:flex-col max-md:items-stretch max-md:gap-2.5">
                 <div>
                     <h2 class="text-base font-semibold tracking-wide flex items-center gap-2">
                         <span>Media Results</span>
@@ -88,8 +88,8 @@
                     }
                 </div>
                 <BbTooltipProvider>
-                    <div class="flex items-start transition-opacity @DimClass">
-                    <div class="stat-badges-row flex items-start text-xs font-medium">
+                    <div class="flex items-start transition-opacity @DimClass max-md:w-full">
+                    <div class="stat-badges-row flex items-start text-xs font-medium max-md:flex-1 max-md:justify-between">
                         <PreviewFilterBadge Flash="_flash" Icon="list" Label="All fetched" Count="_rawResults.Count" Active="_activeFilters.Count == 0 && !_atRiskOnly" OnClick="ResetFilters">
                             <Tooltip>Total items fetched from the source list. Click to clear filters.</Tooltip>
                         </PreviewFilterBadge>
@@ -118,7 +118,7 @@
                     </div>
                     @if (IsMirror && LeavingCount > 0)
                     {
-                        <div class="leaving-badge-slot flex items-start text-xs font-medium ml-2 pl-2 border-l border-border">
+                        <div class="leaving-badge-slot flex items-start text-xs font-medium ml-2 pl-2 border-l border-border max-md:ml-1.5 max-md:pl-1.5">
                             <PreviewFilterBadge Flash="_flash" Icon="log-out" Label="On its way out" Detailed="true" Count="LeavingCount" Active="_atRiskOnly" OnClick="ToggleAtRiskOnly">
                                 <Tooltip>
                                     <p class="font-medium mb-0.5">On its way out</p>
@@ -150,7 +150,7 @@
             {
                 <div class="preview-main-results transition-opacity @DimClass">
                 <VirtualizeGuard>
-                    <Virtualize @key="_filteredResults.Count" Items="_filteredResults" Context="result" ItemSize="215" OverscanCount="6">
+                    <Virtualize @key="(_filteredResults.Count, IsPhone)" Items="_filteredResults" Context="result" ItemSize="215" OverscanCount="6">
                         <ItemContent>
                         @{
                         var item = result.Item;
@@ -210,7 +210,7 @@
                 <div class="mt-4 preview-gone-results transition-opacity @DimClass">
                     <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 pb-2">@PreviewCopy.GoneHeading</p>
                     <VirtualizeGuard>
-                        <Virtualize @key="_filteredGoneResults.Count" Items="_filteredGoneResults" Context="gone" ItemSize="215" OverscanCount="6">
+                        <Virtualize @key="(_filteredGoneResults.Count, IsPhone)" Items="_filteredGoneResults" Context="gone" ItemSize="215" OverscanCount="6">
                             <ItemContent>
                         @{
                                 var goneItem = gone.Media;
@@ -251,7 +251,7 @@
                 <div class="mt-4 transition-opacity @DimClass">
                     <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 pb-2">Not found in provider</p>
                     <VirtualizeGuard>
-                        <Virtualize @key="_filteredUnmatchedResults.Count" Items="_filteredUnmatchedResults" Context="item" ItemSize="215" OverscanCount="6">
+                        <Virtualize @key="(_filteredUnmatchedResults.Count, IsPhone)" Items="_filteredUnmatchedResults" Context="item" ItemSize="215" OverscanCount="6">
                             <ItemContent>
                         @{
                                 <div class="pb-2">
@@ -352,6 +352,8 @@
 <MediaDetailSheet Open="_details is not null" OnOpenChanged="DetailsOpenChangedAsync" Media="_details" Source="ManualSource.FeedPreview"/>
 
 @code {
+
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
 
     [Parameter] public required FeedConfig Config { get; set; }
     [Parameter] public FeedId? SavedFeedId { get; set; }

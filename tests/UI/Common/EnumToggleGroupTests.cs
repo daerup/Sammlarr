@@ -73,6 +73,15 @@ public class EnumToggleGroupTests : BunitContext
 	}
 
 	[Test]
+	public async Task Render_WhenFilling_StretchesEveryValueOnPhones()
+	{
+		var cut = RenderGroup(Choice.First, parameters => parameters.Add(group => group.Fill, true));
+
+		await Assert.That(cut.Find("[role=radiogroup]").ClassList).Contains("max-md:w-full");
+		await Assert.That(Radios(cut).All(radio => radio.ClassList.Contains("max-md:flex-1"))).IsTrue();
+	}
+
+	[Test]
 	public async Task Render_WithATooltipProvider_KeepsEachValueOneRadioAndExplainsItOnHoverOrTap()
 	{
 		var portal = Render<BbPortalHost>();

@@ -1,11 +1,11 @@
 @typeparam TEnum where TEnum : struct, Enum
 
 <BbToggleGroup TValue="TEnum?" Value="Value" ValueChanged="SelectAsync" Required="true" Disabled="Disabled"
-               Class="h-10 w-fit gap-0 rounded-md bg-muted p-1 text-muted-foreground" aria-label="Enum selection">
+               Class="@($"h-10 w-fit gap-0 rounded-md bg-muted p-1 text-muted-foreground {(Fill ? "max-md:w-full" : null)}")" aria-label="Enum selection">
     @foreach (var option in Enum.GetValues<TEnum>())
     {
         <BbToggleGroupItem TValue="TEnum?" Value="@option" Disabled="@DisabledValues.Contains(option)"
-                           Class="h-full rounded-sm px-3 hover:text-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-xs">
+                           Class="@($"h-full rounded-sm px-3 hover:text-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-xs {(Fill ? "max-md:flex-1" : null)}")">
             @if (TooltipProvider is null)
             {
                 @option.Humanize()
@@ -35,6 +35,8 @@
     [Parameter] [EditorRequired] public required EventCallback<TEnum> OnChange { get; set; }
 
     [Parameter] public bool Disabled { get; set; }
+
+    [Parameter] public bool Fill { get; set; }
 
     [Parameter] public IReadOnlyCollection<TEnum> DisabledValues { get; set; } = [];
 

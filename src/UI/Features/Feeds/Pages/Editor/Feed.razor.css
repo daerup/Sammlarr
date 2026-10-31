@@ -1,0 +1,16 @@
+.editor-pane {
+    display: contents;
+}
+
+@media (width < 48rem) {
+    .editor-panes {
+        flex-direction: column;
+        height: auto;
+        overflow: visible;
+    }
+
+    .editor-panes[data-view="Settings"] > .editor-pane.is-preview,
+    .editor-panes[data-view="Preview"] > .editor-pane.is-settings {
+        display: none;
+    }
+}
