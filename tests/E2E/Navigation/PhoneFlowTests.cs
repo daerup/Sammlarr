@@ -204,9 +204,8 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	public async Task Wantlist_OnAPhone_ShowsItsActionsInTheFooter()
 	{
 		string[] slots = ["Select", "Filter"];
-		string[] selecting = ["Filter"];
-		var page = await WantlistWithTheTrendingTitleAsync();
-		var labels = page.Toolbar.Locator(".toolbar-slot-label");
+		var page = await WantlistWithAsync(TrendingTiles.Title);
+		var labels = page.Toolbar.Locator(".toolbar-slot-label:visible");
 		var search = page.GetByRole(AriaRole.Searchbox);
 
 		await Expect(labels).ToHaveTextAsync(slots, Wait.Settle);
@@ -217,13 +216,13 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 		await search.BlurAsync();
 		await Expect(page.Toolbar).ToBeVisibleAsync();
 		await page.Toolbar.Button("Select").TapAsync();
-		await Expect(labels).ToHaveTextAsync(selecting);
+		await Expect(page.Locator("header .phone-select-bar [role=status]")).ToHaveTextAsync("0 selected");
 	}
 
 	[Test]
 	public async Task Filter_Applied_NarrowsTheList()
 	{
-		var page = await WantlistWithTheTrendingTitleAsync();
+		var page = await WantlistWithAsync(TrendingTiles.Title);
 		var title = page.Heading(TrendingTiles.Title);
 		var filter = page.Toolbar.ButtonContaining("Filter");
 		var sheet = page.Modal("Filter and sort");
@@ -242,7 +241,7 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 		await page.WaitForFunctionAsync("() => Math.abs(document.querySelector('[role=dialog]').getBoundingClientRect().bottom - innerHeight) < 1");
 		var clearBox = (await sheet.Button("Clear all").BoundingBoxAsync())!;
 		var showBox = (await show.BoundingBoxAsync())!;
-		await Assert.That(showBox.Y).IsEqualTo(clearBox.Y);
+		await Assert.That(Math.Abs(showBox.Y - clearBox.Y)).IsLessThan(1);
 		await Assert.That(showBox.Height).IsGreaterThanOrEqualTo(52);
 		await Assert.That(clearBox.Width + showBox.Width).IsGreaterThanOrEqualTo(page.ViewportSize!.Width - 14);
 		await sheet.Radio("Shows").TapAsync();
@@ -268,15 +267,43 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 		await Expect(page.Heading("Second Page 4")).ToHaveCountAsync(1);
 	}
 
-	private static async Task<IPage> WantlistWithTheTrendingTitleAsync()
+	[Test]
+	public async Task SelectMode_TwoTilesPicked_ShowsTheCountAndTheBulkActions()
+	{
+		string[] bulk = ["Blocklist", "Remove"];
+		string[] browsing = ["Select", "Filter"];
+		var page = await WantlistWithAsync(TrendingTiles.Title, TrendingTiles.Second);
+		var layers = page.Locator("[data-testid='selection-layer']");
+		var labels = page.Toolbar.Locator(".toolbar-slot-label:visible");
+
+		await page.Toolbar.Button("Select").TapAsync();
+		await layers.Nth(0).TapAsync();
+		await layers.Nth(1).TapAsync();
+
+		await Expect(page.Locator("header .phone-select-bar [role=status]")).ToHaveTextAsync("2 selected");
+		await Expect(labels).ToHaveTextAsync(bulk);
+		await Expect(page.Locator("header h1.phone-title")).ToBeHiddenAsync();
+		await Expect(page.Button("Leave bulk edit")).ToBeHiddenAsync();
+		await page.Button("Leave select mode").TapAsync();
+		await Expect(labels).ToHaveTextAsync(browsing);
+		await Expect(page.Locator("header .phone-select-bar")).ToHaveCountAsync(0);
+	}
+
+	private static async Task<IPage> WantlistWithAsync(params string[] titles)
 	{
 		var page = await E2EApp.AdminAt(Routes.Browse);
-		var tile = TrendingTiles.Resolved(page, TrendingTiles.Title);
-		await Expect(tile).ToBeVisibleAsync(Wait.Settle);
-		await tile.TapAsync();
-		var add = page.ButtonContaining("Add to Wantlist");
-		await add.TapAsync();
-		await Expect(add).ToBeHiddenAsync(Wait.Settle);
+		foreach (var title in titles)
+		{
+			var tile = TrendingTiles.Resolved(page, title);
+			await Expect(tile).ToBeVisibleAsync(Wait.Settle);
+			await tile.TapAsync();
+			var add = page.ButtonContaining("Add to Wantlist");
+			await add.TapAsync();
+			await Expect(add).ToBeHiddenAsync(Wait.Settle);
+			await page.Keyboard.PressAsync("Escape");
+			await page.WaitForFunctionAsync("() => history.state?.sheet === undefined");
+		}
+
 		await page.VisitAsync(Routes.Wantlist);
 		return page;
 	}

@@ -36,6 +36,14 @@
     background: var(--accent);
 }
 
+.toolbar-slot.is-danger {
+    color: var(--destructive);
+}
+
+.toolbar-slot:disabled {
+    opacity: 0.45;
+}
+
 .toolbar-slot-label {
     max-width: 100%;
     overflow: hidden;

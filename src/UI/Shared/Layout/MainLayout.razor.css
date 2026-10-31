@@ -74,6 +74,22 @@ header ::deep nav > ul[data-underline-ready="true"]::after {
     display: block;
 }
 
+header:has(.phone-select-bar) {
+    background: color-mix(in oklch, var(--accent) 70%, var(--background));
+}
+
+header:has(.phone-select-bar) > div:first-child {
+    display: none;
+}
+
+.page-slots {
+    display: contents;
+}
+
+header:has(.phone-select-bar) ~ .page-toolbar .page-slots {
+    display: none;
+}
+
 .page-toolbar {
     flex: none;
     position: relative;
@@ -86,20 +102,8 @@ header ::deep nav > ul[data-underline-ready="true"]::after {
     background: var(--background);
 }
 
-.page-toolbar:not(:has(*)) {
+.page-toolbar:not(:has(button)) {
     display: none;
-}
-
-.phone-title {
-    flex: 1;
-    min-width: 0;
-    margin-left: 2px;
-    overflow: hidden;
-    font-size: 17px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    white-space: nowrap;
-    text-overflow: ellipsis;
 }
 
 @media (width < 48rem) {

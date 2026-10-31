@@ -59,6 +59,14 @@ public class PageActionTests : BunitContext
 	}
 
 	[Test]
+	public async Task Header_WhenDisabled_DisablesTheButton()
+	{
+		var cut = Render(parameters => parameters.Add(action => action.Disabled, true));
+
+		await Assert.That(cut.Find("button").HasAttribute("disabled")).IsTrue();
+	}
+
+	[Test]
 	public async Task Render_WhenNotVisible_RendersNothing()
 	{
 		var cut = Render(parameters => parameters.Add(action => action.Visible, false));

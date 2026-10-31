@@ -118,46 +118,62 @@
                                    OnClearSelection="_selection.Clear"
                                    OnExit="ExitSelecting">
                         <Actions>
-                            <HoverButton Preset="HoverButtonPreset.Custom"
-                                         Color="var(--foreground)"
-                                         Size="ButtonSize.Small"
-                                         Class="min-w-24 justify-center"
-                                         OnClick="OpenBulkRun"
-                                         Disabled="@(!Chosen.Any(row => row.Feed.Enabled && !row.IsBusy))">
-                                <LucideIcon Name="play" Size="14" Class="mr-1"/>
-                                <span>Run</span>
-                            </HoverButton>
-                            @if (Chosen.Count > 0 && Chosen.All(row => !row.Feed.Enabled))
+                            <PageAction Icon="play" Label="Run" OnClick="OpenBulkRun" Disabled="!CanRunChosen">
+                                <Desktop>
+                                    <HoverButton Preset="HoverButtonPreset.Custom"
+                                                 Color="var(--foreground)"
+                                                 Size="ButtonSize.Small"
+                                                 Class="min-w-24 justify-center"
+                                                 OnClick="OpenBulkRun"
+                                                 Disabled="!CanRunChosen">
+                                        <LucideIcon Name="play" Size="14" Class="mr-1"/>
+                                        <span>Run</span>
+                                    </HoverButton>
+                                </Desktop>
+                            </PageAction>
+                            @if (ChosenAllPaused)
                             {
-                                <HoverButton Preset="HoverButtonPreset.Custom"
-                                             Color="var(--alert-warning)"
-                                             Size="ButtonSize.Small"
-                                             Class="min-w-24 justify-center"
-                                             OnClick="ResumeAsync">
-                                    <LucideIcon Name="play" Size="14" Class="mr-1"/>
-                                    <span>Resume</span>
-                                </HoverButton>
+                                <PageAction Icon="play" Label="Resume" OnClick="ResumeAsync">
+                                    <Desktop>
+                                        <HoverButton Preset="HoverButtonPreset.Custom"
+                                                     Color="var(--alert-warning)"
+                                                     Size="ButtonSize.Small"
+                                                     Class="min-w-24 justify-center"
+                                                     OnClick="ResumeAsync">
+                                            <LucideIcon Name="play" Size="14" Class="mr-1"/>
+                                            <span>Resume</span>
+                                        </HoverButton>
+                                    </Desktop>
+                                </PageAction>
                             }
                             else
                             {
-                                <HoverButton Preset="HoverButtonPreset.Custom"
-                                             Color="var(--alert-warning)"
-                                             Size="ButtonSize.Small"
-                                             Class="min-w-24 justify-center"
-                                             OnClick="() => _confirm = FeedsConfirm.Pause"
-                                             Disabled="@(!Chosen.Any(row => row.Feed.Enabled))">
-                                    <LucideIcon Name="pause" Size="14" Class="mr-1"/>
-                                    <span>Pause</span>
-                                </HoverButton>
+                                <PageAction Icon="pause" Label="Pause" OnClick="AskPause" Disabled="!CanPauseChosen">
+                                    <Desktop>
+                                        <HoverButton Preset="HoverButtonPreset.Custom"
+                                                     Color="var(--alert-warning)"
+                                                     Size="ButtonSize.Small"
+                                                     Class="min-w-24 justify-center"
+                                                     OnClick="AskPause"
+                                                     Disabled="!CanPauseChosen">
+                                            <LucideIcon Name="pause" Size="14" Class="mr-1"/>
+                                            <span>Pause</span>
+                                        </HoverButton>
+                                    </Desktop>
+                                </PageAction>
                             }
-                            <HoverButton Preset="HoverButtonPreset.Destructive"
-                                         Size="ButtonSize.Small"
-                                         Class="min-w-24 justify-center"
-                                         OnClick="() => AskDelete(Chosen)"
-                                         Disabled="@(Chosen.Count == 0)">
-                                <LucideIcon Name="trash-2" Size="14" Class="mr-1"/>
-                                <span>Delete</span>
-                            </HoverButton>
+                            <PageAction Icon="trash-2" Label="Delete" Tone="ActionTone.Danger" OnClick="AskDeleteChosen" Disabled="!HasChosen">
+                                <Desktop>
+                                    <HoverButton Preset="HoverButtonPreset.Destructive"
+                                                 Size="ButtonSize.Small"
+                                                 Class="min-w-24 justify-center"
+                                                 OnClick="AskDeleteChosen"
+                                                 Disabled="!HasChosen">
+                                        <LucideIcon Name="trash-2" Size="14" Class="mr-1"/>
+                                        <span>Delete</span>
+                                    </HoverButton>
+                                </Desktop>
+                            </PageAction>
                         </Actions>
                     </BulkActionBar>
                 }
@@ -343,6 +359,18 @@
 
     [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)]
     private bool IsPhone { get; set; }
+
+    private bool CanRunChosen => Chosen.Any(row => row.Feed.Enabled && !row.IsBusy);
+
+    private bool CanPauseChosen => Chosen.Any(row => row.Feed.Enabled);
+
+    private bool ChosenAllPaused => HasChosen && Chosen.All(row => !row.Feed.Enabled);
+
+    private bool HasChosen => Chosen.Count > 0;
+
+    private void AskPause() => _confirm = FeedsConfirm.Pause;
+
+    private void AskDeleteChosen() => AskDelete(Chosen);
 
     private IReadOnlyList<FeedRow> PageRows => IsPhone ? FeedPaging.Head(_visible, _shownPages) : FeedPaging.Slice(_visible, FeedPaging.PageWithin(_currentPage, _visible.Count));
 

@@ -43,3 +43,17 @@
     padding: 10px 24px;
     background: var(--background);
 }
+
+.phone-select-bar {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 52px;
+    padding: 0 8px;
+}
+
+@media (width < 48rem) {
+    .bulk-sticky {
+        display: none;
+    }
+}

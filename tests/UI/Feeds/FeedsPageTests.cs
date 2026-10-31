@@ -20,11 +20,14 @@ using Domain.Media;
 using Domain.Providers;
 using Domain.Usage;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Sections;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 using Observability.Usage;
 using TestInfrastructure;
+using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Components.Runs;
+using UI.Shared.Layout;
 using UI.Shared.Services;
 using FeedsPage = UI.Features.Feeds.Pages.Feeds;
 
@@ -211,6 +214,44 @@ public class FeedsPageTests : BunitContext
 		await run.ClickAsync(new());
 
 		_jobs.EnqueueAsync(Any<IJobRequest>(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task SelectMode_OnAPhone_PutsTheFeedBulkActionsInTheToolbar()
+	{
+		RegisterServices([Overview()]);
+		RenderTree.TryAdd<CascadingValue<bool>>(cascade => cascade.Add(value => value.Name, PhoneLayout.IsPhoneCascade).Add(value => value.Value, true));
+		var cut = Render(builder =>
+		{
+			builder.OpenComponent<BbPortalHost>(0);
+			builder.CloseComponent();
+			builder.AddContent(1, Outlet("page", PhoneLayout.ToolbarSection));
+			builder.AddContent(2, Outlet("bulk", PhoneLayout.BulkSection));
+			builder.OpenComponent<FeedsPage>(3);
+			builder.CloseComponent();
+		});
+		cut.WaitForState(() => cut.FindAll(".feed-card").Count == 1);
+
+		await cut.FindAll(".page .toolbar-slot").Single(slot => slot.TextContent.Trim() == "Select").ClickAsync(new());
+		await cut.Find(".feed-card-select").ClickAsync(new());
+
+		var slots = cut.FindAll(".bulk .toolbar-slot");
+		await Assert.That(slots.Select(slot => slot.TextContent.Trim())).IsEquivalentTo(["Run", "Pause", "Delete"], CollectionOrdering.Matching);
+		await Assert.That(slots.Count(slot => slot.HasAttribute("disabled"))).IsEqualTo(0);
+		await Assert.That(slots[2].ClassList).Contains("is-danger");
+	}
+
+	private static RenderFragment Outlet(string name, string section)
+	{
+		return builder =>
+		{
+			builder.OpenElement(0, "output");
+			builder.AddAttribute(1, "class", name);
+			builder.OpenComponent<SectionOutlet>(2);
+			builder.AddAttribute(3, nameof(SectionOutlet.SectionName), section);
+			builder.CloseComponent();
+			builder.CloseElement();
+		};
 	}
 
 	private void RegisterServices(IReadOnlyList<FeedOverview> overviews)

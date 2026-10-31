@@ -638,6 +638,18 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
         translate: 0 var(--sheet-drag, 0px);
     }
 
+    .phone-title {
+        flex: 1;
+        min-width: 0;
+        margin-left: 2px;
+        overflow: hidden;
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
     .menu-row {
         display: flex;
         align-items: center;

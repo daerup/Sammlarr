@@ -58,6 +58,9 @@
                     <ProfileCard/>
                 </div>
             </div>
+            <PhoneOnly>
+                <SectionOutlet SectionName="@PhoneLayout.BarSection"/>
+            </PhoneOnly>
         </header>
 
         <main class="flex-1 min-h-0 overflow-y-auto">
@@ -66,7 +69,10 @@
 
         <PhoneOnly>
             <nav class="page-toolbar" aria-label="Page actions">
-                <SectionOutlet SectionName="@PhoneLayout.ToolbarSection"/>
+                <div class="page-slots">
+                    <SectionOutlet SectionName="@PhoneLayout.ToolbarSection"/>
+                </div>
+                <SectionOutlet SectionName="@PhoneLayout.BulkSection"/>
             </nav>
         </PhoneOnly>
 
