@@ -264,6 +264,15 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	}
 
 	[Test]
+	public async Task Home_OnAPhone_OffersSyncInTheFooter()
+	{
+		var page = await E2EApp.AdminAt(Routes.Home);
+
+		await Expect(page.Toolbar.ButtonContaining("Sync")).ToBeEnabledAsync(Wait.Settle);
+		await Expect(page.GetByRole(AriaRole.Group, new PageGetByRoleOptions { Name = "Wantlist sync", Exact = true })).ToBeHiddenAsync();
+	}
+
+	[Test]
 	public async Task Wantlist_OnAPhone_ShowsItsActionsInTheFooter()
 	{
 		string[] slots = ["Select", "Filter", "Sync"];

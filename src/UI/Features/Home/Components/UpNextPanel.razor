@@ -1,11 +1,19 @@
 <SectionCard Look="SectionCardLook.Panel" Title="Up next" Note="@Note" Class="mb-[18px]">
-    <UpNextSection Title="Running and queued" Rows="Queued" Empty="Nothing is running or queued right now." OnCancel="OnCancel"/>
+    @if (!IsPhone || Queued.Count > 0)
+    {
+        <UpNextSection Title="Running and queued" Rows="Queued" Empty="Nothing is running or queued right now." OnCancel="OnCancel"/>
+    }
 
-    <UpNextSection Title="On a schedule" Rows="NextScheduled" Empty="No feed is on a schedule, so nothing will run on its own."/>
+    @if (!IsPhone || Scheduled.Count > 0)
+    {
+        <UpNextSection Title="On a schedule" Rows="NextScheduled" Empty="No feed is on a schedule, so nothing will run on its own."/>
+    }
 </SectionCard>
 
 @code {
     private const int ScheduledShown = 5;
+
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
 
     [Parameter] public IReadOnlyList<UpNextRow> Queued { get; set; } = [];
     [Parameter] public IReadOnlyList<UpNextRow> Scheduled { get; set; } = [];

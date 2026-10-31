@@ -50,12 +50,20 @@ else
     <Actions>
         <ProtectedSection GuardState="IsSignedIn" ShowFallback="false">
             <PageAction Icon="play" Label="Run feeds" OnClick="@(() => _isRunOpen = true)" Visible="_feeds.Count > 0"/>
-            <PageAction Icon="refresh-cw" Label="Sync">
+            <PageAction Icon="refresh-cw"
+                        Label="Sync"
+                        BadgeContent="SyncControl?.Badge"
+                        BadgeLabel="@SyncControl?.BadgeLabel"
+                        PhoneOnClick="OpenSyncAsync"
+                        Disabled="@(SyncControl is null || SyncControl.IsBusy)"
+                        DisabledReason="@SyncDeniedReason"
+                        DisabledLink="@ProtectedComponent.SinkLink(_settings.Sink)">
                 <Desktop>
                     <ProtectedComponent GuardState="IsConnected"
                                         Sink="@_settings.Sink"
-                                        DeniedActionDescription="sync your wantlist">
+                                        DeniedActionDescription="@SyncAction">
                         <WantlistSyncButton @ref="_syncControl"
+                                             StateChanged="StateHasChanged"
                                              OnSynced="SyncFinishedAsync"
                                              OnStatusRefresh="LoadOutboxAsync"
                                              OnSyncStarted="StartSync"
@@ -115,7 +123,7 @@ else
                 {
                     @foreach (var day in _days)
                     {
-                        <ActivityDayBlock @key="day.Date" Day="day" Media="_media" Today="_today" OnSelect="SelectMedia" OnNeedMedia="LoadPostersAsync"/>
+                        <ActivityDayBlock @key="day.Date" Day="day" Media="_media" Today="_today" StartsFolded="@(day.Date != _days[0].Date)" OnSelect="SelectMedia" OnNeedMedia="LoadPostersAsync"/>
                     }
                 }
             }
@@ -181,6 +189,14 @@ else
     private IReadOnlyList<BrandingInfo> Sink => BrandingService.Brands((_settings?.Sink ?? SinkKind.Plex).Service);
 
     private bool IsConnected() => _isConnected;
+
+    private const string SyncAction = "sync your wantlist";
+
+    private WantlistSyncButton? SyncControl => IsConnected() ? _syncControl : null;
+
+    private string? SyncDeniedReason => IsConnected() ? null : ProtectedComponent.SinkReason(_settings!.Sink, SyncAction);
+
+    private Task OpenSyncAsync() => _syncControl?.OpenAsync() ?? Task.CompletedTask;
 
     private string? BrandColor => _settings is null ? null : BrandingService.Color(_settings.Sink.Service);
 

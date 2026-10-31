@@ -5,6 +5,7 @@ public class PageFitTests(Device device) : E2ETests(device)
 {
 	[Test]
 	[Arguments(Routes.SignIn, Viewer.Guest)]
+	[Arguments(Routes.Home, Viewer.Admin)]
 	[Arguments(Routes.Browse, Viewer.Admin)]
 	[Arguments(Routes.Feeds, Viewer.Admin)]
 	[Arguments(Routes.Wantlist, Viewer.Admin)]

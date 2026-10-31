@@ -1,7 +1,8 @@
 @using System.Globalization
+@using UI.Shared.Changes
 
 <div class="dcard">
-    <button type="button" class="dtop @(_collapsed ? "is-collapsed" : null)" aria-expanded="@(_collapsed ? "false" : "true")" @onclick="@(() => _collapsed = !_collapsed)">
+    <button type="button" class="dtop @(_collapsed ? "is-collapsed" : null)" aria-expanded="@(_collapsed ? "false" : "true")" @onclick="ToggleAsync">
         <span class="dchev"><LucideIcon Name="@(_collapsed ? "chevron-right" : "chevron-down")" Size="13"/></span>
         <span class="dname">@DayName</span>
         <span class="dstat">
@@ -14,6 +15,10 @@
                 <span class="part"><span class="dn">&minus;@Day.Removed.Count.ToString("N0")</span> removed</span>
             }
             <span class="part">@("run".ToQuantity(Day.RunCount))</span>
+            @if (IsPhone && _collapsed && Day.Inconclusive.Count > 0)
+            {
+                <span class="part is-problem">@("problem".ToQuantity(Day.Inconclusive.Count))</span>
+            }
         </span>
     </button>
 
@@ -36,18 +41,37 @@
             </div>
         }
 
-        @if (Day.Added.Count > 0)
+        @if (IsPhone)
         {
-            <PosterTrack Ids="Day.Added" Media="Media" OnSelect="OnSelect" OnNeedMedia="OnNeedMedia"/>
+            @if (ShownAdded.Count > 0)
+            {
+                @Rows(ShownAdded, ChangeKind.Added)
+            }
+            @if (ShownRemoved.Count > 0)
+            {
+                @RemovedHeading
+                @Rows(ShownRemoved, ChangeKind.Removed)
+            }
+            @if (HiddenRows > 0)
+            {
+                <button type="button" class="dtoggle" @onclick="ShowAllRowsAsync">
+                    <LucideIcon Name="chevron-down" Size="13"/>
+                    Show @HiddenRows.ToString("N0") more
+                </button>
+            }
         }
-
-        @if (Day.Removed.Count > 0)
+        else
         {
-            <div class="dsub">
-                <LucideIcon Name="trash-2" Size="11"/>
-                Removed
-            </div>
-            <PosterTrack Ids="Day.Removed" Media="Media" OnSelect="OnSelect" OnNeedMedia="OnNeedMedia" Faded="true"/>
+            @if (Day.Added.Count > 0)
+            {
+                <PosterTrack Ids="Day.Added" Media="Media" OnSelect="OnSelect" OnNeedMedia="OnNeedMedia"/>
+            }
+
+            @if (Day.Removed.Count > 0)
+            {
+                @RemovedHeading
+                <PosterTrack Ids="Day.Removed" Media="Media" OnSelect="OnSelect" OnNeedMedia="OnNeedMedia" Faded="true"/>
+            }
         }
 
         @foreach (var entry in Day.Inconclusive)
@@ -107,10 +131,96 @@
     [Parameter] public EventCallback<MatchedMedia> OnSelect { get; set; }
     [Parameter] public EventCallback<IReadOnlyList<MediaId>> OnNeedMedia { get; set; }
     [Parameter] public DateOnly Today { get; set; }
+    [Parameter] public bool StartsFolded { get; set; }
+
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
+    private const int RowBatch = 20;
 
     private bool _collapsed;
 
     private bool _expanded;
+
+    private bool _placedOnPhone;
+
+    private int _rowLimit = RowBatch;
+
+    private readonly HashSet<MediaId> _requested = [];
+
+    private IReadOnlyList<MediaId> ShownAdded => [.. Day.Added.Take(_rowLimit)];
+
+    private IReadOnlyList<MediaId> ShownRemoved => [.. Day.Removed.Take(Math.Max(0, _rowLimit - Day.Added.Count))];
+
+    private int HiddenRows => Math.Max(0, Day.Added.Count + Day.Removed.Count - _rowLimit);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsPhone && !_placedOnPhone)
+        {
+            _placedOnPhone = true;
+            _collapsed = StartsFolded;
+        }
+
+        await RequestRowMediaAsync();
+    }
+
+    private async Task ToggleAsync()
+    {
+        _collapsed = !_collapsed;
+        await RequestRowMediaAsync();
+    }
+
+    private async Task ShowAllRowsAsync()
+    {
+        _rowLimit = int.MaxValue;
+        await RequestRowMediaAsync();
+    }
+
+    private async Task RequestRowMediaAsync()
+    {
+        if (!IsPhone || _collapsed)
+        {
+            return;
+        }
+
+        var wanted = ShownAdded.Concat(ShownRemoved).Where(id => !_requested.Contains(id)).ToList();
+        if (wanted.Count == 0)
+        {
+            return;
+        }
+
+        _requested.UnionWith(wanted);
+        await OnNeedMedia.InvokeAsync(wanted);
+    }
+
+    private RenderFragment RemovedHeading =>
+        @<div class="dsub">
+            <LucideIcon Name="trash-2" Size="11"/>
+            Removed
+        </div>;
+
+    private RenderFragment Rows(IReadOnlyList<MediaId> ids, ChangeKind kind) =>
+        @<div class="day-rows">
+            @foreach (var id in ids)
+            {
+                @if (Media.TryGetValue(id, out var media))
+                {
+                    <ChangeRow @key="id.Value" Item="ItemOf(media, kind)" OnSelect="OnSelect"/>
+                }
+            }
+        </div>;
+
+    private static ChangeItem ItemOf(MatchedMedia media, ChangeKind kind)
+    {
+        return new ChangeItem
+        {
+            Title = media.Details.Title ?? "Unknown title",
+            Id = media.Identity.Id,
+            Media = media,
+            Kind = kind,
+            Subtitle = media.Details.Year?.ToString(),
+        };
+    }
 
     private string DayName =>
         Day.Date == Today ? "Today"

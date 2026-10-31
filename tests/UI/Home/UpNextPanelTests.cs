@@ -38,6 +38,25 @@ public class UpNextPanelTests : BunitContext
 	}
 
 	[Test]
+	public async Task Phone_WithNothingQueuedOrScheduled_ShowsOnlyItsNote()
+	{
+		var cut = this.RenderOnPhone<UpNextPanel>(_ => { }).Component;
+
+		await Assert.That(cut.FindAll(".sect")).IsEmpty();
+		await Assert.That(cut.Find(".panel-note").TextContent).IsEqualTo("nothing scheduled");
+	}
+
+	[Test]
+	public async Task Phone_WithOnlyAScheduledFeed_LeavesOutTheEmptyQueue()
+	{
+		IReadOnlyList<UpNextRow> scheduled = [new("feed 1", "At 04:00", "a day from now", UpNextKind.Scheduled, null)];
+
+		var cut = this.RenderOnPhone<UpNextPanel>(parameters => parameters.Add(panel => panel.Scheduled, scheduled)).Component;
+
+		await Assert.That(cut.FindAll(".sect-title").Select(title => title.TextContent)).IsEquivalentTo(["On a schedule"]);
+	}
+
+	[Test]
 	public async Task Note_WithOneFeedScheduled_CountsItInTheSingular()
 	{
 		IReadOnlyList<UpNextRow> scheduled = [new("feed 1", "At 04:00", "a day from now", UpNextKind.Scheduled, null)];
