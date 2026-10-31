@@ -13,6 +13,10 @@
     color: var(--muted-foreground);
 }
 
+.arr-roles {
+    padding: 12px 16px 0 49px;
+}
+
 .arr-panel {
     position: relative;
     border-top: 1px solid var(--border);
@@ -60,6 +64,7 @@
 }
 
 @media (max-width: 640px) {
+    .arr-roles,
     .arr-panel,
     .arr-shared {
         padding-left: 20px;

@@ -2,6 +2,7 @@ using BlazorBlueprint.Components;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using UI.Shared.Common;
+using UI.Shared.Layout;
 
 namespace UI.Tests.Common;
 
@@ -67,10 +68,42 @@ public class UnfoldRowTests : BunitContext
 		await Assert.That(opened).IsTrue();
 	}
 
+	[Test]
+	public async Task Phone_WithAPhoneSummary_ShowsItInItsOwnColumns()
+	{
+		RenderTree.TryAdd<CascadingValue<bool>>(cascade => cascade.Add(value => value.Name, PhoneLayout.IsPhoneCascade).Add(value => value.Value, true));
+		RenderFragment phone = builder => builder.AddMarkupContent(0, "<span class=\"phone\">TMDB</span>");
+
+		var cut = RenderRow(parameters => parameters.Add(row => row.PhoneColumns, "grid-cols-[15px_minmax(0,1fr)_auto]").Add(row => row.PhoneSummary, phone));
+
+		var trigger = cut.Find("button");
+		await Assert.That(trigger.ClassList).Contains("grid-cols-[15px_minmax(0,1fr)_auto]");
+		await Assert.That(trigger.ClassList).DoesNotContain("grid-cols-[15px_1fr_auto]");
+		await Assert.That(trigger.QuerySelectorAll(".summary")).IsEmpty();
+		await Assert.That(trigger.QuerySelector(".phone")!.TextContent).IsEqualTo("TMDB");
+	}
+
+	[Test]
+	public async Task Desktop_WithAPhoneSummary_KeepsTheSummary()
+	{
+		RenderFragment phone = builder => builder.AddMarkupContent(0, "<span class=\"phone\">TMDB</span>");
+
+		var cut = RenderRow(parameters => parameters.Add(row => row.PhoneColumns, "grid-cols-[15px_minmax(0,1fr)_auto]").Add(row => row.PhoneSummary, phone));
+
+		await Assert.That(cut.Find("button").ClassList).Contains("grid-cols-[15px_1fr_auto]");
+		await Assert.That(cut.FindAll(".phone")).IsEmpty();
+	}
+
 	private IRenderedComponent<UnfoldRow> RenderRow(Func<ComponentParameterCollectionBuilder<UnfoldRow>, ComponentParameterCollectionBuilder<UnfoldRow>> extra)
 	{
 		return Render<UnfoldRow>(parameters =>
-			extra(parameters.Add(row => row.TriggerClass, "grid-cols-[15px_1fr_auto] py-3").Add(row => row.Summary, Summary).Add(row => row.Details, Details))
+			extra(
+				parameters
+					.Add(row => row.Columns, "grid-cols-[15px_1fr_auto]")
+					.Add(row => row.TriggerClass, "py-3")
+					.Add(row => row.Summary, Summary)
+					.Add(row => row.Details, Details)
+			)
 		);
 	}
 }

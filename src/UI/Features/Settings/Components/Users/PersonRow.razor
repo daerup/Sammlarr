@@ -7,49 +7,21 @@
 @inject Notifier Notifier
 
 <UnfoldRow Class="@(Colour is { } ? "person-row bird-edge" : "person-row")" Style="@ColourStyle" Divided="true" data-person="@Name" Open="Open" OpenChanged="OpenChanged"
-           TriggerClass="grid-cols-[15px_1fr_auto_auto] py-3">
+           Columns="grid-cols-[15px_1fr_auto_auto]" PhoneColumns="grid-cols-[15px_minmax(0,1fr)_auto]" TriggerClass="py-3">
     <Summary>
-        <span class="flex min-w-0 items-center gap-2.5">
-            @switch (Person)
-            {
-                case JoinedPerson joined when SignIn == AuthProvider.Plex && joined.User.AvatarUrl.Length > 0:
-                    <BbAvatar Size="AvatarSize.Small">
-                        <BbAvatarImage Source="@joined.User.AvatarUrl" Alt="@Name"/>
-                        <BbAvatarFallback>
-                            <PersonAvatar Person="joined.User.Id" Colour="Colour!"/>
-                        </BbAvatarFallback>
-                    </BbAvatar>
-                    break;
-                case JoinedPerson joined:
-                    <PersonAvatar Person="joined.User.Id" Colour="Colour!"/>
-                    break;
-                case InvitedPerson:
-                    <BbAvatar Size="AvatarSize.Small">
-                        <BbAvatarFallback>
-                            <LucideIcon Name="user" Size="15"/>
-                        </BbAvatarFallback>
-                    </BbAvatar>
-                    break;
-            }
-            <span class="flex min-w-0 flex-col">
-                <span class="flex items-center gap-2">
-                    <span class="truncate text-sm font-medium">@Name</span>
-                    @if (IsYou)
-                    {
-                        <span class="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">You</span>
-                    }
-                </span>
-                <span class="truncate text-xs text-muted-foreground" data-owns>@Owns</span>
-            </span>
-        </span>
+        @Identity(Owns)
         <BbBadge Variant="@(Role == UserRole.Admin ? BadgeVariant.Default : BadgeVariant.Outline)" Class="h-5 text-[10px]">@Role</BbBadge>
-        <span class="flex items-center gap-1.5 whitespace-nowrap text-xs @Status.Tone" data-status>
-            <span class="inline-block size-1.5 rounded-full @Status.Dot"></span>
-            @Status.Text
-        </span>
+        @StatusLine
     </Summary>
+    <PhoneSummary>
+        @Identity(PhoneLine)
+        @if (!Active)
+        {
+            @StatusLine
+        }
+    </PhoneSummary>
     <Details>
-        <div class="flex flex-col gap-3 pb-4 pl-[61px] pr-4 pt-3">
+        <div class="flex flex-col gap-3 pb-4 pl-[61px] pr-4 pt-3 max-md:pl-[43px]">
             <p class="text-[13px] text-muted-foreground">@About</p>
             <div class="flex flex-wrap items-center gap-2">
                 @switch (Person)
@@ -269,4 +241,49 @@
     }
 
     private sealed record Issued(string Title, string Description, string Link);
+
+    private bool Active => Person is JoinedPerson joined && joined.LockedUntil.IsNone();
+
+    private string PhoneLine => Person is InvitedPerson ? Owns : $"{Role} · {Owns}";
+
+    private RenderFragment Identity(string line) =>
+        @<span class="flex min-w-0 items-center gap-2.5">
+            @switch (Person)
+            {
+                case JoinedPerson joined when SignIn == AuthProvider.Plex && joined.User.AvatarUrl.Length > 0:
+                    <BbAvatar Size="AvatarSize.Small">
+                        <BbAvatarImage Source="@joined.User.AvatarUrl" Alt="@Name"/>
+                        <BbAvatarFallback>
+                            <PersonAvatar Person="joined.User.Id" Colour="Colour!"/>
+                        </BbAvatarFallback>
+                    </BbAvatar>
+                    break;
+                case JoinedPerson joined:
+                    <PersonAvatar Person="joined.User.Id" Colour="Colour!"/>
+                    break;
+                case InvitedPerson:
+                    <BbAvatar Size="AvatarSize.Small">
+                        <BbAvatarFallback>
+                            <LucideIcon Name="user" Size="15"/>
+                        </BbAvatarFallback>
+                    </BbAvatar>
+                    break;
+            }
+            <span class="flex min-w-0 flex-col">
+                <span class="flex items-center gap-2">
+                    <span class="truncate text-sm font-medium">@Name</span>
+                    @if (IsYou)
+                    {
+                        <span class="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">You</span>
+                    }
+                </span>
+                <span class="truncate text-xs text-muted-foreground" data-owns>@line</span>
+            </span>
+        </span>;
+
+    private RenderFragment StatusLine =>
+        @<span class="flex items-center gap-1.5 whitespace-nowrap text-xs @Status.Tone" data-status>
+            <span class="inline-block size-1.5 rounded-full @Status.Dot"></span>
+            @Status.Text
+        </span>;
 }

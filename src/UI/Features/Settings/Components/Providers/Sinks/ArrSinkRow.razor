@@ -11,48 +11,23 @@
 @inject MediaProviderBrandingService Branding
 
 <UnfoldRow id="@ProviderRows.Id(new Arr())" Class="arr-row scroll-mt-20" Edge="@Branding.Color(SinkKind.Arr.Service)" Open="Open" OpenChanged="OpenChanged"
-           TriggerClass="arr-row-head grid-cols-[15px_190px_1fr_auto] py-4">
+           Columns="grid-cols-[15px_190px_1fr_auto]" PhoneColumns="grid-cols-[15px_minmax(0,1fr)_auto]" TriggerClass="arr-row-head py-4">
     <Summary>
-        <span class="arr-lockup">
-            <BrandedLogo Brand="Branding.GetBrandingInfo(RemoteService.Radarr)" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
-            Radarr
-            <span class="arr-lockup-plus">+</span>
-            <BrandedLogo Brand="Branding.GetBrandingInfo(RemoteService.Sonarr)" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
-            Sonarr
-        </span>
+        @Lockup
         <RoleIcons Key="new Arr()"/>
-        <span>
-            @if (SettingUp)
-            {
-                <BbBadge Variant="BadgeVariant.Outline" Class="@WarnBadge">
-                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--alert-warning)]"></span>
-                    Needs setup
-                </BbBadge>
-            }
-            else if (_config is null || States.Contains(ArrConnectionState.Testing))
-            {
-                <BbBadge Variant="BadgeVariant.Secondary" Class="h-6 items-center gap-1.5 text-muted-foreground">
-                    <BbSpinner Size="SpinnerSize.Small"/>
-                    Checking…
-                </BbBadge>
-            }
-            else if (Silent.Count > 0)
-            {
-                <BbBadge Variant="BadgeVariant.Outline" Class="@WarnBadge">
-                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--alert-warning)]"></span>
-                    @Silent.Select(app => app.Name).Humanize(Notation.Words) not answering
-                </BbBadge>
-            }
-            else
-            {
-                <BbBadge Variant="BadgeVariant.Outline" Class="h-6 items-center gap-1.5 text-success border-success">
-                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-success"></span>
-                    Connected
-                </BbBadge>
-            }
-        </span>
+        @Status
     </Summary>
+    <PhoneSummary>
+        <span class="min-w-0 overflow-hidden">@Lockup</span>
+        @Status
+    </PhoneSummary>
     <Details>
+        @if (IsPhone)
+        {
+            <div class="arr-roles">
+                <RoleIcons Key="new Arr()" Named="true"/>
+            </div>
+        }
         @if (_config is { } config)
         {
             <div class="arr-panel" style="--seg: @SegColour">
@@ -138,8 +113,9 @@
 </UnfoldRow>
 
 @code {
-    [Parameter] public bool Open { get; set; }
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
 
+    [Parameter] public bool Open { get; set; }
 
     [Parameter] public EventCallback<bool> OpenChanged { get; set; }
 
@@ -187,6 +163,8 @@
     private bool BothReady => _config is { } config && Apps.All(app => _apps[app].State == ArrConnectionState.Connected && IsChosen(config.Of(app)));
 
     private IReadOnlyList<ArrApp> Silent => [.. Apps.Where(app => _apps[app].State != ArrConnectionState.Connected)];
+
+    private string SilentText => IsPhone ? "Not answering" : $"{Silent.Select(app => app.Name).Humanize(Notation.Words)} not answering";
 
     private const string TagsTab = "Tags";
 
@@ -350,4 +328,45 @@
 
         public static AppStatus Of(ArrConnectionState state) => new(state, string.Empty, new ArrInstanceChoices([], []));
     }
+
+    private RenderFragment Lockup =>
+        @<span class="arr-lockup">
+            <BrandedLogo Brand="Branding.GetBrandingInfo(RemoteService.Radarr)" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
+            Radarr
+            <span class="arr-lockup-plus">+</span>
+            <BrandedLogo Brand="Branding.GetBrandingInfo(RemoteService.Sonarr)" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
+            Sonarr
+        </span>;
+
+    private RenderFragment Status =>
+        @<span>
+            @if (SettingUp)
+            {
+                <BbBadge Variant="BadgeVariant.Outline" Class="@WarnBadge">
+                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--alert-warning)]"></span>
+                    Needs setup
+                </BbBadge>
+            }
+            else if (_config is null || States.Contains(ArrConnectionState.Testing))
+            {
+                <BbBadge Variant="BadgeVariant.Secondary" Class="h-6 items-center gap-1.5 text-muted-foreground">
+                    <BbSpinner Size="SpinnerSize.Small"/>
+                    Checking…
+                </BbBadge>
+            }
+            else if (Silent.Count > 0)
+            {
+                <BbBadge Variant="BadgeVariant.Outline" Class="@WarnBadge">
+                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--alert-warning)]"></span>
+                    @SilentText
+                </BbBadge>
+            }
+            else
+            {
+                <BbBadge Variant="BadgeVariant.Outline" Class="h-6 items-center gap-1.5 text-success border-success">
+                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-success"></span>
+                    Connected
+                </BbBadge>
+            }
+        </span>;
 }
