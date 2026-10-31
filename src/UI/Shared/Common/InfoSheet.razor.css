@@ -1,0 +1,16 @@
+.info-sheet-handle {
+    display: grid;
+    flex: none;
+    place-items: center;
+    height: 22px;
+    touch-action: none;
+}
+
+.info-sheet-handle::after {
+    content: "";
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--muted-foreground);
+    opacity: 0.4;
+}

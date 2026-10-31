@@ -620,6 +620,10 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
 }
 
 @layer components {
+    .info-sheet {
+        translate: 0 var(--sheet-drag, 0px);
+    }
+
     .menu-row {
         display: flex;
         align-items: center;

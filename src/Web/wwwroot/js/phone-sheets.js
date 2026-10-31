@@ -65,6 +65,7 @@
         handle.addEventListener("pointerdown", event => {
             start = event.clientY;
             distance = 0;
+            sheet.portal.style.transition = "none";
             handle.setPointerCapture(event.pointerId);
         });
         handle.addEventListener("pointermove", event => {
@@ -75,6 +76,7 @@
         const release = () => {
             if (start === null) return;
             start = null;
+            sheet.portal.style.removeProperty("transition");
             if (distance > CLOSE_DISTANCE) close(sheet);
             else sheet.portal.style.removeProperty("--sheet-drag");
         };
@@ -108,6 +110,8 @@
     const opened = portal => {
         const sheet = { portal, id: crypto.randomUUID(), entry: false, dialog: isDialog(portal) };
         if (restyles(portal)) restyle(sheet);
+        const handle = portal.querySelector("[data-sheet-handle]");
+        if (handle) drag(sheet, handle);
         open.push(sheet);
         remember(sheet);
     };

@@ -160,6 +160,34 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	}
 
 	[Test]
+	public async Task HelpTip_Tapped_OpensItsSheetWithoutFocusingTheField()
+	{
+		var page = await E2EApp.AdminAt(Routes.CreateFeed);
+		var help = page.Button("About Name");
+		var sheet = page.Modal("Name");
+
+		await help.TapAsync();
+
+		await Expect(sheet).ToBeVisibleAsync();
+		await sheet.GetByRole(AriaRole.Heading).TapAsync();
+		await Expect(page.Locator("#name")).Not.ToBeFocusedAsync();
+		await page.GoBackAsync();
+		await Expect(sheet).ToHaveCountAsync(0);
+		await page.ShouldBeAtAsync(Routes.CreateFeed);
+
+		await help.TapAsync();
+		var handle = sheet.Locator("[data-sheet-handle]");
+		await handle.HoverAsync();
+		var box = (await handle.BoundingBoxAsync())!;
+		await page.Mouse.DownAsync();
+		await page.Mouse.MoveAsync(box.X + box.Width / 2, box.Y + 140, new MouseMoveOptions { Steps = 6 });
+		await page.Mouse.UpAsync();
+
+		await Expect(sheet).ToHaveCountAsync(0);
+		await page.WaitForFunctionAsync("() => history.state?.sheet === undefined");
+	}
+
+	[Test]
 	public async Task Menu_OnBack_ClosesWithoutLeavingThePage()
 	{
 		var page = await E2EApp.AdminAt(Routes.Browse);
