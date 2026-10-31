@@ -147,6 +147,28 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	}
 
 	[Test]
+	public async Task Providers_OnAPhone_ListTheServicesWithinTheScreen()
+	{
+		var page = await E2EApp.AdminAt(SettingsPage.Section("providers"));
+		var feeds = page.Locator(".svc-row[data-role=Feeds]");
+		await Expect(feeds).ToBeVisibleAsync(Wait.Settle);
+
+		await Assert.That(await page.OverflowingAsync()).IsEmpty();
+		await page.Locator(".svc-row[data-role=Wantlist] .map-chip").TapAsync();
+		await Expect(page.Locator(".as-sheet [role=menuitem]").First).ToBeVisibleAsync(Wait.Settle);
+	}
+
+	[Test]
+	public async Task Notifications_OnAPhone_FitTheScreen()
+	{
+		var page = await E2EApp.AdminAt(SettingsPage.Section("notifications"));
+		await Expect(page.Locator("header .phone-title")).ToHaveTextAsync("Notifications", Wait.Settle);
+		await Expect(page.Locator("[data-client]").Or(page.GetByText("No clients yet")).First).ToBeVisibleAsync(Wait.Settle);
+
+		await Assert.That(await page.OverflowingAsync()).IsEmpty();
+	}
+
+	[Test]
 	public async Task OptionList_OpensAsASheetAcrossTheScreen()
 	{
 		var page = await E2EApp.AdminAt(Routes.CreateFeed);

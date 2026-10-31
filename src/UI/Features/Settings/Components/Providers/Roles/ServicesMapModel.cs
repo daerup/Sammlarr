@@ -85,6 +85,8 @@ internal sealed record ServicesMapModel(
 
 	internal IReadOnlyList<MapTrace> FeedLines => [.. Traces.Where(trace => trace.Role == ServiceRoles.Feeds.Name)];
 
+	internal IReadOnlyList<Service> Serving(MapRole role) => role.Provider is { } provider ? [provider] : [.. FeedLines.Select(line => line.Provider)];
+
 	internal static ServicesMapModel For(ProviderConfig config) => For(config, [.. Enum.GetValues<FeedProvider>().Select(feed => feed.Service).Distinct()]);
 
 	internal static ServicesMapModel For(ProviderConfig config, IReadOnlyList<Service> feeds)

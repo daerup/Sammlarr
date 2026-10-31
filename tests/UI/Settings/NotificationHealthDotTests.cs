@@ -44,4 +44,27 @@ public class NotificationHealthDotTests : BunitContext
 
 		await Assert.That(cut.Markup).Contains("16 minutes ago").And.Contains("retry 10 minutes from now · HTTP 500");
 	}
+
+	[Test]
+	public async Task Dot_OnAPhoneWithNoDeliveries_OpensASheetSayingSo()
+	{
+		var cut = this.RenderOnPhone<NotificationHealthDot>(parameters => parameters.Add(dot => dot.Outcomes, []));
+
+		await cut.Component.Find("button[aria-label='No deliveries yet']").ClickAsync();
+
+		var sheet = cut.Portal.WaitForElement("[data-sheet][aria-label='Deliveries']");
+		await Assert.That(sheet.TextContent).Contains("No deliveries yet");
+	}
+
+	[Test]
+	public async Task Dot_WhenNotInteractive_OffersNothingToTapAndNamesAFailureInItsColour()
+	{
+		var failed = new NotificationDeliveryOutcome(new Failed("HTTP 500"), NotificationEventType.WantlistSyncCompleted, Now.AddMinutes(-3));
+
+		var cut = Render<NotificationHealthDot>(parameters => parameters.Add(dot => dot.Outcomes, [failed]).Add(dot => dot.Interactive, false));
+
+		await Assert.That(cut.FindAll("button")).IsEmpty();
+		await Assert.That(cut.Find("[aria-hidden=true]").ClassList).Contains("bg-destructive");
+		await Assert.That(cut.Find(".sr-only").TextContent).IsEqualTo("A delivery failed");
+	}
 }

@@ -9,8 +9,8 @@
 @if (Open)
 {
     <div class="fixed inset-0 z-50 overflow-auto bg-black/50 backdrop-blur-sm" @onclick="TryClose">
-        <div class="mx-auto my-[6vh] flex w-max items-start gap-6">
-            <div @onclick:stopPropagation="true" class="@($"flex w-[42rem] shrink-0 flex-col gap-5 overflow-y-auto rounded-lg border bg-background p-6 shadow-xl {(_client is null ? "max-h-[88vh]" : "h-[88vh]")}")">
+        <div class="mx-auto my-[6vh] flex w-max items-start gap-6 max-md:my-0 max-md:w-full max-md:flex-col max-md:items-stretch max-md:gap-2">
+            <div @onclick:stopPropagation="true" class="@($"flex w-[42rem] shrink-0 flex-col gap-5 overflow-y-auto rounded-lg border bg-background p-6 shadow-xl max-md:h-auto max-md:max-h-none max-md:shadow-none max-md:w-full max-md:overflow-visible max-md:rounded-none max-md:border-x-0 max-md:p-4 {(_client is null ? "max-h-[88vh]" : "h-[88vh]")}")">
             <div class="flex items-start justify-between gap-4">
                 <h2 class="text-lg font-semibold">@(_isCreate ? "Add alert" : "Edit alert")</h2>
                 <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" OnClick="TryClose" Disabled="_saving" AriaLabel="Close">
@@ -82,11 +82,11 @@
 
         @if (_previewOpen && _client is { } previewClient && _selected.Count > 0)
         {
-            <div @onclick:stopPropagation="true" class="flex max-h-[88vh] shrink-0 flex-col flex-wrap content-start gap-6">
+            <div @onclick:stopPropagation="true" class="flex max-h-[88vh] shrink-0 flex-col flex-wrap content-start gap-6 max-md:max-h-none max-md:flex-nowrap max-md:gap-2">
                 @foreach (var option in NotificationEventCatalog.Subscribable.Where(o => _selected.Contains(o.EventType)))
                 {
                     var context = NotificationSampleContext.For(option.EventType);
-                    <div class="flex w-[34rem] shrink-0 flex-col gap-3 rounded-lg border bg-background p-6 shadow-xl">
+                    <div class="flex w-[34rem] shrink-0 flex-col gap-3 rounded-lg border bg-background p-6 shadow-xl max-md:w-full max-md:rounded-none max-md:border-x-0 max-md:p-4 max-md:shadow-none">
                         <p class="text-sm font-medium">Preview — @option.Label</p>
                         @if (previewClient.Channel == NotificationChannel.Webhook)
                         {
