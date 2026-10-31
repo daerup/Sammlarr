@@ -11,10 +11,21 @@ public class CircuitFailureSinkTests
 		"   at Microsoft.AspNetCore.Components.Web.Virtualization.VirtualizeJsInterop.DisposeAsync()",
 	];
 
+	private static readonly string[] NavigationLockDisposeCancelled =
+	[
+		"System.Threading.Tasks.TaskCanceledException: A task was canceled.",
+		"   at Microsoft.JSInterop.JSRuntime.InvokeAsync[TValue](Int64 targetInstanceId, String identifier, JSCallType callType, Object[] args)",
+		"   at Microsoft.JSInterop.JSRuntimeExtensions.InvokeVoidAsync(IJSRuntime jsRuntime, String identifier, Object[] args)",
+		"   at Microsoft.AspNetCore.Components.Routing.NavigationLock.System.IAsyncDisposable.DisposeAsync()",
+	];
+
+	public static IEnumerable<Func<string[]>> FrameworkDisposalsCancelled() => [() => VirtualizeDisposeCancelled, () => NavigationLockDisposeCancelled];
+
 	[Test]
-	public async Task AssertNone_WhenOnlyVirtualizeDisposeWasCancelled_Passes()
+	[MethodDataSource(nameof(FrameworkDisposalsCancelled))]
+	public async Task AssertNone_WhenOnlyAFrameworkDisposalWasCancelled_Passes(string[] cancelled)
 	{
-		var crashed = Crash(VirtualizeDisposeCancelled);
+		var crashed = Crash(cancelled);
 
 		await Assert.That(() => CircuitFailureSink.AssertNone(crashed)).ThrowsNothing();
 	}

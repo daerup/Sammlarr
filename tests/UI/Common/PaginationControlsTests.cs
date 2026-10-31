@@ -71,7 +71,7 @@ public class PaginationControlsTests : BunitContext
 	}
 
 	[Test]
-	public async Task Dispose_WhileItsModuleIsStillLoading_ReportsNoError()
+	public async Task Dispose_WhileItsModuleIsStillLoading_ReleasesItOnceItArrives()
 	{
 		var import = new TaskCompletionSource<IJSObjectReference>();
 		var js = IJSRuntime.Mock();
@@ -86,9 +86,89 @@ public class PaginationControlsTests : BunitContext
 
 		await Renderer.Dispatcher.InvokeAsync(DisposeComponentsAsync);
 		await Renderer.Dispatcher.InvokeAsync(() => import.SetResult(module.Object));
+		await SettledAsync();
+
+		module.DisposeAsync().WasCalled(Times.Once);
+		await Assert.That(Renderer.UnhandledException.IsCompleted).IsFalse();
+	}
+
+	[Test]
+	public async Task Watch_OvertakenByANewerOne_StopsOnlyTheStaleWatcher()
+	{
+		var started = new TaskCompletionSource<IJSObjectReference>();
+		var js = IJSRuntime.Mock();
+		var module = IJSObjectReference.Mock();
+		var stale = IJSObjectReference.Mock();
+		var fresh = IJSObjectReference.Mock();
+		var watches = 0;
+		js.InvokeAsync<IJSObjectReference>(Any<string>(), Any<object?[]?>()).Returns(module.Object);
+		module
+			.InvokeAsync<IJSObjectReference>(Any<string>(), Any<object?[]?>())
+			.Returns((_, _) => watches++ == 0 ? new ValueTask<IJSObjectReference>(started.Task) : new ValueTask<IJSObjectReference>(fresh.Object));
+		Services.AddSingleton(js.Object);
+		var cut = Render(totalPages: 4);
+
+		cut.Render(parameters => parameters.Add(pager => pager.TotalPages, 1));
+		cut.Render(parameters => parameters.Add(pager => pager.TotalPages, 4));
+		await Renderer.Dispatcher.InvokeAsync(() => started.SetResult(stale.Object));
+		await SettledAsync();
+
+		stale.DisposeAsync().WasCalled(Times.Once);
+		fresh.DisposeAsync().WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task Watch_AfterTheImportTimedOut_ImportsAgain()
+	{
+		var js = IJSRuntime.Mock();
+		var imports = 0;
+		js.InvokeAsync<IJSObjectReference>(Any<string>(), Is<object?[]?>(args => args![0] is "./js/pager.js"))
+			.Returns(
+				(_, _) =>
+					imports++ == 0
+						? ValueTask.FromException<IJSObjectReference>(new TaskCanceledException())
+						: new ValueTask<IJSObjectReference>(IJSObjectReference.Mock().Object)
+			);
+		Services.AddSingleton(js.Object);
+		var cut = Render(totalPages: 4);
+
+		cut.Render(parameters => parameters.Add(pager => pager.TotalPages, 1));
+		cut.Render(parameters => parameters.Add(pager => pager.TotalPages, 4));
+
+		await Assert.That(imports).IsEqualTo(2);
+		await Assert.That(Renderer.UnhandledException.IsCompleted).IsFalse();
+	}
+
+	[Test]
+	public async Task Watch_WhenTheCircuitIsGone_ReportsNoError()
+	{
+		var js = IJSRuntime.Mock();
+		js.InvokeAsync<IJSObjectReference>(Any<string>(), Any<object?[]?>()).Throws(new JSDisconnectedException("gone"));
+		Services.AddSingleton(js.Object);
+
+		Render(totalPages: 4);
 
 		await Assert.That(Renderer.UnhandledException.IsCompleted).IsFalse();
 	}
+
+	[Test]
+	public async Task Dispose_WhenTheWatcherIsAlreadyGone_ReportsNoError()
+	{
+		var js = IJSRuntime.Mock();
+		var module = IJSObjectReference.Mock();
+		var watcher = IJSObjectReference.Mock();
+		js.InvokeAsync<IJSObjectReference>(Any<string>(), Any<object?[]?>()).Returns(module.Object);
+		module.InvokeAsync<IJSObjectReference>(Any<string>(), Any<object?[]?>()).Returns(watcher.Object);
+		watcher.DisposeAsync().Throws(new ObjectDisposedException("JSObjectReference"));
+		Services.AddSingleton(js.Object);
+		Render(totalPages: 4);
+
+		await Renderer.Dispatcher.InvokeAsync(DisposeComponentsAsync);
+
+		await Assert.That(Renderer.UnhandledException.IsCompleted).IsFalse();
+	}
+
+	private Task SettledAsync() => Renderer.Dispatcher.InvokeAsync(() => { });
 
 	private IRenderedComponent<PaginationControls> Render(int totalPages) =>
 		Render<PaginationControls>(parameters => parameters.Add(pager => pager.TotalPages, totalPages));
