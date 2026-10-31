@@ -31,6 +31,21 @@
     border-radius: 15px;
 }
 
+@media (width < 48rem) {
+    .search-modal-content {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        max-height: none;
+        padding: calc(8px + env(safe-area-inset-top)) 16px max(12px, env(safe-area-inset-bottom));
+        border-radius: 0;
+    }
+
+    .search-modal-backdrop {
+        display: none;
+    }
+}
+
 .search-modal-body {
     min-height: 0;
     flex: 1;

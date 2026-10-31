@@ -186,6 +186,10 @@
         }
     }, { capture: true });
 
+    document.addEventListener("keydown", event => {
+        if (phone.matches && event.key === "Enter" && event.target.matches?.('input[enterkeyhint="search"]')) event.target.blur();
+    }, { capture: true });
+
     new MutationObserver(sync).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["data-state"] });
     phone.addEventListener("change", sync);
 })();

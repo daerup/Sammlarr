@@ -102,6 +102,34 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	}
 
 	[Test]
+	public async Task Search_FromTheBar_TakesTheScreen()
+	{
+		var page = await E2EApp.AdminAt(Routes.Wantlist);
+		var trigger = page.Button("Search for a movie or show");
+		var search = page.Modal("Search");
+		await Expect(trigger).ToBeVisibleAsync(Wait.Settle);
+
+		await trigger.TapAsync();
+
+		var field = page.Locator("#search-input");
+		await Expect(field).ToBeFocusedAsync();
+		await page.WaitForFunctionAsync(
+			"() => { const box = document.querySelector('.search-modal-content').getBoundingClientRect(); return box.top === 0 && box.left === 0 && box.width === innerWidth && Math.abs(box.height - innerHeight) < 1; }"
+		);
+		await page.Keyboard.PressAsync("Enter");
+		await Expect(field).Not.ToBeFocusedAsync();
+		await search.Button("Cancel").TapAsync();
+		await Expect(search).ToHaveCountAsync(0);
+		await page.WaitForFunctionAsync("() => history.state?.sheet === undefined");
+
+		await trigger.TapAsync();
+		await Expect(search).ToBeVisibleAsync();
+		await page.GoBackAsync();
+		await Expect(search).ToHaveCountAsync(0);
+		await page.ShouldBeAtAsync(Routes.Wantlist);
+	}
+
+	[Test]
 	public async Task OptionList_OpensAsASheetAcrossTheScreen()
 	{
 		var page = await E2EApp.AdminAt(Routes.CreateFeed);

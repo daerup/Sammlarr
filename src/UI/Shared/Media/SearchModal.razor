@@ -18,7 +18,7 @@
         <div tabindex="0" class="sr-only" aria-hidden="true" @onfocus="FocusTrapLoopAsync"></div>
 
         <div class="search-modal-content">
-            <div class="flex items-start justify-between gap-4">
+            <div class="flex items-start justify-between gap-4 max-md:hidden">
                 <div>
                     <h2 class="text-lg font-bold tracking-wide">@SearchModalTitle</h2>
                     <p class="text-sm text-muted-foreground">@SearchModalDescription</p>
@@ -28,14 +28,15 @@
                 </BbButton>
             </div>
 
-            <div class="search-modal-body space-y-4 mt-4">
+            <div class="search-modal-body space-y-4 mt-4 max-md:mt-0">
                 <div class="flex items-center gap-2">
                     <BbField Class="flex-1">
                         <BbFieldLabel For="search-input" Class="sr-only">Search query</BbFieldLabel>
                         <BbFieldContent>
                             <input id="search-input"
-                                   class="w-full border-input bg-secondary file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 min-w-0 rounded-md border px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                   class="w-full border-input bg-secondary file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 max-md:h-11 min-w-0 rounded-md border px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                                    type="search"
+                                   enterkeyhint="search"
                                    @bind="_searchQuery"
                                    @bind:event="oninput"
                                    @onkeydown="HandleSearchKeyDown"
@@ -44,7 +45,7 @@
                                    placeholder="Search title"/>
                         </BbFieldContent>
                     </BbField>
-                    <BbButton Variant="ButtonVariant.Outline" OnClick="SearchAsync" Disabled="@_isSearching" Class="bg-secondary">
+                    <BbButton Variant="ButtonVariant.Outline" OnClick="SearchAsync" Disabled="@_isSearching" Class="bg-secondary max-md:hidden">
                         @if (_isSearching)
                         {
                             <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
@@ -56,6 +57,7 @@
                             <span>Search</span>
                         }
                     </BbButton>
+                    <BbButton Variant="ButtonVariant.Ghost" Class="h-11 px-2 md:hidden" OnClick="CloseAsync">Cancel</BbButton>
                 </div>
 
                 @if (!string.IsNullOrWhiteSpace(_searchHint))
@@ -79,7 +81,7 @@
 
                 @if (_isSearching)
                 {
-                    <div class="search-modal-results scrollbar-thin space-y-2 pr-1" aria-hidden="true" tabindex="-1">
+                    <div class="search-modal-results scrollbar-thin space-y-2 pr-1 max-md:space-y-0" aria-hidden="true" tabindex="-1">
                         <AutoSkeletons Preset="AutoSkeletonPreset.MediaDetailTile" Count="4"/>
                     </div>
                 }
@@ -109,7 +111,7 @@
                             </BbTabsList>
                         </BbTabs>
                     }
-                    <div class="search-modal-results scrollbar-thin space-y-2 pr-1" tabindex="-1">
+                    <div class="search-modal-results scrollbar-thin space-y-2 pr-1 max-md:space-y-0" tabindex="-1">
                         @foreach (var result in ShownResults)
                         {
                             <MediaDetailTile @key="result.Key"
