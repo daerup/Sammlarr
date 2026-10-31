@@ -52,6 +52,16 @@ public class InviteDialogTests : BunitContext
 		await Assert.That(footer.QuerySelector("[data-dialog-commit]")!.TextContent.Trim()).IsEqualTo("Create link");
 	}
 
+	[Test]
+	public async Task Dialog_KeepsItsCloseButtonLastSoPhonesCanHideIt()
+	{
+		var cut = await OpenDialogAsync();
+
+		var close = cut.Find("[role=dialog]").LastElementChild!;
+		await Assert.That(close.TagName).IsEqualTo("BUTTON");
+		await Assert.That(close.TextContent).Contains("Close");
+	}
+
 	private async Task<IRenderedComponent<IComponent>> OpenAsync(string username)
 	{
 		var cut = await OpenDialogAsync();

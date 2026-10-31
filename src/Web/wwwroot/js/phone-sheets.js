@@ -8,20 +8,19 @@
     const waiting = [];
     const push = history.pushState.bind(history);
     const replace = history.replaceState.bind(history);
+    const go = history.go.bind(history);
     let quiet = 0;
     let href = location.href;
 
-    const portals = () => document.querySelectorAll('[data-bb-portal][data-state="open"], [data-sheet][data-state="open"]');
+    const portals = () => document.querySelectorAll('[data-bb-portal][data-state="open"], [data-sheet][data-state="open"], [aria-modal="true"]:not([data-state="closed"])');
     const isTooltip = portal => portal.matches(":has(> [role=tooltip])");
     const isModal = portal => portal.querySelector('[aria-modal="true"]') !== null;
     const restyles = portal => portal.matches("[data-bb-portal]") && !isTooltip(portal) && !isModal(portal);
-    const tracks = portal => portal.matches("[data-sheet]") || restyles(portal);
-    const isOpen = sheet => sheet.portal.isConnected && sheet.portal.dataset.state === "open";
+    const isDialog = portal => portal.matches('[data-sheet], [aria-modal="true"]');
+    const tracks = portal => isDialog(portal) || restyles(portal);
+    const isOpen = sheet => sheet.portal.isConnected && sheet.portal.dataset.state !== "closed";
     const top = () => open.findLast(sheet => sheet.entry);
     const current = () => open.find(sheet => sheet.entry && sheet.id === history.state?.sheet);
-    const owns = (sheet, element) => sheet.portal === element || sheet.portal.contains(element);
-    const modals = () => [...document.querySelectorAll('[aria-modal="true"]:not([data-state="closed"])')]
-        .filter(dialog => !open.some(sheet => owns(sheet, dialog)));
     const closing = sheet => sheet.portal.style.pointerEvents === "none";
 
     const mark = sheet => {
@@ -36,10 +35,17 @@
 
     const goBackQuietly = steps => {
         quiet++;
-        history.go(-steps);
+        go(-steps);
     };
 
     const escape = sheet => {
+        const cancel = sheet.portal.matches("[role=alertdialog]")
+            ? sheet.portal.querySelector("[data-dialog-cancel]") ?? sheet.portal.querySelector(":scope > div:last-child > button:first-child")
+            : null;
+        if (cancel) {
+            cancel.click();
+            return;
+        }
         const target = sheet.portal.querySelector("[role=listbox], [role=menu]") ?? sheet.portal;
         target.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
     };
@@ -100,7 +106,7 @@
     };
 
     const opened = portal => {
-        const sheet = { portal, id: crypto.randomUUID(), entry: false, under: modals() };
+        const sheet = { portal, id: crypto.randomUUID(), entry: false, dialog: isDialog(portal) };
         if (restyles(portal)) restyle(sheet);
         open.push(sheet);
         remember(sheet);
@@ -114,13 +120,13 @@
         });
         const steps = closed.filter(sheet => sheet.entry).length;
         if (steps > 0 && closed.some(sheet => sheet.id === history.state?.sheet)) goBackQuietly(steps);
-        if (open.length > 0) {
-            const shown = modals();
-            open.forEach(sheet => sheet.portal.classList.toggle("sheet-under", shown.some(dialog => !sheet.under.includes(dialog))));
+        if (phone.matches) {
+            portals().forEach(portal => {
+                if (!open.some(sheet => sheet.portal === portal) && tracks(portal)) opened(portal);
+            });
         }
-        if (!phone.matches) return;
-        portals().forEach(portal => {
-            if (!open.some(sheet => sheet.portal === portal) && tracks(portal)) opened(portal);
+        open.forEach((sheet, index) => {
+            if (sheet.handle) sheet.portal.classList.toggle("sheet-under", open.slice(index + 1).some(later => later.dialog));
         });
     };
 
@@ -133,6 +139,17 @@
         else push(state, unused, url);
         href = location.href;
     };
+
+    history.go = delta => {
+        const sheet = current();
+        if (sheet && delta < 0) {
+            sheet.entry = false;
+            go(delta - 1);
+        }
+        else go(delta);
+    };
+
+    history.back = () => history.go(-1);
 
     history.replaceState = (state, unused, url) => {
         const sheet = current();

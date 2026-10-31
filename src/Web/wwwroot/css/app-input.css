@@ -96,8 +96,66 @@
   .as-sheet :is([role="option"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]) {
     min-height: 44px;
   }
+
+  :is([role="dialog"], [role="alertdialog"]):has([data-dialog-actions]),
+  [role="alertdialog"]:not(:has([data-dialog-actions])) {
+    inset: auto 0 0 0 !important;
+    max-width: none !important;
+    max-height: 92dvh;
+    overflow-y: auto;
+    padding-bottom: 0 !important;
+    border-radius: 14px 14px 0 0 !important;
+    translate: none !important;
+    animation: sheet-up 0.2s ease-out !important;
+  }
+
+  [data-dialog-actions],
+  [role="alertdialog"]:not(:has([data-dialog-actions])) > div:last-child {
+    position: sticky !important;
+    bottom: 0;
+    order: 1;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom)) !important;
+    border-top: 1px solid var(--border) !important;
+    background: var(--background);
+  }
+
+  [data-dialog-buttons] {
+    display: contents !important;
+  }
+
+  [data-dialog-actions] :is([data-dialog-cancel], [data-dialog-commit]),
+  [data-dialog-actions] > button,
+  [role="alertdialog"]:not(:has([data-dialog-actions])) > div:last-child > button {
+    flex: 1 !important;
+    min-height: 52px;
+    margin: 0 !important;
+  }
+
+  [data-dialog-lead] {
+    order: -1;
+    flex-basis: 100% !important;
+    padding: 8px 10px !important;
+  }
+
+  [data-dialog-actions] > :empty {
+    display: none !important;
+  }
+
+  :is([role="dialog"], [role="alertdialog"]):has([data-dialog-actions]) > button:last-child {
+    display: none !important;
+  }
 }
 
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
 @font-face {
   font-family: 'Roboto';
   font-style: normal;

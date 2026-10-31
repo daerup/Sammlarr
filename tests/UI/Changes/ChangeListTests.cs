@@ -175,6 +175,15 @@ public class ChangeListTests : BunitContext
 	}
 
 	[Test]
+	public async Task Dialog_WithOnlyANote_StaysAnOrdinaryDialogOnPhones()
+	{
+		var portal = OpenDialog(withActions: false);
+
+		await Assert.That(portal.FindAll("[data-dialog-actions]")).IsEmpty();
+		await Assert.That(portal.Find(".change-foot a").TextContent.Trim()).IsEqualTo("7 runs");
+	}
+
+	[Test]
 	public async Task Render_ForUnchangedItems_GroupsThemLastUnderTheCallersLabel()
 	{
 		var cut = RenderList([Unchanged("Held"), Added("Fresh"), Removed("Gone")], [], unchangedLabel: "Already in sync");
@@ -401,7 +410,7 @@ public class ChangeListTests : BunitContext
 		await Assert.That(cut.Find(".change-pin b").TextContent).IsEqualTo(2614.ToString("N0"));
 	}
 
-	private IRenderedComponent<BbPortalHost> OpenDialog()
+	private IRenderedComponent<BbPortalHost> OpenDialog(bool withActions = true)
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
@@ -427,7 +436,7 @@ public class ChangeListTests : BunitContext
 				.Add(dialog => dialog.BandTone, ChangeBandTone.Bad)
 				.Add(dialog => dialog.Prologue, builder => builder.AddContent(0, "5 waiting"))
 				.Add(dialog => dialog.Band, builder => builder.AddContent(0, "Plex is unreachable"))
-				.Add(dialog => dialog.Actions, builder => builder.AddContent(0, "Cancel"))
+				.Add(dialog => dialog.Actions, withActions ? builder => builder.AddContent(0, "Cancel") : null)
 		);
 
 		return portal;

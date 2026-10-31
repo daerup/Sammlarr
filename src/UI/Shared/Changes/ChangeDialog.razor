@@ -57,7 +57,7 @@
             <div class="change-empty">@EmptyMessage</div>
         }
 
-        <div class="change-foot @(Actions is null ? "is-note-only" : null)" data-dialog-actions>
+        <div class="change-foot @(Actions is null ? "is-note-only" : null)" data-dialog-actions="@(Actions is not null)">
             @if (Note is not null && NoteHref is not null)
             {
                 <AppLink Href="@NoteHref" Class="text-xs" data-dialog-lead>@Note</AppLink>

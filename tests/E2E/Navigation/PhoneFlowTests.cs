@@ -1,4 +1,5 @@
 using E2E.Tests.Browse;
+using E2E.Tests.Feeds;
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
@@ -90,6 +91,75 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	}
 
 	[Test]
+	public async Task RunFeeds_OnAPhone_ShowsCancelAndRunAtTheBottom()
+	{
+		var (page, _) = await FeedsWithOneAsync();
+
+		await page.Button("Run feeds").TapAsync();
+
+		var dialog = page.GetByRole(AriaRole.Dialog);
+		var cancel = dialog.Locator("[data-dialog-cancel]");
+		var run = dialog.Locator("[data-dialog-commit]");
+		await Expect(run).ToBeVisibleAsync(Wait.Settle);
+		await page.WaitForFunctionAsync("() => Math.abs(document.querySelector('[role=dialog]').getBoundingClientRect().bottom - innerHeight) < 1");
+		var viewport = page.ViewportSize!;
+		var cancelBox = (await cancel.BoundingBoxAsync())!;
+		var runBox = (await run.BoundingBoxAsync())!;
+		await Assert.That(runBox.Y).IsEqualTo(cancelBox.Y);
+		await Assert.That(runBox.Height).IsGreaterThanOrEqualTo(52);
+		await Assert.That(runBox.Y + runBox.Height).IsGreaterThanOrEqualTo(viewport.Height - 7);
+		await Assert.That(cancelBox.Width + runBox.Width).IsGreaterThanOrEqualTo(viewport.Width - 14);
+
+		await page.GoBackAsync();
+
+		await Expect(dialog).ToHaveCountAsync(0);
+		await page.WaitForFunctionAsync("() => history.state?.sheet === undefined");
+		await page.ShouldBeAtAsync(Routes.Feeds);
+	}
+
+	[Test]
+	public async Task DeleteConfirm_OnBack_ClosesWithoutDeleting()
+	{
+		var (page, card) = await FeedsWithOneAsync();
+
+		await card.Labelled("Delete").TapAsync();
+		await Expect(page.AlertDialog).ToBeVisibleAsync();
+		await page.GoBackAsync();
+
+		await Expect(page.AlertDialog).ToHaveCountAsync(0);
+		await page.WaitForFunctionAsync("() => history.state?.sheet === undefined");
+		await page.ShouldBeAtAsync(Routes.Feeds);
+		await page.VisitAsync(Routes.Feeds);
+		await Expect(card).ToBeVisibleAsync(Wait.Settle);
+	}
+
+	[Test]
+	public async Task Editor_OnBackWithChanges_LeavesOnlyOnDiscard()
+	{
+		var page = await E2EApp.AdminAt(Routes.Feeds);
+		await page.Button("Add feed").TapAsync();
+		await page.ShouldBeAtAsync(Routes.CreateFeed);
+		await FeedEditor.ConfigureAsync(page, TestData.Name("Back"));
+
+		await page.GoBackAsync();
+		await Expect(page.GetByText("Leave without saving?")).ToBeVisibleAsync(Wait.Settle);
+		await page.GoBackAsync();
+		await Expect(page.AlertDialog).ToHaveCountAsync(0);
+		await page.ShouldBeAtAsync(Routes.CreateFeed);
+
+		await page.GoBackAsync();
+		await page.Button("Keep editing").TapAsync();
+		await Expect(page.AlertDialog).ToHaveCountAsync(0);
+		await page.ShouldBeAtAsync(Routes.CreateFeed);
+
+		await page.GoBackAsync();
+		await page.Button("Discard changes").TapAsync();
+
+		await page.ShouldBeAtAsync(Routes.Feeds);
+		await page.WaitForFunctionAsync("() => history.state?.sheet === undefined");
+	}
+
+	[Test]
 	public async Task Menu_OnBack_ClosesWithoutLeavingThePage()
 	{
 		var page = await E2EApp.AdminAt(Routes.Browse);
@@ -100,5 +170,17 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 
 		await Expect(page.Modal("Menu")).ToHaveCountAsync(0);
 		await page.ShouldBeAtAsync(Routes.Browse);
+	}
+
+	private static async Task<(IPage Page, ILocator Card)> FeedsWithOneAsync()
+	{
+		var name = TestData.Name("Phone");
+		var page = await E2EApp.AdminAt(Routes.CreateFeed);
+		await FeedEditor.ConfigureAsync(page, name);
+		await FeedEditor.LoadAsync(page);
+		await FeedEditor.SaveAndCloseAsync(page);
+		var card = page.FeedCard(name);
+		await Expect(card).ToBeVisibleAsync(Wait.Settle);
+		return (page, card);
 	}
 }
