@@ -265,3 +265,49 @@
         font-size: 16px;
     }
 }
+
+@media (width < 48rem) {
+    .change-chips {
+        justify-content: space-between;
+        padding: 10px 16px;
+        row-gap: 10px;
+    }
+
+    .change-search {
+        flex: none;
+        margin-left: 0;
+        padding: 0;
+        border: 0;
+    }
+
+    .change-search-open {
+        display: grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        margin: -6px -8px -6px 0;
+        border: 0;
+        background: none;
+        color: var(--muted-foreground);
+    }
+
+    .change-chips.is-searching ::deep > :not(.change-search, .change-search-cancel) {
+        display: none;
+    }
+
+    .change-chips.is-searching .change-search {
+        flex: 1 1 auto;
+        max-width: none;
+        padding: 6px 11px;
+        border: 1px solid var(--border);
+    }
+
+    .change-search-cancel {
+        min-height: 36px;
+        padding: 0 0 0 12px;
+        border: 0;
+        background: none;
+        color: var(--foreground);
+        font-size: 14px;
+    }
+}

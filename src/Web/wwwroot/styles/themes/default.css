@@ -170,6 +170,12 @@
     max-width: 94vw;
 }
 
+@media (width < 48rem) {
+    .change-dialog:has([data-dialog-actions]) {
+        width: auto;
+    }
+}
+
 
 .change-dialog .change-prologue {
     padding-right: 44px;

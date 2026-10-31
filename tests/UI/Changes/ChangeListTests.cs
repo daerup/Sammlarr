@@ -331,6 +331,28 @@ public class ChangeListTests : BunitContext
 	}
 
 	[Test]
+	public async Task Search_FromTheMagnifier_OpensTheFieldAndCancelClearsIt()
+	{
+		var cut = RenderList(Added("Wanted"), Added("Other"));
+
+		await cut.Find(".change-search-open").ClickAsync(new());
+		await cut.Find(".change-search input").InputAsync(new ChangeEventArgs { Value = "Other" });
+
+		await Assert.That(cut.Find(".change-chips").ClassList).Contains("is-searching");
+		await Assert.That(cut.Find(".change-search input").ClassList).DoesNotContain("max-md:hidden");
+		await Assert.That(cut.FindAll(".change-row")).Count().IsEqualTo(1);
+		await Assert.That(JSInterop.Invocations.Any(invocation => invocation.Identifier == "Blazor._internal.domWrapper.focus")).IsTrue();
+
+		await cut.Find("button[aria-label='Cancel search']").ClickAsync(new());
+
+		await Assert.That(cut.Find(".change-chips").ClassList).DoesNotContain("is-searching");
+		await Assert.That(cut.Find(".change-search input").GetAttribute("value")).IsEmpty();
+		await Assert.That(cut.FindAll(".change-row")).Count().IsEqualTo(2);
+		await Assert.That(cut.FindAll(".change-search-open")).HasSingleItem();
+		await Assert.That(JSInterop.Invocations.Count(invocation => invocation.Identifier == "Blazor._internal.domWrapper.focus")).IsEqualTo(2);
+	}
+
+	[Test]
 	public async Task Render_WhenAKindIsFolded_ShowsOneLineAtTheFootInsteadOfItsGroup()
 	{
 		var cut = RenderList([Added("Fresh"), Unchanged("Held")], [], fold: Fold(2614), unchangedLabel: "Already in sync");
