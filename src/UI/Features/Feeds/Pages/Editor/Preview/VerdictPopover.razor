@@ -1,8 +1,8 @@
-<DetailTip Title="@Title" Delay="200" TriggerClass="p-0 cursor-default">
+<DetailTip Title="@Title" Delay="200" TriggerClass="p-0 cursor-default" PhoneLabel="@Title">
     <Trigger>
-        <div class="search-result-status-indicator">
+        <span class="search-result-status-indicator block">
             <LucideIcon Name="@Icon" Size="24"/>
-        </div>
+        </span>
     </Trigger>
     <Detail>
         <div class="@(Edge is null ? "verdict-popover" : "verdict-popover has-edge")">

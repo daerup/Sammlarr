@@ -37,4 +37,15 @@ public class PushStatusDotTests : BunitContext
 
 		await Assert.That(cut.Find("[aria-label]").GetAttribute("aria-label")).IsEqualTo(expected);
 	}
+
+	[Test]
+	public async Task Phone_NamesTheButtonThatOpensTheStatus()
+	{
+		Services.AddBlazorBlueprintComponents();
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = this.RenderOnPhone<PushStatusDot>(parameters => parameters.Add(dot => dot.State, PushDotState.Pushed));
+
+		await Assert.That(cut.Component.FindAll("button[aria-label='Synced to your media service']")).HasSingleItem();
+	}
 }

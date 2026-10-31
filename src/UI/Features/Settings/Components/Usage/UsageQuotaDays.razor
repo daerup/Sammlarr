@@ -13,7 +13,7 @@
     {
         var last = index == Quota.Days.Count - 1;
         <div class="absolute" style="@($"left: {At(index)}; width: {Slot}; top: {PlotTop}px; height: {PlotHeight}px")">
-            <DetailTip Title="@Label(day, last)" Delay="100" TriggerClass="block size-full" Focusable="false" ContentClass="@Tooltips.Panel" ContentTestId="usage-quota-day-tip" style="display: block; position: relative; width: 100%; height: 100%" data-testid="usage-quota-day">
+            <DetailTip Title="@Label(day, last)" PhoneLabel="@Label(day, last)" Delay="100" TriggerClass="block size-full" Focusable="false" ContentClass="@Tooltips.Panel" ContentTestId="usage-quota-day-tip" style="display: block; position: relative; width: 100%; height: 100%" data-testid="usage-quota-day">
                 <Trigger>
                     <span class="absolute bottom-0 left-1/2 flex -translate-x-1/2 flex-col-reverse gap-[1.5px]"
                           style="@($"width: min(64px, 56%); height: {Percent(day.Total)}")">

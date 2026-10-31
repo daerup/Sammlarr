@@ -50,4 +50,22 @@ public class DetailTipTests : BunitContext
 		await Assert.That(cut.FindComponent<BbTooltipContent>().Instance.Class).IsEqualTo("max-w-xs");
 		await Assert.That(cut.FindAll("[data-testid=usage-quota-day]")).HasSingleItem();
 	}
+
+	[Test]
+	public async Task Phone_TappingTheTrigger_OpensTheDetailInASheet()
+	{
+		var cut = this.RenderOnPhone<DetailTip>(parameters =>
+			parameters
+				.Add(tip => tip.Title, "Where it came from")
+				.Add(tip => tip.Trigger, Badge)
+				.Add(tip => tip.Detail, Detail)
+				.AddUnmatched("aria-label", "Plex watchlist")
+		);
+
+		await Assert.That(cut.Component.FindComponents<BbTooltip>()).IsEmpty();
+		await cut.Component.Find("button[aria-label='Plex watchlist'] .badge").ClickAsync();
+
+		var sheet = cut.Portal.WaitForElement("[data-sheet][aria-label='Where it came from']");
+		await Assert.That(sheet.TextContent).Contains("Added from your Plex watchlist.");
+	}
 }

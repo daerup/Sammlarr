@@ -4,7 +4,7 @@
 @{
     var feedUrl = ProvenanceView.RunUrl(Provenance, ItemId);
 }
-@if (feedUrl is not null)
+@if (feedUrl is not null && !IsPhone)
 {
     <a href="@feedUrl" class="wl-badge-brand inline-flex cursor-pointer" style="@BrandStyle">
         @Badge
@@ -18,6 +18,8 @@ else
 }
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     [Parameter, EditorRequired]
     public required WantlistItemProvenance Provenance { get; set; }
 
@@ -40,7 +42,14 @@ else
                     </span>
                 </Trigger>
                 <Detail>
-                    @ProvenanceView.Description(Provenance, Branding, AddedAt, Type)
+                    @if (IsPhone)
+                    {
+                        <ProvenanceDetails Provenance="Provenance" AddedAt="AddedAt" ItemId="ItemId" Type="Type"/>
+                    }
+                    else
+                    {
+                        @ProvenanceView.Description(Provenance, Branding, AddedAt, Type)
+                    }
                 </Detail>
             </DetailTip>
         </BbBadge>;

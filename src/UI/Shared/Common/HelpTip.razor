@@ -1,25 +1,12 @@
-@if (IsPhone)
-{
-    <button type="button" class="@($"{TriggerClass} relative after:absolute after:-inset-3")" aria-label="@($"About {Title}")" @attributes="Attributes"
-            @onclick="() => _open = true" @onclick:preventDefault="true" @onclick:stopPropagation="true">
+<DetailTip Title="@Title" Delay="Delay" Placement="Placement" TriggerClass="@TriggerClass" Focusable="Focusable" ContentClass="@ContentClass" ContentTestId="@ContentTestId"
+           PhoneLabel="@($"About {Title}")" PhoneClass="relative after:absolute after:-inset-3" @attributes="Attributes">
+    <Trigger>
         <LucideIcon Name="info" Size="IconSize" Class="@IconClass"/>
-    </button>
-    <InfoSheet @bind-Open="_open" Title="@Title">@ChildContent</InfoSheet>
-}
-else
-{
-    <DetailTip Title="@Title" Delay="Delay" Placement="Placement" TriggerClass="@TriggerClass" Focusable="Focusable" ContentClass="@ContentClass" ContentTestId="@ContentTestId"
-               @attributes="Attributes">
-        <Trigger>
-            <LucideIcon Name="info" Size="IconSize" Class="@IconClass"/>
-        </Trigger>
-        <Detail>@ChildContent</Detail>
-    </DetailTip>
-}
+    </Trigger>
+    <Detail>@ChildContent</Detail>
+</DetailTip>
 
 @code {
-    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
-
     [Parameter, EditorRequired] public required string Title { get; set; }
     [Parameter] public int Delay { get; set; } = 300;
     [Parameter] public PopoverPlacement Placement { get; set; } = PopoverPlacement.Top;
@@ -31,14 +18,4 @@ else
     [Parameter] public string? ContentTestId { get; set; }
     [Parameter, EditorRequired] public required RenderFragment ChildContent { get; set; }
     [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? Attributes { get; set; }
-
-    private bool _open;
-
-    protected override void OnParametersSet()
-    {
-        if (!IsPhone)
-        {
-            _open = false;
-        }
-    }
 }

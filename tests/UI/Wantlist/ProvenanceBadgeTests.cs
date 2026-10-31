@@ -66,6 +66,28 @@ public class ProvenanceBadgeTests : BunitContext
 		await Assert.That(cut.Find(".wl-badge-label").TextContent.Trim()).IsEqualTo(app);
 	}
 
+	[Test]
+	public async Task Phone_ForATitleAddedByARun_OpensASheetWithTheRunLinkInsteadOfLinkingTheBadge()
+	{
+		Services.AddBlazorBlueprintComponents();
+		Services.AddLogging();
+		Services.AddProviderBranding();
+		JSInterop.Mode = JSRuntimeMode.Loose;
+		var cut = this.RenderOnPhone<ProvenanceBadge>(parameters =>
+			parameters
+				.Add(badge => badge.Provenance, TestFeeds.Origin(Feed, Run))
+				.Add(badge => badge.AddedAt, DateTimeOffset.UtcNow)
+				.Add(badge => badge.Type, MediaType.Movie)
+		);
+
+		await Assert.That(cut.Component.FindAll("a")).IsEmpty();
+		await cut.Component.Find("button[aria-haspopup=dialog]").ClickAsync();
+
+		var sheet = cut.Portal.WaitForElement("[data-sheet]");
+		var run = sheet.QuerySelectorAll("a").Single(link => link.TextContent.Trim() == "See this run");
+		await Assert.That(run.GetAttribute("href")).IsEqualTo($"/feeds/{UrlGuid.Encode(Feed)}/runs/{UrlGuid.Encode(Run)}");
+	}
+
 	private IRenderedComponent<ProvenanceBadge> RenderBadge(WantlistItemProvenance provenance, MediaId? itemId = null, MediaType type = MediaType.Movie)
 	{
 		Services.AddBlazorBlueprintComponents();
