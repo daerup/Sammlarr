@@ -4,6 +4,8 @@ internal static class WantlistNotices
 {
 	internal const string CantUpdate = "Can't update wantlist";
 
+	internal const string Unmatched = "Could not be matched in your media service. This item can't be added to your wantlist.";
+
 	internal static string NoMatch(string sink, string? title)
 	{
 		return $"{sink} has no match for '{title}', so it can't go on your wantlist.";

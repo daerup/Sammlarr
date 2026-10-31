@@ -13,16 +13,23 @@
 {
     <div class="sheet-modal-backdrop"></div>
 }
-<BbSheet Open="Open" OpenChanged="HandleSheetOpenChangedAsync">
-    <BbSheetContent Side="SheetSide.Right" ShowClose="false" Class="media-detail-sheet-content overflow-y-auto scrollbar-thin">
+<BbSheet Open="Open" OpenChanged="HandleSheetOpenChangedAsync" Side="@(IsPhone ? SheetSide.Bottom : SheetSide.Right)">
+    <BbSheetContent InitialFocus="@(IsPhone ? FocusTrapInitialFocus.Container : FocusTrapInitialFocus.FirstFocusable)"
+                    ShowClose="false"
+                    data-sheet
+                    Class="@($"media-detail-sheet-content overflow-y-auto scrollbar-thin {(IsPhone ? "phone-sheet outline-none" : null)}")">
         @if (Media.HasValue)
         {
             var media = Media.Value;
             var details = media.Details;
             <div class="space-y-6">
+                <div class="media-sheet-handle md:hidden" data-sheet-handle aria-hidden="true"></div>
                 <div class="media-sheet-hero">
                     @if (!_failed && details.PosterUrl is { } poster)
                     {
+                        <div class="hero-band md:hidden" aria-hidden="true">
+                            <img src="@poster" alt=""/>
+                        </div>
                         <PosterFade Src="@poster" Alt="@details.Title" OnError="OnImageError"/>
                     }
                     else
@@ -51,6 +58,13 @@
                                                  IsToggling="_togglingBlocklist"
                                                  OnToggle="ToggleBlocklistAsync"/>
                         </div>
+                    }
+                    else
+                    {
+                        <p class="media-sheet-unmatched flex items-start gap-2 text-left text-sm text-destructive md:hidden">
+                            <LucideIcon Name="circle-alert" Size="16" Class="mt-0.5 shrink-0"/>
+                            <span>@WantlistNotices.Unmatched</span>
+                        </p>
                     }
                     <BbSheetTitle Class="font-bold tracking-wide text-xl">
                         <MediaTitleLink Title="@details.Title" Ids="@([.. media.Externals])" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
@@ -96,10 +110,13 @@
 
             </div>
         }
+        <BbButton Variant="ButtonVariant.Ghost" Class="sr-only" OnClick="() => HandleSheetOpenChangedAsync(false)">Close</BbButton>
     </BbSheetContent>
 </BbSheet>
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     [Parameter]
     public bool Open { get; set; }
 

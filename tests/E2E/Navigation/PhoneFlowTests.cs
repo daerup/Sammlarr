@@ -79,6 +79,29 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	}
 
 	[Test]
+	public async Task Tile_Tapped_OpensTheDetailsSheetAndSwipesAway()
+	{
+		var page = await E2EApp.AdminAt(Routes.Browse);
+		var tile = TrendingTiles.Resolved(page, TrendingTiles.Title);
+		var sheet = page.Locator(".media-detail-sheet-content");
+		await Expect(tile).ToBeVisibleAsync(Wait.Settle);
+
+		await tile.TapAsync();
+
+		await Expect(sheet.Locator(".hero-band img")).ToHaveCountAsync(1, Wait.Settle);
+		await SitsOnTheBottomAsync(page, ".media-detail-sheet-content");
+		await page.GoBackAsync();
+		await Expect(sheet).ToHaveCountAsync(0);
+		await page.ShouldBeAtAsync(Routes.Browse);
+
+		await tile.TapAsync();
+		await SwipeDownAsync(page, sheet.Locator("[data-sheet-handle]"));
+
+		await Expect(sheet).ToHaveCountAsync(0);
+		await page.WaitForFunctionAsync("() => history.state?.sheet === undefined");
+	}
+
+	[Test]
 	public async Task OptionList_OpensAsASheetAcrossTheScreen()
 	{
 		var page = await E2EApp.AdminAt(Routes.CreateFeed);
@@ -101,7 +124,7 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 		var cancel = dialog.Locator("[data-dialog-cancel]");
 		var run = dialog.Locator("[data-dialog-commit]");
 		await Expect(run).ToBeVisibleAsync(Wait.Settle);
-		await page.WaitForFunctionAsync("() => Math.abs(document.querySelector('[role=dialog]').getBoundingClientRect().bottom - innerHeight) < 1");
+		await SitsOnTheBottomAsync(page, "[role=dialog]");
 		var viewport = page.ViewportSize!;
 		var cancelBox = (await cancel.BoundingBoxAsync())!;
 		var runBox = (await run.BoundingBoxAsync())!;
@@ -176,12 +199,7 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 		await page.ShouldBeAtAsync(Routes.CreateFeed);
 
 		await help.TapAsync();
-		var handle = sheet.Locator("[data-sheet-handle]");
-		await handle.HoverAsync();
-		var box = (await handle.BoundingBoxAsync())!;
-		await page.Mouse.DownAsync();
-		await page.Mouse.MoveAsync(box.X + box.Width / 2, box.Y + 140, new MouseMoveOptions { Steps = 6 });
-		await page.Mouse.UpAsync();
+		await SwipeDownAsync(page, sheet.Locator("[data-sheet-handle]"));
 
 		await Expect(sheet).ToHaveCountAsync(0);
 		await page.WaitForFunctionAsync("() => history.state?.sheet === undefined");
@@ -238,7 +256,7 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 
 		await filter.TapAsync();
 		await Expect(show).ToHaveTextAsync("Show 1 title");
-		await page.WaitForFunctionAsync("() => Math.abs(document.querySelector('[role=dialog]').getBoundingClientRect().bottom - innerHeight) < 1");
+		await SitsOnTheBottomAsync(page, "[role=dialog]");
 		var clearBox = (await sheet.Button("Clear all").BoundingBoxAsync())!;
 		var showBox = (await show.BoundingBoxAsync())!;
 		await Assert.That(Math.Abs(showBox.Y - clearBox.Y)).IsLessThan(1);
@@ -287,6 +305,20 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 		await page.Button("Leave select mode").TapAsync();
 		await Expect(labels).ToHaveTextAsync(browsing);
 		await Expect(page.Locator("header .phone-select-bar")).ToHaveCountAsync(0);
+	}
+
+	private static async Task SitsOnTheBottomAsync(IPage page, string selector)
+	{
+		await page.WaitForFunctionAsync($"() => Math.abs(document.querySelector('{selector}').getBoundingClientRect().bottom - innerHeight) < 1");
+	}
+
+	private static async Task SwipeDownAsync(IPage page, ILocator handle)
+	{
+		await handle.HoverAsync();
+		var box = (await handle.BoundingBoxAsync())!;
+		await page.Mouse.DownAsync();
+		await page.Mouse.MoveAsync(box.X + box.Width / 2, box.Y + 140, new MouseMoveOptions { Steps = 6 });
+		await page.Mouse.UpAsync();
 	}
 
 	private static async Task<IPage> WantlistWithAsync(params string[] titles)

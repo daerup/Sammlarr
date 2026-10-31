@@ -452,6 +452,14 @@ body:has(.error-dialog) .search-modal {
     border-left-width: 0;
 }
 
+.media-detail-sheet-content.phone-sheet[data-state] {
+    width: 100%;
+    max-width: none;
+    height: 84dvh;
+    border-radius: 14px 14px 0 0;
+    translate: 0 var(--sheet-drag, 0px);
+}
+
 .lucide-icon.meta-tv-icon {
     transform: translateY(-1px);
 }
