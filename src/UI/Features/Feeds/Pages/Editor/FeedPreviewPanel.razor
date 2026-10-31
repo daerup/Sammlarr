@@ -178,7 +178,8 @@
                                                  Class="@(hoverStyle)"
                                                  IsFocused="_focusedResult == item.Key"
                                                  OnFocusIn="() => _focusedResult = item.Key"
-                                                 OnFocusOut="() => ClearFocus(item)">
+                                                 OnFocusOut="() => ClearFocus(item)"
+                                                 OnOpen="() => _details = item">
                                     <Icons>
                                         @if (isAtRisk)
                                         {
@@ -219,7 +220,8 @@
                                                      Class="result-leaving"
                                                      IsFocused="_focusedResult == goneItem.Key"
                                                      OnFocusIn="() => _focusedResult = goneItem.Key"
-                                                     OnFocusOut="() => ClearFocus(goneItem)">
+                                                     OnFocusOut="() => ClearFocus(goneItem)"
+                                                     OnOpen="() => _details = goneItem">
                                         <Icons>
                                             <LeavingIndicator Reason="@PreviewCopy.GoneReason" Threshold="MirrorThreshold" Absences="AbsencesOf(goneItem.Identity.Id)"/>
                                             <WantlistToggle Result="goneItem"
@@ -257,7 +259,8 @@
                                                      Media="item"
                                                      IsFocused="_focusedResult == item.Key"
                                                      OnFocusIn="() => _focusedResult = item.Key"
-                                                     OnFocusOut="() => ClearFocus(item)">
+                                                     OnFocusOut="() => ClearFocus(item)"
+                                                     OnOpen="() => _details = item">
                                         <Icons>
                                             @if (item is UnmatchedMedia unmatched)
                                             {
@@ -346,6 +349,8 @@
     </div>
 </BbCard>
 
+<MediaDetailSheet Open="_details is not null" OnOpenChanged="DetailsOpenChangedAsync" Media="_details" Source="ManualSource.FeedPreview"/>
+
 @code {
 
     [Parameter] public required FeedConfig Config { get; set; }
@@ -400,6 +405,7 @@
     private MediaId? _togglingBlocklistItem;
     private WantlistSnapshot _wantlist = new([]);
     private readonly HashSet<MediaId> _blocklistIds = [];
+    private MediaMatchResult? _details;
     private bool _refreshDialogOpen;
     private bool _providerUnavailable;
     private readonly Stopwatch _fetchTimer = new();
@@ -962,6 +968,20 @@
         _cts?.Dispose();
     }
 
+    private async Task DetailsOpenChangedAsync(bool open)
+    {
+        if (open)
+        {
+            return;
+        }
+
+        _details = null;
+        _blocklistIds.Clear();
+        await LoadWantlistAndBlocklistAsync(CancellationToken.None);
+        await ReprocessLoadedAsync();
+        await EmitStatusIfChangedAsync();
+    }
+
     private async Task LoadWantlistAndBlocklistAsync(CancellationToken cancellationToken)
     {
         try
@@ -1060,7 +1080,7 @@
         }
         catch (UnknownMediaException)
         {
-            Notify(notifier => notifier.Warning($"'{item.Details.Title}' isn't ready yet: still loading.", "Can't update blocklist"));
+            Notify(notifier => notifier.Warning(BlocklistNotices.NotReady(item.Details.Title), BlocklistNotices.CantUpdate));
         }
         catch (Exception ex)
         {

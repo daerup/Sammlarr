@@ -7,7 +7,7 @@
 <KeyboardShortcut Keys="@ShortcutKeys" OnInvoked="OpenFromShortcutAsync" Enabled="ShortcutEnabled"/>
 @if (IsOpen)
 {
-    <div class="search-modal"
+    <div class="search-modal @(_details is null ? null : "under-details")"
          role="dialog"
          aria-modal="true"
          aria-label="@SearchModalTitle"
@@ -116,7 +116,8 @@
                                              Media="result"
                                              IsFocused="_focusedResult == result.Key"
                                              OnFocusIn="() => _focusedResult = result.Key"
-                                             OnFocusOut="() => ClearFocusedResult(result)">
+                                             OnFocusOut="() => ClearFocusedResult(result)"
+                                             OnOpen="() => _details = result">
                                 <Icons>
                                     @if (result is MatchedMedia matched)
                                     {
@@ -124,7 +125,7 @@
                                     }
                                     else if (result is UnmatchedMedia { Reason: UnmatchedReason.Conflict })
                                     {
-                                        <DetailTip Title="Can't be added" TriggerClass="text-muted-foreground" PhoneLabel="Can't be added" data-testid="search-conflict">
+                                        <DetailTip Title="Can't be added" TriggerClass="text-muted-foreground" PhoneLabel="Can't be added" PhoneClass="relative after:absolute after:-inset-2.5" data-testid="search-conflict">
                                             <Trigger>
                                                 <LucideIcon Name="split" Size="16"/>
                                             </Trigger>
@@ -159,6 +160,10 @@
 
         <div tabindex="0" class="sr-only" aria-hidden="true" @onfocus="FocusTrapLoopAsync"></div>
 
+        <MediaDetailSheet Open="_details is not null"
+                          OnOpenChanged="@(open => { if (!open) { _details = null; } })"
+                          Media="_details"
+                          Source="ManualSource.Search"/>
     </div>
 }
 
@@ -183,6 +188,7 @@
     private IReadOnlyList<SearchMiss> _missed = [];
     private MediaId? _activeToggledSourceId;
     private List<MediaMatchResult> _searchResults = [];
+    private MediaMatchResult? _details;
 
     private string _tab = ArrApp.Radarr.Name;
 

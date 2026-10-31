@@ -205,3 +205,101 @@
         transition: stroke 0.15s ease, fill 0.15s ease;
     }
 }
+
+@media (width < 48rem) {
+    .search-result-row {
+        border-width: 0 0 1px;
+        border-radius: 0;
+        background-color: transparent;
+    }
+
+    .search-result-row::before,
+    .search-result-tagline,
+    .search-result-genres,
+    .search-result-summary {
+        display: none;
+    }
+
+    .search-result-row > div {
+        padding: 10px 0;
+        align-items: center;
+    }
+
+    .result-open {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+    }
+
+    .result-open:focus-visible {
+        outline: 2px solid var(--ring);
+        outline-offset: -2px;
+    }
+
+    .search-result-main-content {
+        flex: 1;
+        min-width: 0;
+        align-items: center;
+    }
+
+    .search-result-poster {
+        width: 64px;
+        height: 96px;
+    }
+
+    .search-result-poster img {
+        border-radius: 6px;
+    }
+
+    .search-result-content {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        padding-left: 12px;
+    }
+
+    .search-result-title {
+        order: -1;
+        padding-top: 0;
+    }
+
+    .search-result-title ::deep svg,
+    .search-result-facts ::deep > svg:first-child {
+        display: none;
+    }
+
+    .search-result-facts {
+        flex-wrap: nowrap;
+        overflow: hidden;
+        white-space: nowrap;
+        mask-image: linear-gradient(to right, #000 85%, transparent);
+    }
+
+    .result-icons {
+        position: absolute;
+        left: 47px;
+        bottom: 3px;
+        z-index: 2;
+    }
+
+    .result-icons ::deep :is(.provenance-trigger, .search-result-toggle-btn) {
+        display: none;
+    }
+
+    .result-icons ::deep > button[aria-haspopup="dialog"] {
+        display: grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 9999px;
+        background: var(--background);
+    }
+
+    .result-icons ::deep > button[aria-haspopup="dialog"] svg {
+        width: 15px;
+        height: 15px;
+    }
+}

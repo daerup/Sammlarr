@@ -29,6 +29,8 @@ public class MediaDetailSheetTests : BunitContext
 
 	private Mock<IMediaService> _media = null!;
 
+	private Mock<IBlocklistService> _blocklist = null!;
+
 	[Test]
 	public async Task Toggle_WhenARemovalIsAlreadyQueued_StillReadsAsAddRatherThanCancel()
 	{
@@ -129,6 +131,21 @@ public class MediaDetailSheetTests : BunitContext
 		await Assert.That(Toggle(cut)).IsNull();
 	}
 
+	[Test]
+	public async Task Blocklist_ForATitleStillLoading_WarnsThatItIsNotReady()
+	{
+		Register();
+		_blocklist.AddAsync(Any(), Any()).Throws(new UnknownMediaException(Id));
+
+		var cut = RenderSheet();
+		cut.WaitForState(() => cut.FindAll(".media-detail-sheet-content button[aria-label='Add to blocklist']").Count == 1);
+		await cut.Find(".media-detail-sheet-content button[aria-label='Add to blocklist']").ClickAsync(new());
+
+		var toast = Services.GetRequiredService<ToastService>().Toasts.Single();
+		await Assert.That(toast.Variant).IsEqualTo(ToastVariant.Warning);
+		await Assert.That(toast.Description).IsEqualTo("'Futurama' isn't ready yet: still loading.");
+	}
+
 	private static WantlistSnapshot Wantlisted(WantlistItemProvenance provenance) => new([new WantlistItem(Id, DateTimeOffset.UnixEpoch, provenance)]);
 
 	private static IElement? Toggle(IRenderedComponent<Harness> cut) =>
@@ -152,9 +169,9 @@ public class MediaDetailSheetTests : BunitContext
 		_wantlist.GetAsync(Any()).Returns(Nothing);
 		Services.AddSingleton(_wantlist.Object);
 
-		var blocklist = IBlocklistService.Mock();
-		blocklist.GetAsync(Any()).Returns(new BlocklistSnapshot([]));
-		Services.AddSingleton(blocklist.Object);
+		_blocklist = IBlocklistService.Mock();
+		_blocklist.GetAsync(Any()).Returns(new BlocklistSnapshot([]));
+		Services.AddSingleton(_blocklist.Object);
 
 		_media = IMediaService.Mock();
 		_media.GetDetailsAsync(Any<IEnumerable<MediaId>>(), Any(), Any()).Returns(AsyncEnumerable.Empty<Result<MatchedMedia>>());

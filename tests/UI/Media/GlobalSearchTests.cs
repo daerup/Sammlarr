@@ -89,6 +89,23 @@ public class GlobalSearchTests : BunitContext
 	}
 
 	[Test]
+	public async Task Result_WhenOpened_ShowsItsDetailsUntilTheSheetCloses()
+	{
+		var cut = await SearchForTheMovieAsync();
+
+		await cut.FindAll(".search-result-row").Single(row => row.TextContent.Contains(Movie)).QuerySelector(".result-open")!.ClickAsync(new());
+
+		var sheet = cut.FindComponent<MediaDetailSheet>();
+		await Assert.That(sheet.Instance.Open).IsTrue();
+		await Assert.That(sheet.Instance.Media).IsEqualTo(Matched);
+		await Assert.That(cut.Find(".search-modal").ClassList).Contains("under-details");
+		await cut.InvokeAsync(() => sheet.Instance.OnOpenChanged.InvokeAsync(false));
+		await Assert.That(sheet.Instance.Open).IsFalse();
+		await Assert.That(cut.Find(".search-modal").ClassList).DoesNotContain("under-details");
+		await Assert.That(cut.FindAll(".search-result-row")).Count().IsEqualTo(2);
+	}
+
+	[Test]
 	[Arguments(SearchProvider.Tmdb, "Results from The Movie Database")]
 	[Arguments(SearchProvider.Arr, "Results from Radarr and Sonarr")]
 	[Arguments(SearchProvider.Plex, "Results from Plex")]

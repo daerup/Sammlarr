@@ -7,6 +7,10 @@
     justify-content: center;
 }
 
+.search-modal.under-details {
+    z-index: 40;
+}
+
 .search-modal-backdrop {
     position: absolute;
     inset: 0;

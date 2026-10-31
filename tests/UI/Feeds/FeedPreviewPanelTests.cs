@@ -26,6 +26,7 @@ using Observability.Usage;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Pages.Editor;
+using UI.Shared.Media;
 using UI.Shared.Services;
 using UI.Tests.Media;
 using FilterOperator = BlazorBlueprint.Primitives.Filtering.FilterOperator;
@@ -160,6 +161,25 @@ public class FeedPreviewPanelTests : BunitContext
 
 		await Assert.That(cut.FindAll(".preview-gone-results button[aria-label='Add to wantlist']")).Count().IsEqualTo(1);
 		await Assert.That(cut.FindAll(".preview-gone-results button[aria-label='Add to blocklist']")).Count().IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task Details_ClosedAfterAChange_RefreshesTheRow()
+	{
+		var gone = MediaId.From(new Guid(99, 0, 0, new byte[8]));
+		var wantlist = IWantlistService.Mock();
+		var cut = RenderPanel(new GonePlanner(gone), resolved: 5, unmatched: 0, gone: gone, wantlist: wantlist);
+		await ApplyAsync(cut, new Mirror(3));
+		cut.WaitForState(() => cut.FindAll(".preview-gone-results .result-open").Count == 1);
+
+		await cut.Find(".preview-gone-results .result-open").ClickAsync(new());
+		var sheet = cut.FindComponent<MediaDetailSheet>();
+		await Assert.That(sheet.Instance.Open).IsTrue();
+		wantlist.GetAsync(Any()).Returns(new WantlistSnapshot([new WantlistItem(gone, DateTimeOffset.UnixEpoch, new ManualOrigin(ManualSource.FeedPreview))]));
+		await cut.InvokeAsync(() => sheet.Instance.OnOpenChanged.InvokeAsync(false));
+
+		cut.WaitForState(() => cut.FindAll(".preview-gone-results button[aria-label='Remove from wantlist']").Count == 1);
+		await Assert.That(sheet.Instance.Open).IsFalse();
 	}
 
 	[Test]
@@ -506,7 +526,8 @@ public class FeedPreviewPanelTests : BunitContext
 		MediaId? gone = null,
 		IFeedProvider? provider = null,
 		Mock<IMediaService>? media = null,
-		IReadOnlyList<WantlistItem>? wantlisted = null
+		IReadOnlyList<WantlistItem>? wantlisted = null,
+		Mock<IWantlistService>? wantlist = null
 	)
 	{
 		Services.AddBlazorBlueprintComponents();
@@ -514,11 +535,11 @@ public class FeedPreviewPanelTests : BunitContext
 		Services.AddSingleton(RatingStub.Context());
 		Services.AddLogging();
 		Services.AddSingleton(planner);
-		var wantlist = IWantlistService.Mock();
-		wantlist.GetAsync(Any()).Returns(new WantlistSnapshot(wantlisted ?? []));
+		var wantlistService = wantlist ?? IWantlistService.Mock();
+		wantlistService.GetAsync(Any()).Returns(new WantlistSnapshot(wantlisted ?? []));
 		var blocklist = IBlocklistService.Mock();
 		blocklist.GetAsync(Any()).Returns(new BlocklistSnapshot([]));
-		Services.AddSingleton(wantlist.Object);
+		Services.AddSingleton(wantlistService.Object);
 		Services.AddSingleton(blocklist.Object);
 		Services.AddSingleton(ICurrentUser.Mock().Object);
 		Services.AddSingleton(IUserScope.Mock().Object);

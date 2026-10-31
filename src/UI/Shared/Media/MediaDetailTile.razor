@@ -7,6 +7,10 @@
      @onfocusin="OnFocusIn"
      @onfocusout="OnFocusOut">
     <div class="flex items-start justify-between gap-3">
+        @if (OnOpen.HasDelegate)
+        {
+            <button type="button" class="result-open md:hidden" aria-label="@($"Details for {Details.Title}")" aria-haspopup="dialog" @onclick="OnOpen" @onfocusin:stopPropagation="true"></button>
+        }
         <div class="search-result-main-content flex items-start">
             <div class="search-result-poster">
                 @if (!_failed && Details.PosterUrl is { } poster)
@@ -19,7 +23,7 @@
                 }
             </div>
             <div class="search-result-content min-w-0">
-                <div class="text-xs text-muted-foreground flex flex-wrap items-center gap-x-1.5 gap-y-1 space-x-1">
+                <div class="search-result-facts text-xs text-muted-foreground flex flex-wrap items-center gap-x-1.5 gap-y-1 space-x-1">
                     <LucideIcon Name="@Details.Type.Icon" Size="13"/>
                     @if (Details.ReleaseDate is { } released)
                     {
@@ -33,13 +37,13 @@
                     <span aria-hidden="true">•</span>
                     <SammlarrRatingBadge Ratings="@Details.Ratings" Ids="@_ids" Title="@Details.Title" Media="Media.MatchedId" Strategy="Strategy"/>
                 </div>
-                <div class="flex items-center gap-2 pt-2 min-w-0">
-                    <MediaTitleLink Title="@Details.Title" Ids="@_ids" Class="font-bold truncate text-xl" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
+                <div class="search-result-title flex items-center gap-2 pt-2 min-w-0">
+                    <MediaTitleLink Title="@Details.Title" Ids="@_ids" Class="font-bold truncate text-xl max-md:text-[15px] max-md:font-semibold" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
                 </div>
 
                 @if (Details.Tagline is { } tagline)
                 {
-                    <p class="text-xs italic text-muted-foreground line-clamp-1 pt-1">@tagline</p>
+                    <p class="search-result-tagline text-xs italic text-muted-foreground line-clamp-1 pt-1">@tagline</p>
                 }
 
                 @if (Details.Genres.Count > 0)
@@ -54,15 +58,19 @@
 
                 @if (Details.Summary is { } summary)
                 {
-                    <p class="text-sm text-foreground line-clamp-2 pt-2">@summary</p>
+                    <p class="search-result-summary text-sm text-foreground line-clamp-2 pt-2">@summary</p>
                 }
             </div>
         </div>
         @if (Icons != null)
         {
-            <div class="flex items-center gap-1">
+            <div class="result-icons flex items-center gap-1">
                 @Icons
             </div>
+        }
+        @if (OnOpen.HasDelegate)
+        {
+            <LucideIcon Name="chevron-right" Size="20" Class="result-chevron self-center shrink-0 text-muted-foreground md:hidden"/>
         }
     </div>
 </div>
@@ -75,6 +83,7 @@
     [Parameter] public EventCallback OnFocusIn { get; set; }
     [Parameter] public EventCallback OnFocusOut { get; set; }
     [Parameter] public RenderFragment? Icons { get; set; }
+    [Parameter] public EventCallback OnOpen { get; set; }
     [Parameter] public Optional<RatingStrategy> Strategy { get; set; } = new None();
 
     private MediaDetails Details => Media.Details;

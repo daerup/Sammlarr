@@ -230,6 +230,10 @@
 
             await LoadEnrollmentAsync(media.Identity.Id);
         }
+        catch (UnknownMediaException)
+        {
+            Notifier.Warning(BlocklistNotices.NotReady(media.Details.Title), BlocklistNotices.CantUpdate);
+        }
         catch (Exception ex)
         {
             Notifier.Error(ex, "Failed to update blocklist");
