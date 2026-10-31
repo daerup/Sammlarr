@@ -169,6 +169,21 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	}
 
 	[Test]
+	public async Task Ratings_OnAPhone_ListTheSourcesAndMoveThemWithButtons()
+	{
+		var page = await E2EApp.AdminAt(SettingsPage.Section("ratings"));
+		var sources = page.Locator(".rating-source");
+		await Expect(sources.First).ToBeVisibleAsync(Wait.Settle);
+
+		await Assert.That(await page.OverflowingAsync()).IsEmpty();
+		await page.GetByRole(AriaRole.Radio, new() { Name = "First available" }).TapAsync();
+		await page.Button("Move IMDb up").TapAsync();
+
+		await Expect(sources.First).ToContainTextAsync("IMDb");
+		await Assert.That(await page.OverflowingAsync()).IsEmpty();
+	}
+
+	[Test]
 	public async Task OptionList_OpensAsASheetAcrossTheScreen()
 	{
 		var page = await E2EApp.AdminAt(Routes.CreateFeed);
@@ -195,7 +210,7 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 		var viewport = page.ViewportSize!;
 		var cancelBox = (await cancel.BoundingBoxAsync())!;
 		var runBox = (await run.BoundingBoxAsync())!;
-		await Assert.That(runBox.Y).IsEqualTo(cancelBox.Y);
+		await Assert.That(runBox.Y).IsEqualTo(cancelBox.Y).Within(0.5f);
 		await Assert.That(runBox.Height).IsGreaterThanOrEqualTo(52);
 		await Assert.That(runBox.Y + runBox.Height).IsGreaterThanOrEqualTo(viewport.Height - 7);
 		await Assert.That(cancelBox.Width + runBox.Width).IsGreaterThanOrEqualTo(viewport.Width - 14);

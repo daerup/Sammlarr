@@ -117,6 +117,8 @@ public class SammlarrRatingBadgeTests : BunitContext
 		var cut = RenderBreakdown(ProjectHailMary, new RatingStrategy(AveragedRating.Everything));
 
 		await Assert.That(cut.Find(".rating-breakdown-how").TextContent).Contains("Average · your default").And.Contains("549,900 votes");
+		await Assert.That(cut.FindAll(".rating-tip")).IsNotEmpty();
+		await Assert.That(cut.FindAll(".rating-breakdown-sums")).IsEmpty();
 	}
 
 	[Test]
@@ -227,6 +229,23 @@ public class SammlarrRatingBadgeTests : BunitContext
 
 	private static IEnumerable<string> Subtitles(IRenderedComponent<SammlarrRatingBreakdown> cut) =>
 		cut.FindAll(".rating-row-name small").Select(line => line.TextContent.Trim());
+
+	[Test]
+	public async Task Breakdown_OnAPhone_WritesTheSumsAndEachRowsRawValueInsteadOfTooltips()
+	{
+		var cut = this.RenderOnPhone<SammlarrRatingBreakdown>(parameters =>
+			parameters
+				.Add(breakdown => breakdown.Ratings, ProjectHailMary)
+				.Add(breakdown => breakdown.Strategy, new RatingStrategy(AveragedRating.Everything))
+				.Add(breakdown => breakdown.Available, Everything)
+				.Add(breakdown => breakdown.Where, "your default")
+		).Component;
+
+		await Assert.That(cut.FindAll(".rating-tip")).IsEmpty();
+		await Assert.That(cut.Find(".rating-breakdown-sums").Children.Length).IsEqualTo(2);
+		await Assert.That(Subtitles(cut)).Contains(line => line == "95% of critics liked it · 95% → 9.5");
+		await Assert.That(cut.Find(".rating-breakdown-foot").TextContent).IsEqualTo(RatingTexts.PhoneFooter);
+	}
 
 	private IRenderedComponent<SammlarrRatingBreakdown> RenderAnime(params IExternalMediaId[] ids)
 	{

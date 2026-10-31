@@ -158,6 +158,43 @@ public class RatingPipelineCardTests : BunitContext
 	}
 
 	[Test]
+	public async Task Phone_ListsEverySourceWithItsSwitchAndKeepsTheUnsuppliedOnesDimmedWithTheirSuppliers()
+	{
+		var cut = RenderOnPhone(new RatingStrategy(AveragedRating.Everything));
+		var unsupplied = cut.FindAll(".rating-source.is-unsupplied");
+
+		await Assert.That(cut.FindAll(".rating-source").Count).IsEqualTo(Enum.GetValues<RatingSource>().Length);
+		await Assert.That(cut.FindAll(".rating-source button[role=switch]").Count).IsEqualTo(Supplied.Count);
+		await Assert.That(unsupplied).IsNotEmpty();
+		await Assert.That(unsupplied.All(row => row.QuerySelector(".rating-suppliers-link") is not null)).IsTrue();
+		await Assert.That(cut.FindAll(".pipeline")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Phone_UnderFirstAvailable_MovesASourceUpAndKeepsFocusOnItsButtons()
+	{
+		var cut = RenderOnPhone(new RatingStrategy(new OrderedRating()));
+
+		await Move(cut, "Move IMDb up").ClickAsync();
+
+		_ratings.StoreDefaultAsync(new RatingStrategy(new OrderedRating([RatingSource.Imdb])), Any()).WasCalled(Times.Once);
+		await Assert.That(cut.FindAll(".rating-source")[0].TextContent).Contains("IMDb");
+		await Assert.That(Move(cut, "Move IMDb up").HasAttribute("disabled")).IsTrue();
+		JSInterop.VerifyFocusAsyncInvoke();
+	}
+
+	[Test]
+	public async Task Phone_UnderFirstAvailable_MovesASourceDownAndOffersNoMoveDownForTheLast()
+	{
+		var cut = RenderOnPhone(new RatingStrategy(new OrderedRating()));
+
+		await Move(cut, "Move IMDb down").ClickAsync();
+
+		_ratings.StoreDefaultAsync(new RatingStrategy(new OrderedRating().Moved(RatingSource.Imdb, 2)), Any()).WasCalled(Times.Once);
+		await Assert.That(cut.FindAll(".rating-source button[aria-label$=' down']")[^1].HasAttribute("disabled")).IsTrue();
+	}
+
+	[Test]
 	public async Task Combination_WhenSwitchedFromFirstAvailableToAverage_KeepsTheRowOrder()
 	{
 		var cut = RenderCard(new RatingStrategy(new OrderedRating([RatingSource.RottenTomatoesAudience, RatingSource.Imdb])), Supplied);
@@ -180,6 +217,15 @@ public class RatingPipelineCardTests : BunitContext
 	{
 		return cut.FindAll(".pipeline-tile").Single(tile => tile.QuerySelector(".pipeline-name")!.TextContent.Trim() == name);
 	}
+
+	private IRenderedComponent<RatingPipelineCard> RenderOnPhone(RatingStrategy strategy)
+	{
+		return this.RenderOnPhone<RatingPipelineCard>(parameters =>
+			parameters.Add(card => card.Strategy, strategy).Add(card => card.Available, Supplied)
+		).Component;
+	}
+
+	private static IElement Move(IRenderedComponent<RatingPipelineCard> cut, string label) => cut.Find($"button[aria-label='{label}']");
 
 	private static IElement Radio(IRenderedComponent<RatingPipelineCard> cut, string name)
 	{

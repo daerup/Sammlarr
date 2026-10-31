@@ -35,6 +35,13 @@
     color: var(--muted-foreground);
 }
 
+.rating-breakdown-sums {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 12px 12px;
+}
+
 .rating-row {
     position: relative;
     display: grid;
@@ -174,4 +181,11 @@
     text-decoration: underline dotted;
     text-decoration-thickness: 1px;
     text-underline-offset: 3px;
+}
+
+@media (width < 48rem) {
+    .rating-breakdown {
+        width: auto;
+        max-width: none;
+    }
 }

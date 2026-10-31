@@ -8,6 +8,8 @@ internal static class RatingTexts
 {
 	public const string Footer = "Out of 10. Hover a value for the provider's own number, the rating above for the arithmetic.";
 
+	public const string PhoneFooter = "Out of 10. Each row shows the provider's own number and what it becomes.";
+
 	public const string UnratedFooter = "No provider rates this title yet; it gets a Sammlarr rating as soon as one does.";
 
 	public const string Unrated = "No Sammlarr rating yet";
