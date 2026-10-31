@@ -30,7 +30,7 @@
         <HoverButton OnClick="OpenAsync" Disabled="IsBusy" Color="@BrandColor" Class="whitespace-nowrap">@SyncLabel</HoverButton>
     }
     <span class="sync-status @(IsBusy ? "is-busy" : null)" style="@(PerApp || string.IsNullOrEmpty(BrandColor) ? null : $"--tint: {BrandColor};")">
-        @if (_isLoadingDryRun || (_dryRun is null && _dryRunError is null))
+        @if (Comparing)
         {
             <BbSpinner Size="SpinnerSize.Small"/>
             <span class="sync-note">Comparing</span>
@@ -106,6 +106,7 @@
                   EmptyMessage="Everything is in sync."
                   BandTone="ChangeBandTone.Bad"
                   Prologue="@(OutboxEntries.Count > 0 ? OutboxStrip : null)"
+                  Totals="@(IsPhone && _dryRun is { } report ? TotalsOf(report) : null)"
                   Band="@(_dryRunError is not null ? ErrorBand : null)">
         <Actions>
             <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="CloseAsync" data-dialog-cancel>Cancel</BbButton>
@@ -150,7 +151,132 @@
 
     [Parameter] public SinkKind? Sink { get; set; }
 
+    [Parameter] public EventCallback StateChanged { get; set; }
+
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     private bool PerApp => Sink == SinkKind.Arr;
+
+    private bool Comparing => _isLoadingDryRun || (_dryRun is null && _dryRunError is null);
+
+    private enum SyncState
+    {
+        Comparing,
+        Changes,
+        InSync,
+        Unreachable,
+    }
+
+    private SyncState State
+    {
+        get
+        {
+            if (Comparing)
+            {
+                return SyncState.Comparing;
+            }
+
+            if (_dryRun is { TotalChanges: > 0 })
+            {
+                return SyncState.Changes;
+            }
+
+            return _dryRunError is null ? SyncState.InSync : SyncState.Unreachable;
+        }
+    }
+
+    internal RenderFragment Badge =>
+        @<span class="sync-badge">
+            @switch (State)
+            {
+                case SyncState.Comparing:
+                    <LucideIcon Name="loader-circle" Size="12" Class="animate-spin"/>
+                    break;
+                case SyncState.Changes:
+                    @if (_dryRun!.AddCount > 0)
+                    {
+                        <span class="sync-badge-add">@($"+{_dryRun.AddCount:N0}")</span>
+                    }
+                    @if (_dryRun.RemoveCount > 0)
+                    {
+                        <span class="sync-badge-remove">@($"−{_dryRun.RemoveCount:N0}")</span>
+                    }
+                    break;
+                case SyncState.InSync:
+                    <LucideIcon Name="check" Size="12"/>
+                    break;
+                case SyncState.Unreachable:
+                    <LucideIcon Name="cloud-off" Size="12"/>
+                    break;
+            }
+        </span>;
+
+    internal string BadgeLabel
+    {
+        get
+        {
+            return State switch
+            {
+                SyncState.Comparing => "comparing",
+                SyncState.Changes => ChangesText(_dryRun!),
+                SyncState.InSync => "in sync",
+                SyncState.Unreachable => "unreachable",
+            };
+        }
+    }
+
+    private static string ChangesText(WantlistSyncSummary report)
+    {
+        var parts = new List<string>(2);
+        if (report.AddCount > 0)
+        {
+            parts.Add($"{report.AddCount:N0} to add");
+        }
+
+        if (report.RemoveCount > 0)
+        {
+            parts.Add($"{report.RemoveCount:N0} to remove");
+        }
+
+        return string.Join(", ", parts);
+    }
+
+    private sealed record SyncTotal(RemoteService Remote, string Name, string What, int Adds, int Removes, Optional<int> Same);
+
+    private IEnumerable<SyncTotal> TotalsFor(WantlistSyncSummary report)
+    {
+        if (!PerApp)
+        {
+            return [new SyncTotal(RemoteService.Plex, ProviderName, "Your watchlist", report.AddCount, report.RemoveCount, Some.Of(report.NoOps.Count))];
+        }
+
+        return Enum.GetValues<ArrApp>().Select(app => AppTotal(report, app));
+    }
+
+    private SyncTotal AppTotal(WantlistSyncSummary report, ArrApp app)
+    {
+        var (adds, removes) = ChangesOf(report, app);
+        return new SyncTotal(app.Remote, app.Name, app.Type.Plural, adds, removes, new None());
+    }
+
+    private RenderFragment TotalsOf(WantlistSyncSummary report) =>
+        @<div class="sync-totals">
+            @foreach (var total in TotalsFor(report))
+            {
+                <div class="sync-total" data-testid="sync-total" data-app="@total.Name">
+                    <BrandedLogo Brand="Branding.GetBrandingInfo(total.Remote)" Form="ProviderLogoForm.Mark" Size="24" Decorative="true"/>
+                    <span class="sync-total-name"><b>@total.Name</b><span>@total.What</span></span>
+                    <span class="sync-total-counts">
+                        <span class="is-added">@($"+{total.Adds:N0}")</span>
+                        <span class="is-removed">@($"−{total.Removes:N0}")</span>
+                        @if (total.Same is Some<int>(var same))
+                        {
+                            <span class="sync-total-same"><LucideIcon Name="check" Size="12"/>@same.ToString("N0")</span>
+                        }
+                    </span>
+                </div>
+            }
+        </div>;
 
     private ValueSet<ArrApp> _unreachable = [];
 
@@ -196,7 +322,7 @@
     private CoalescedReload _dryRunReload = null!;
     private MediaMatchResult? _selected;
 
-    private bool IsBusy => _isSyncing || _isRunning || IsSyncing;
+    internal bool IsBusy => _isSyncing || _isRunning || IsSyncing;
 
     private Task ShowDetailsAsync(MatchedMedia media)
     {
@@ -267,6 +393,7 @@
     {
         _isLoadingDryRun = true;
         StateHasChanged();
+        await NotifyAsync();
 
         var token = _cts.Token;
         try
@@ -280,7 +407,10 @@
 
         _isLoadingDryRun = false;
         StateHasChanged();
+        await NotifyAsync();
     }
+
+    private Task NotifyAsync() => IsPhone ? StateChanged.InvokeAsync() : Task.CompletedTask;
 
     private async Task<WantlistPlanResult> PlanAsync(CancellationToken cancellationToken)
     {
@@ -410,6 +540,7 @@
             }
 
             StateHasChanged();
+            await NotifyAsync();
         });
     }
 }

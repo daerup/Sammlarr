@@ -26,9 +26,26 @@ else
     {
         return Sink switch
         {
+            { } sink => SinkLink(sink),
+            null => ApiProvider is { } provider ? SettingsLinks.Provider(provider.Remote) : null,
+        };
+    }
+
+    internal static string SinkReason(SinkKind sink, string action)
+    {
+        return sink switch
+        {
+            SinkKind.Plex => $"Connect your Plex account to {action}.",
+            SinkKind.Arr => $"Radarr + Sonarr needs setting up before you can {action}.",
+        };
+    }
+
+    internal static string? SinkLink(SinkKind sink)
+    {
+        return sink switch
+        {
             SinkKind.Plex => SettingsLinks.Provider(RemoteService.Plex),
             SinkKind.Arr => null,
-            null => ApiProvider is { } provider ? SettingsLinks.Provider(provider.Remote) : null,
         };
     }
 
@@ -36,11 +53,7 @@ else
     {
         if (Sink is { } sink)
         {
-            return sink switch
-            {
-                SinkKind.Plex => $"Connect your Plex account to {DeniedActionDescription}.",
-                SinkKind.Arr => $"Radarr + Sonarr needs setting up before you can {DeniedActionDescription}.",
-            };
+            return SinkReason(sink, DeniedActionDescription);
         }
 
         if (ApiProvider.HasValue)

@@ -30,6 +30,8 @@
             </div>
         </div>
 
+        @Totals
+
         @if (Band is not null)
         {
             <div class="change-band @BandClass">@Band</div>
@@ -41,6 +43,7 @@
                         Chips="Chips"
                         OnSelect="OnSelect"
                         Fold="Fold"
+                        Fill="@(IsPhone && Actions is not null)"
                         RemovedLabel="@RemovedLabel"
                         AddedLabel="@AddedLabel"
                         UnchangedLabel="@UnchangedLabel"/>
@@ -72,6 +75,8 @@
 </BbDialog>
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     [Parameter] public bool Open { get; set; }
     [Parameter] public EventCallback<bool> OnOpenChanged { get; set; }
 
@@ -81,6 +86,7 @@
 
     [Parameter] public RenderFragment? Prologue { get; set; }
     [Parameter] public RenderFragment? Band { get; set; }
+    [Parameter] public RenderFragment? Totals { get; set; }
     [Parameter] public ChangeBandTone BandTone { get; set; } = ChangeBandTone.Warn;
 
     [Parameter] public bool Loading { get; set; }

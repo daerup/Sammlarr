@@ -42,12 +42,19 @@
     <Actions>
         <PageAction Icon="square-check" Label="Select" DesktopLabel="Bulk edit" OnClick="EnterEditMode" Visible="HasItems && !IsEditMode"/>
         <PageAction Icon="sliders-horizontal" Label="Filter" DesktopLabel="View" Active="ShowFilters" Badge="Filter.ActiveCount" OnClick="ToggleFilterBar" PhoneOnClick="OpenFilterSheet" Visible="HasItems"/>
-        <PageAction Icon="refresh-cw" Label="Sync">
+        <PageAction Icon="refresh-cw"
+                    Label="Sync"
+                    BadgeContent="SyncControl?.Badge"
+                    BadgeLabel="@SyncControl?.BadgeLabel"
+                    PhoneOnClick="OpenSyncAsync"
+                    Disabled="@(SyncControl is null || SyncControl.IsBusy)"
+                    DisabledReason="@SyncDeniedReason"
+                    DisabledLink="@ProtectedComponent.SinkLink(Settings!.Sink)">
             <Desktop>
                 <ProtectedComponent GuardState="IsConnected"
                                     Sink="@Settings!.Sink"
-                                    DeniedActionDescription="sync your wantlist">
-                    <WantlistSyncButton @ref="_syncControl" OnSynced="LoadAsync" OnStatusRefresh="LoadOutboxAsync" OnSyncStarted="StartSync" IsSyncing="_syncing" BrandColor="@SinkBrandColor" ProviderName="@SinkName" Sink="Settings?.Sink" OutboxEntries="_outboxEntries.Values"/>
+                                    DeniedActionDescription="@SyncAction">
+                    <WantlistSyncButton @ref="_syncControl" StateChanged="StateHasChanged" OnSynced="LoadAsync" OnStatusRefresh="LoadOutboxAsync" OnSyncStarted="StartSync" IsSyncing="_syncing" BrandColor="@SinkBrandColor" ProviderName="@SinkName" Sink="Settings?.Sink" OutboxEntries="_outboxEntries.Values"/>
                 </ProtectedComponent>
             </Desktop>
         </PageAction>
@@ -160,6 +167,12 @@
     private bool _syncing;
     private WantlistedMedia? _selectedItem;
     private WantlistSyncButton? _syncControl;
+
+    private const string SyncAction = "sync your wantlist";
+
+    private WantlistSyncButton? SyncControl => IsConnected() ? _syncControl : null;
+
+    private string? SyncDeniedReason => IsConnected() ? null : ProtectedComponent.SinkReason(Settings!.Sink, SyncAction);
 
     [Parameter]
     [SupplyParameterFromQuery(Name = "feed")]

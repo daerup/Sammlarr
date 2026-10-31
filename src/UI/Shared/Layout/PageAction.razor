@@ -1,15 +1,12 @@
 @if (Visible)
 {
-    @if (Placement is ActionPlacement.Toolbar && HasSlot)
+    @if (Placement is ActionPlacement.Toolbar && HasSlot && Disabled && DisabledReason is not null)
     {
-        <button type="button" class="toolbar-slot @(Active && !PhoneOnClick.HasDelegate ? "is-on" : null) @(Tone is ActionTone.Danger ? "is-danger" : null)" disabled="@Disabled" aria-label="@(Badge > 0 ? $"{Label}, {Badge}" : null)" @onclick="PhoneOnClick.HasDelegate ? PhoneOnClick : OnClick">
-            <LucideIcon Name="@Icon" Size="20"/>
-            <span class="toolbar-slot-label">@Label</span>
-            @if (Badge > 0)
-            {
-                <span class="toolbar-badge">@Badge</span>
-            }
-        </button>
+        <ReasonTip TriggerClass="flex min-w-0 flex-1" Reason="@DisabledReason" ActionText="Settings" ActionHref="@DisabledLink">@Slot</ReasonTip>
+    }
+    else if (Placement is ActionPlacement.Toolbar && HasSlot)
+    {
+        @Slot
     }
     else if (Placement is ActionPlacement.Header)
     {
@@ -50,6 +47,38 @@
     [Parameter] public EventCallback OnClick { get; set; }
     [Parameter] public EventCallback PhoneOnClick { get; set; }
     [Parameter] public RenderFragment? Desktop { get; set; }
+    [Parameter] public RenderFragment? BadgeContent { get; set; }
+    [Parameter] public string? BadgeLabel { get; set; }
+    [Parameter] public string? DisabledReason { get; set; }
+    [Parameter] public string? DisabledLink { get; set; }
 
     private bool HasSlot => OnClick.HasDelegate || PhoneOnClick.HasDelegate;
+
+    private string? SlotLabel
+    {
+        get
+        {
+            return (Disabled ? DisabledReason : null, BadgeLabel, Badge) switch
+            {
+                ({ } reason, _, _) => $"{Label}, {reason}",
+                (null, { } status, _) => $"{Label}, {status}",
+                (null, null, > 0) => $"{Label}, {Badge}",
+                _ => null,
+            };
+        }
+    }
+
+    private RenderFragment Slot =>
+        @<button type="button" class="toolbar-slot @(Active && !PhoneOnClick.HasDelegate ? "is-on" : null) @(Tone is ActionTone.Danger ? "is-danger" : null)" disabled="@Disabled" aria-label="@SlotLabel" @onclick="PhoneOnClick.HasDelegate ? PhoneOnClick : OnClick">
+            <LucideIcon Name="@Icon" Size="20"/>
+            <span class="toolbar-slot-label">@Label</span>
+            @if (BadgeContent is not null)
+            {
+                <span class="toolbar-badge is-status">@BadgeContent</span>
+            }
+            else if (Badge > 0)
+            {
+                <span class="toolbar-badge">@Badge</span>
+            }
+        </button>;
 }

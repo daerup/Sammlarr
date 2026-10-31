@@ -1,6 +1,7 @@
 using BlazorBlueprint.Components;
 using Bunit;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 using UI.Shared.Layout;
 
 namespace UI.Tests.Layout;
@@ -156,6 +157,38 @@ public class PageActionTests : BunitContext
 		var cut = RenderInToolbar(parameters => parameters.Add(action => action.Desktop, desktop));
 
 		await Assert.That(cut.Markup.Trim()).IsEmpty();
+	}
+
+	[Test]
+	public async Task Toolbar_WithAStatusBadge_ShowsItAndNamesTheSlotWithIt()
+	{
+		RenderFragment status = builder => builder.AddMarkupContent(0, "<b>+2</b>");
+
+		var cut = RenderInToolbar(parameters =>
+			parameters.Add(action => action.BadgeContent, status).Add(action => action.BadgeLabel, "2 to add").Add(action => action.PhoneOnClick, () => { })
+		);
+
+		await Assert.That(cut.Find(".toolbar-badge.is-status").TextContent).IsEqualTo("+2");
+		await Assert.That(cut.Find(".toolbar-slot").GetAttribute("aria-label")).IsEqualTo("Select, 2 to add");
+	}
+
+	[Test]
+	public async Task Toolbar_WhenDisabledForAReason_NamesItAndExplainsItOnATap()
+	{
+		RenderTree.TryAdd<CascadingValue<bool>>(cascade => cascade.Add(value => value.Name, PhoneLayout.IsPhoneCascade).Add(value => value.Value, true));
+		var cut = RenderInToolbar(parameters =>
+			parameters
+				.Add(action => action.PhoneOnClick, () => { })
+				.Add(action => action.Disabled, true)
+				.Add(action => action.DisabledReason, "Connect your Plex account to sync your wantlist.")
+				.Add(action => action.DisabledLink, "/settings")
+		);
+
+		await cut.Find(".reason-tip").ClickAsync(new());
+
+		await Assert.That(cut.Find(".toolbar-slot").HasAttribute("disabled")).IsTrue();
+		await Assert.That(cut.Find(".toolbar-slot").GetAttribute("aria-label")).IsEqualTo("Select, Connect your Plex account to sync your wantlist.");
+		await Assert.That(Services.GetRequiredService<ToastService>().Toasts.Single().Description).IsEqualTo("Connect your Plex account to sync your wantlist.");
 	}
 
 	private IRenderedComponent<PageAction> RenderInToolbar(Action<ComponentParameterCollectionBuilder<PageAction>> configure)

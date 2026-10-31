@@ -173,6 +173,8 @@
 @media (width < 48rem) {
     .change-dialog:has([data-dialog-actions]) {
         width: auto;
+        display: flex;
+        flex-direction: column;
     }
 }
 

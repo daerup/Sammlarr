@@ -23,6 +23,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
+using TUnit.Assertions.Enums;
 using UI.Features.Wantlist.Components;
 using UI.Shared.Services;
 using UI.Tests.Media;
@@ -45,6 +46,36 @@ public class WantlistSyncButtonTests : BunitContext
 		await cut.InvokeAsync(() => events.Publish(new JobStateChangedEvent(Viewer, JobKind.WantlistSync, string.Empty, JobState.Running)));
 
 		await Assert.That(cut.Markup).Contains("Syncing...");
+	}
+
+	[Test]
+	public async Task Phone_WhenTheViewersSyncJobStarts_TellsThePageItIsBusy()
+	{
+		var (_, planner) = RegisterServices();
+		planner.PlanAsync(Any()).Returns(Summary());
+		var changes = 0;
+		var cut = this.RenderOnPhone<WantlistSyncButton>(parameters => parameters.Add(button => button.StateChanged, () => changes++)).Component;
+		cut.WaitForState(() => cut.Instance.BadgeLabel == "in sync");
+		var before = changes;
+
+		await cut.InvokeAsync(() => events.Publish(new JobStateChangedEvent(Viewer, JobKind.WantlistSync, string.Empty, JobState.Running)));
+
+		cut.WaitForState(() => changes > before);
+		await Assert.That(cut.Instance.IsBusy).IsTrue();
+	}
+
+	[Test]
+	public async Task Desktop_WhenTheViewersSyncJobStarts_LeavesThePageAlone()
+	{
+		var (_, planner) = RegisterServices();
+		planner.PlanAsync(Any()).Returns(Summary());
+		var changes = 0;
+		var cut = Render<WantlistSyncButton>(parameters => parameters.Add(button => button.StateChanged, () => changes++));
+
+		await cut.InvokeAsync(() => events.Publish(new JobStateChangedEvent(Viewer, JobKind.WantlistSync, string.Empty, JobState.Running)));
+
+		await Assert.That(cut.Markup).Contains("Syncing...");
+		await Assert.That(changes).IsEqualTo(0);
 	}
 
 	[Test]
@@ -175,13 +206,7 @@ public class WantlistSyncButtonTests : BunitContext
 		var movie = MediaId.New();
 		var shows = Ids(3);
 		planner.PlanAsync(Any()).Returns(Summary(new WantlistDelta([movie, shows[0], shows[1]], []), new WantlistDelta([], [shows[2]])));
-		var media = IMediaService.Mock();
-		media
-			.GetDetailsAsync(Any(), Any(), Any())
-			.Returns(
-				(ids, _, _) => AsyncSequence.Of([.. ids.Select(id => (Result<MatchedMedia>)Success.Of(Typed(id, id == movie ? MediaType.Movie : MediaType.Show)))])
-			);
-		Services.AddSingleton(media.Object);
+		Services.AddSingleton(ShowsBut(movie));
 
 		var cut = Render<WantlistSyncButton>(parameters => parameters.Add(button => button.Sink, SinkKind.Arr));
 
@@ -370,6 +395,92 @@ public class WantlistSyncButtonTests : BunitContext
 		await Assert.That(read.Count(id => id == Synced)).IsEqualTo(1);
 	}
 
+	[Test]
+	public async Task Badge_WithChanges_CountsThemAndSaysSo()
+	{
+		var (_, planner) = RegisterServices();
+		planner.PlanAsync(Any()).Returns(Summary(new WantlistDelta(Ids(12), Ids(3)), new WantlistDelta(Ids(2), Ids(1))));
+
+		var cut = Render<WantlistSyncButton>();
+		cut.WaitForElement(".sync-status .is-added");
+		var badge = Render(cut.Instance.Badge);
+
+		await Assert.That(badge.Find(".sync-badge-add").TextContent).IsEqualTo("+14");
+		await Assert.That(badge.Find(".sync-badge-remove").TextContent).IsEqualTo("−4");
+		await Assert.That(cut.Instance.BadgeLabel).IsEqualTo("14 to add, 4 to remove");
+	}
+
+	[Test]
+	public async Task Badge_WhenInSync_ShowsATick()
+	{
+		var (_, planner) = RegisterServices();
+		planner.PlanAsync(Any()).Returns(Summary());
+
+		var cut = Render<WantlistSyncButton>();
+		cut.WaitForState(() => cut.Instance.BadgeLabel == "in sync");
+
+		await Assert.That(Render(cut.Instance.Badge).FindAll("svg")).HasSingleItem();
+	}
+
+	[Test]
+	public async Task Badge_WhilePlanningAgain_SaysItIsComparing()
+	{
+		var (_, planner) = RegisterServices();
+		var pending = new TaskCompletionSource<WantlistPlanResult>();
+		var plans = 0;
+		planner.PlanAsync(Any()).Returns(_ => plans++ == 0 ? Task.FromResult<WantlistPlanResult>(Summary()) : pending.Task);
+		var cut = Render<WantlistSyncButton>();
+		cut.WaitForState(() => cut.Instance.BadgeLabel == "in sync");
+
+		_ = cut.InvokeAsync(cut.Instance.RefreshAsync);
+
+		cut.WaitForState(() => cut.Instance.BadgeLabel == "comparing");
+		await Assert.That(Render(cut.Instance.Badge).Find("svg").ClassList).Contains("animate-spin");
+	}
+
+	[Test]
+	public async Task Badge_OnRadarrAndSonarrWhenSonarrIsUnreachable_SaysSoInsteadOfInSync()
+	{
+		var (_, planner) = RegisterServices();
+		planner.PlanAsync(Any()).Returns(Summary() with { Down = Some.Of(new WantlistSyncSinkUnreachable("Sonarr answered 401 Unauthorized.", [ArrApp.Sonarr])) });
+
+		var cut = Render<WantlistSyncButton>(parameters => parameters.Add(button => button.Sink, SinkKind.Arr));
+
+		cut.WaitForState(() => cut.Instance.BadgeLabel != "comparing", TimeSpan.FromSeconds(10));
+		await Assert.That(cut.Instance.BadgeLabel).IsEqualTo("unreachable");
+	}
+
+	[Test]
+	public async Task Phone_OnRadarrAndSonarr_OpensWithTheTotalsOfEachApp()
+	{
+		var (_, planner) = RegisterServices();
+		var movie = MediaId.New();
+		var shows = Ids(3);
+		planner.PlanAsync(Any()).Returns(Summary(new WantlistDelta([movie, shows[0], shows[1]], []), new WantlistDelta([], [shows[2]])));
+		Services.AddSingleton(ShowsBut(movie));
+
+		var cut = this.RenderOnPhone<WantlistSyncButton>(parameters => parameters.Add(button => button.Sink, SinkKind.Arr));
+		cut.Component.WaitForElement("[data-app=Sonarr] .is-removed");
+		await cut.Component.InvokeAsync(() => cut.Component.Instance.OpenAsync());
+
+		cut.Portal.WaitForElement("[data-testid=sync-total]");
+		var totals = cut.Portal.FindAll("[data-testid=sync-total]").Select(total => total.TextContent.Squeezed());
+		await Assert.That(totals).IsEquivalentTo(["RadarrMovies+1−0", "SonarrShows+2−1"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Desktop_OpenedDialog_HasNoTotals()
+	{
+		var (_, planner) = RegisterServices();
+		planner.PlanAsync(Any()).Returns(Summary());
+
+		var cut = Render<Harness>();
+		await cut.Find("button").ClickAsync(new());
+
+		cut.WaitForElement(".change-head");
+		await Assert.That(cut.FindAll("[data-testid=sync-total]")).IsEmpty();
+	}
+
 	private static IElement Opener<T>(IRenderedComponent<T> cut)
 		where T : IComponent
 	{
@@ -380,6 +491,17 @@ public class WantlistSyncButtonTests : BunitContext
 		where T : IComponent
 	{
 		return cut.FindAll(".change-actions button").Single(button => button.TextContent.Trim() == "Sync");
+	}
+
+	private static IMediaService ShowsBut(MediaId movie)
+	{
+		var media = IMediaService.Mock();
+		media
+			.GetDetailsAsync(Any(), Any(), Any())
+			.Returns(
+				(ids, _, _) => AsyncSequence.Of([.. ids.Select(id => (Result<MatchedMedia>)Success.Of(Typed(id, id == movie ? MediaType.Movie : MediaType.Show)))])
+			);
+		return media.Object;
 	}
 
 	private static IMediaService MediaOf(MediaType type)

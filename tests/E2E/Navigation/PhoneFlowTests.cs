@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using E2E.Tests.Browse;
 using E2E.Tests.Feeds;
 using E2E.Tests.Settings;
@@ -265,20 +266,36 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	[Test]
 	public async Task Wantlist_OnAPhone_ShowsItsActionsInTheFooter()
 	{
-		string[] slots = ["Select", "Filter"];
+		string[] slots = ["Select", "Filter", "Sync"];
 		var page = await WantlistWithAsync(TrendingTiles.Title);
 		var labels = page.Toolbar.Locator(".toolbar-slot-label:visible");
 		var search = page.GetByRole(AriaRole.Searchbox);
 
 		await Expect(labels).ToHaveTextAsync(slots, Wait.Settle);
 		await Expect(page.ButtonContaining("Bulk edit")).ToBeHiddenAsync();
-		await Expect(page.GetByRole(AriaRole.Group, new PageGetByRoleOptions { Name = "Wantlist sync", Exact = true })).ToBeVisibleAsync();
+		await Expect(page.GetByRole(AriaRole.Group, new PageGetByRoleOptions { Name = "Wantlist sync", Exact = true })).ToBeHiddenAsync();
 		await search.FocusAsync();
 		await Expect(page.Toolbar).ToBeHiddenAsync();
 		await search.BlurAsync();
 		await Expect(page.Toolbar).ToBeVisibleAsync();
 		await page.Toolbar.Button("Select").TapAsync();
 		await Expect(page.Locator("header .phone-select-bar [role=status]")).ToHaveTextAsync("0 selected");
+	}
+
+	[Test]
+	public async Task Sync_Tapped_OpensTheChangeSheetWithItsTotals()
+	{
+		var page = await WantlistWithAsync(TrendingTiles.Title);
+		var sync = page.Toolbar.ButtonContaining("Sync");
+		var sheet = page.GetByRole(AriaRole.Dialog).Filter(new LocatorFilterOptions { HasText = "Review changes before syncing" });
+
+		await Expect(sync).ToHaveAccessibleNameAsync(new Regex("^Sync, (?!comparing)"), new LocatorAssertionsToHaveAccessibleNameOptions { Timeout = Wait.Settle });
+		await sync.TapAsync();
+
+		await Expect(sheet.Locator("[data-testid=sync-total]")).ToHaveCountAsync(1, Wait.Settle);
+		await SitsOnTheBottomAsync(page, "[role=dialog]");
+		await page.GoBackAsync();
+		await Expect(sheet).ToHaveCountAsync(0);
 	}
 
 	[Test]
@@ -333,7 +350,7 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	public async Task SelectMode_TwoTilesPicked_ShowsTheCountAndTheBulkActions()
 	{
 		string[] bulk = ["Blocklist", "Remove"];
-		string[] browsing = ["Select", "Filter"];
+		string[] browsing = ["Select", "Filter", "Sync"];
 		var page = await WantlistWithAsync(TrendingTiles.Title, TrendingTiles.Second);
 		var layers = page.Locator("[data-testid='selection-layer']");
 		var labels = page.Toolbar.Locator(".toolbar-slot-label:visible");
