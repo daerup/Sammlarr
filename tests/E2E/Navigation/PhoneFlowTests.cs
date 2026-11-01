@@ -435,6 +435,38 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	}
 
 	[Test]
+	public async Task Clock_OnAPhone_DragsTheHandToAnExactMinute()
+	{
+		var page = await E2EApp.AdminAt(Routes.CreateFeed);
+		await FeedEditor.ConfigureAsync(page, TestData.Name("Clock"));
+		await FeedEditor.OpenOptionalSectionAsync(page, "Sync Frequency");
+		await FeedEditor.Option(page, "Trigger", "Scheduled").TapAsync();
+		var field = page.Locator(".clock-field");
+		await field.TapAsync();
+		var sheet = page.Modal("Run at");
+
+		await sheet.Button("Hour 07").TapAsync();
+		await Expect(sheet.GetByText("Pick the minute, or drag for an exact one")).ToBeVisibleAsync();
+		var box = (await sheet.Locator(".clock-dial").BoundingBoxAsync())!;
+		var (x, y) = (box.X + box.Width / 2, box.Y + box.Height / 2);
+		await page.Mouse.MoveAsync(x - 88, y);
+		await page.Mouse.DownAsync();
+		foreach (var degrees in new[] { 272, 276, 280, 282 })
+		{
+			await page.Mouse.MoveAsync(
+				x + 88 * MathF.Sin(degrees * MathF.PI / 180),
+				y - 88 * MathF.Cos(degrees * MathF.PI / 180),
+				new MouseMoveOptions { Steps = 3 }
+			);
+		}
+		await page.Mouse.UpAsync();
+
+		await Expect(sheet.Locator(".clock-dial-exact")).ToHaveTextAsync("47");
+		await sheet.Button("Set 07:47").TapAsync();
+		await Expect(field).ToContainTextAsync("07:47");
+	}
+
+	[Test]
 	public async Task Editor_FiltersAndLimit_FitTheScreen()
 	{
 		var page = await E2EApp.AdminAt(Routes.CreateFeed);

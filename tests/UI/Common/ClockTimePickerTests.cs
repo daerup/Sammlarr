@@ -49,7 +49,7 @@ public class ClockTimePickerTests : BunitContext
 	}
 
 	[Test]
-	public async Task Desktop_KeepsTheTypedFieldAndSetsTheTimeOnceTheMinuteIsPicked()
+	public async Task Desktop_KeepsTheTypedFieldAndSetsTheTimeOnlyWithTheSetButton()
 	{
 		TimeSpan? set = null;
 		var portal = Render<BbPortalHost>();
@@ -61,6 +61,10 @@ public class ClockTimePickerTests : BunitContext
 		await cut.Find("[aria-label='Open time picker']").ClickAsync(new());
 		await portal.WaitForElement("[aria-label='Hour 22']").ClickAsync(new());
 		await portal.Find("[aria-label='Minute 15']").ClickAsync(new());
+		await Assert.That(set).IsNull();
+
+		var button = portal.FindAll("button").Single(button => button.TextContent.Trim() == "Set 22:15");
+		await button.ClickAsync(new());
 
 		await Assert.That(set).IsEqualTo(new TimeSpan(22, 15, 0));
 	}

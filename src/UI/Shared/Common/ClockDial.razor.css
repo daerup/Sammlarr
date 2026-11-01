@@ -3,6 +3,9 @@
     width: 240px;
     height: 240px;
     flex: none;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .clock-dial-face {
@@ -16,17 +19,58 @@
     stroke: var(--border);
 }
 
-.clock-dial-hand {
-    stroke: var(--primary);
-    stroke-width: 1.5;
+.clock-dial-bar {
+    fill: var(--foreground);
 }
 
-.clock-dial-pin,
+.clock-dial-hairline {
+    fill: color-mix(in oklch, var(--muted-foreground) 70%, transparent);
+}
+
+.clock-dial-hour-hand,
+.clock-dial-cursor,
+.clock-dial-stem,
 .clock-dial-knob {
+    transform-box: view-box;
+    transform-origin: 120px 120px;
+}
+
+.clock-dial-hour-hand,
+.clock-dial-cursor,
+.clock-dial-stem,
+.clock-dial-knob {
+    transition: transform 0.32s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+
+.clock-dial-hour-hand {
+    fill: var(--primary);
+    opacity: 0;
+    transition: transform 0.32s cubic-bezier(0.3, 0.7, 0.2, 1), opacity 0.22s;
+}
+
+.clock-dial.is-minute .clock-dial-hour-hand {
+    opacity: 1;
+}
+
+.clock-dial-tail,
+.clock-dial-stem,
+.clock-dial-knob,
+.clock-dial-pin {
     fill: var(--primary);
 }
 
-.clock-dial-mark {
+.clock-dial-layer {
+    position: absolute;
+    inset: 0;
+    transition: opacity 0.22s;
+}
+
+.clock-dial-layer[inert] {
+    opacity: 0;
+}
+
+.clock-dial-mark,
+.clock-dial-exact {
     position: absolute;
     display: grid;
     place-items: center;
@@ -38,23 +82,66 @@
     background: transparent;
     color: var(--foreground);
     font: inherit;
-    font-size: 14px;
+    font-size: 15px;
+    font-weight: 600;
     font-variant-numeric: tabular-nums;
     transform: translate(-50%, -50%);
+}
+
+.clock-dial-mark {
     cursor: pointer;
 }
 
 .clock-dial-mark.is-inner {
     color: var(--muted-foreground);
     font-size: 12px;
+    font-weight: 400;
+}
+
+.clock-dial-mark.is-on,
+.clock-dial-exact {
+    color: var(--primary-foreground);
+    font-weight: 600;
 }
 
 .clock-dial-mark.is-on {
-    color: var(--primary-foreground);
-    font-weight: 600;
+    transition: color 0s 0.32s;
+}
+
+.clock-dial-exact {
+    pointer-events: none;
+    animation: clock-dial-exact-in 0s 0.32s both;
 }
 
 .clock-dial-mark:focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 1px;
+}
+
+.clock-dial.is-dragging :is(.clock-dial-hour-hand, .clock-dial-cursor, .clock-dial-stem, .clock-dial-knob, .clock-dial-mark) {
+    transition: none;
+}
+
+.clock-dial.is-dragging .clock-dial-exact {
+    animation: none;
+}
+
+@keyframes clock-dial-exact-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .clock-dial :is(.clock-dial-hour-hand, .clock-dial-cursor, .clock-dial-stem, .clock-dial-knob, .clock-dial-layer, .clock-dial-mark) {
+        transition: none;
+    }
+
+    .clock-dial-exact {
+        animation: none;
+    }
 }

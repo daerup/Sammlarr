@@ -10,7 +10,7 @@
         <BbDialogContent>
             <BbDialogHeader>
                 <BbDialogTitle>@Title</BbDialogTitle>
-                <BbDialogDescription>@(_stage == ClockDialKind.Hour ? "Pick the hour" : "Pick the minute")</BbDialogDescription>
+                <BbDialogDescription>@(_stage == ClockDialKind.Hour ? "Pick the hour" : "Pick the minute, or drag for an exact one")</BbDialogDescription>
             </BbDialogHeader>
             @Panel
             <BbDialogFooter data-dialog-actions>
@@ -36,6 +36,7 @@ else
             </BbPopoverTrigger>
             <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.Start" Class="w-auto p-3">
                 @Panel
+                <BbButton Class="w-full" OnClick="SetAsync">Set @Format(_draft)</BbButton>
             </BbPopoverContent>
         </BbPopover>
     </div>
@@ -55,6 +56,10 @@ else
     private TimeSpan _draft;
 
     private ClockDialKind _stage = ClockDialKind.Hour;
+
+    private static readonly TimeSpan HandSettles = TimeSpan.FromMilliseconds(560);
+
+    private int _picks;
 
     private string Shown => Value is { } time ? Format(time) : "--:--";
 
@@ -82,17 +87,18 @@ else
 
     private async Task PickAsync(int value)
     {
-        if (_stage == ClockDialKind.Hour)
+        if (_stage == ClockDialKind.Minute)
         {
-            _draft = new TimeSpan(value, _draft.Minutes, 0);
-            _stage = ClockDialKind.Minute;
+            _draft = new TimeSpan(_draft.Hours, value, 0);
             return;
         }
 
-        _draft = new TimeSpan(_draft.Hours, value, 0);
-        if (!IsPhone)
+        _draft = new TimeSpan(value, _draft.Minutes, 0);
+        var pick = ++_picks;
+        await Task.Delay(HandSettles);
+        if (pick == _picks && _stage == ClockDialKind.Hour)
         {
-            await SetAsync();
+            _stage = ClockDialKind.Minute;
         }
     }
 
@@ -113,6 +119,6 @@ else
                 <span class="clock-colon" aria-hidden="true">:</span>
                 <button type="button" class="@SegmentClass(ClockDialKind.Minute)" aria-label="Pick the minute" aria-pressed="@(_stage == ClockDialKind.Minute ? "true" : "false")" @onclick="() => _stage = ClockDialKind.Minute">@_draft.Minutes.ToString("00", CultureInfo.InvariantCulture)</button>
             </div>
-            <ClockDial Kind="_stage" Value="@(_stage == ClockDialKind.Hour ? _draft.Hours : _draft.Minutes)" ValueChanged="PickAsync"/>
+            <ClockDial Kind="_stage" Time="_draft" ValueChanged="PickAsync"/>
         </div>;
 }

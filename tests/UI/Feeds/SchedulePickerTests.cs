@@ -95,8 +95,11 @@ public class SchedulePickerTests : BunitContext
 
 		await Assert.That(cut.FindAll("button[aria-label='Open time picker']")).Count().IsEqualTo(1);
 		cut.Find("button[aria-label='Open time picker']").Click();
-		cut.WaitForElement("[role=dialog] [aria-label='Hour 07']").Click();
-		cut.Find("[role=dialog] [aria-label='Minute 45']").Click();
+		await cut.WaitForElement("[role=dialog] [aria-label='Hour 07']").ClickAsync(new());
+		await cut.Find("[role=dialog] [aria-label='Minute 45']").ClickAsync(new());
+		await Assert.That(_schedule).IsEqualTo("untouched");
+
+		await cut.FindAll("[role=dialog] button").Single(button => button.TextContent.Trim() == "Set 07:45").ClickAsync(new());
 
 		await Assert.That(_schedule).IsEqualTo("0 45 7 * * *");
 	}
