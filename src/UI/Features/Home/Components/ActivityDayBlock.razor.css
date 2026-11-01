@@ -270,7 +270,17 @@
         border-radius: 0;
     }
 
-    .day-rows {
-        padding: 6px 0;
+    .chips {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .chip {
+        flex: none;
+    }
+
+    .day-grid {
+        padding: 12px 14px;
     }
 }

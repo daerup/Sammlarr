@@ -1,6 +1,7 @@
 using System.Globalization;
 using BlazorBlueprint.Components;
 using Bunit;
+using Contracts.Media;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
@@ -22,11 +23,18 @@ public class ActivityDayBlockTests : BunitContext
 
 	private static readonly DateOnly Today = DateOnly.FromDateTime(Noon.DateTime);
 
+	private const string Tile = "[data-testid=media-tile]";
+
+	private const string Faded = "[data-testid=media-tile] .media-card-dimmed";
+
 	[Before(Test)]
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddSingleton(ArtworkStub.Sizing());
+		Services.AddProviderBranding();
+		Services.AddSingleton(RatingStub.Context());
+		Services.AddSingleton(IMediaService.Mock().Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
@@ -108,7 +116,7 @@ public class ActivityDayBlockTests : BunitContext
 	}
 
 	[Test]
-	public async Task Phone_OpenDay_ListsItsTitlesAsRowsInsteadOfTracks()
+	public async Task Phone_OpenDay_ShowsItsTitlesAsAPosterGridInsteadOfTracks()
 	{
 		var day = Day(added: 2, removed: 1);
 		var requested = new List<MediaId>();
@@ -122,24 +130,24 @@ public class ActivityDayBlockTests : BunitContext
 		).Component;
 
 		await Assert.That(cut.FindAll(".track-wrap")).IsEmpty();
-		await Assert.That(cut.FindAll(".change-row")).Count().IsEqualTo(3);
-		await Assert.That(cut.FindAll(".change-row.is-leaving")).HasSingleItem();
+		await Assert.That(cut.FindAll(Tile)).Count().IsEqualTo(3);
+		await Assert.That(cut.FindAll(Faded)).HasSingleItem();
 		await Assert.That(requested).IsEquivalentTo([.. day.Added, .. day.Removed]);
 	}
 
 	[Test]
-	public async Task Phone_DayWithManyTitles_ListsTheFirstTwentyAndTheRestOnATap()
+	public async Task Phone_DayWithManyTitles_ShowsSevenFullRowsAndTheRestOnATap()
 	{
 		var day = Day(added: 25);
 		var cut = this.RenderOnPhone<ActivityDayBlock>(parameters =>
 			parameters.Add(block => block.Day, day).Add(block => block.Today, Today).Add(block => block.Media, Titled(day))
 		).Component;
 		var more = cut.FindAll(".dtoggle").Single(button => button.TextContent.Contains("more", StringComparison.Ordinal));
-		await Assert.That(more.TextContent.Words()).IsEqualTo("Show 5 more");
+		await Assert.That(more.TextContent.Words()).IsEqualTo("Show 4 more");
 
 		await more.ClickAsync(new());
 
-		await Assert.That(cut.FindAll(".change-row")).Count().IsEqualTo(25);
+		await Assert.That(cut.FindAll(Tile)).Count().IsEqualTo(25);
 	}
 
 	[Test]
@@ -173,8 +181,8 @@ public class ActivityDayBlockTests : BunitContext
 				.Add(block => block.OnNeedMedia, ids => requested.AddRange(ids))
 		).Component;
 		var more = cut.FindAll(".dtoggle").Single(button => button.TextContent.Contains("more", StringComparison.Ordinal));
-		await Assert.That(more.TextContent.Words()).IsEqualTo("Show 3 more");
-		await Assert.That(cut.FindAll(".change-row.is-leaving")).Count().IsEqualTo(2);
+		await Assert.That(more.TextContent.Words()).IsEqualTo("Show 2 more");
+		await Assert.That(cut.FindAll(Faded)).Count().IsEqualTo(3);
 
 		await more.ClickAsync(new());
 
@@ -199,7 +207,7 @@ public class ActivityDayBlockTests : BunitContext
 		await cut.Find(".dtop").ClickAsync(new());
 
 		await Assert.That(requested).IsEquivalentTo(day.Added);
-		await Assert.That(cut.FindAll(".change-row")).Count().IsEqualTo(2);
+		await Assert.That(cut.FindAll(Tile)).Count().IsEqualTo(2);
 	}
 
 	[Test]
@@ -216,7 +224,7 @@ public class ActivityDayBlockTests : BunitContext
 	}
 
 	[Test]
-	public async Task Phone_DayWithOnlyRemovals_LeavesOutTheAddedRows()
+	public async Task Phone_DayWithOnlyRemovals_LeavesOutTheAddedGrid()
 	{
 		var day = Day(removed: 2);
 
@@ -224,8 +232,8 @@ public class ActivityDayBlockTests : BunitContext
 			parameters.Add(block => block.Day, day).Add(block => block.Today, Today).Add(block => block.Media, Titled(day))
 		).Component;
 
-		await Assert.That(cut.FindAll(".day-rows")).HasSingleItem();
-		await Assert.That(cut.FindAll(".change-row.is-leaving")).Count().IsEqualTo(2);
+		await Assert.That(cut.FindAll(".day-grid")).HasSingleItem();
+		await Assert.That(cut.FindAll(Faded)).Count().IsEqualTo(2);
 	}
 
 	[Test]

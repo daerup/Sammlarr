@@ -1,5 +1,4 @@
 @using System.Globalization
-@using UI.Shared.Changes
 
 <div class="dcard">
     <button type="button" class="dtop @(_collapsed ? "is-collapsed" : null)" aria-expanded="@(_collapsed ? "false" : "true")" @onclick="ToggleAsync">
@@ -45,12 +44,12 @@
         {
             @if (ShownAdded.Count > 0)
             {
-                @Rows(ShownAdded, ChangeKind.Added)
+                @Tiles(ShownAdded, false)
             }
             @if (ShownRemoved.Count > 0)
             {
                 @RemovedHeading
-                @Rows(ShownRemoved, ChangeKind.Removed)
+                @Tiles(ShownRemoved, true)
             }
             @if (HiddenRows > 0)
             {
@@ -135,7 +134,7 @@
 
     [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
 
-    private const int RowBatch = 20;
+    private const int RowBatch = 21;
 
     private bool _collapsed;
 
@@ -199,28 +198,18 @@
             Removed
         </div>;
 
-    private RenderFragment Rows(IReadOnlyList<MediaId> ids, ChangeKind kind) =>
-        @<div class="day-rows">
-            @foreach (var id in ids)
-            {
-                @if (Media.TryGetValue(id, out var media))
+    private RenderFragment Tiles(IReadOnlyList<MediaId> ids, bool removed) =>
+        @<div class="day-grid">
+            <MediaGrid>
+                @foreach (var id in ids)
                 {
-                    <ChangeRow @key="id.Value" Item="ItemOf(media, kind)" OnSelect="OnSelect"/>
+                    @if (Media.TryGetValue(id, out var media))
+                    {
+                        <MediaGridTile @key="id.Value" Media="media" Dimmed="removed" OnClick="() => OnSelect.InvokeAsync(media)"/>
+                    }
                 }
-            }
+            </MediaGrid>
         </div>;
-
-    private static ChangeItem ItemOf(MatchedMedia media, ChangeKind kind)
-    {
-        return new ChangeItem
-        {
-            Title = media.Details.Title ?? "Unknown title",
-            Id = media.Identity.Id,
-            Media = media,
-            Kind = kind,
-            Subtitle = media.Details.Year?.ToString(),
-        };
-    }
 
     private string DayName =>
         Day.Date == Today ? "Today"
