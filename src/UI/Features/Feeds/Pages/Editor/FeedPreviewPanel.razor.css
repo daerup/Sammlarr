@@ -24,3 +24,50 @@
         filter: grayscale(0.75) brightness(70%);
     }
 }
+@media (width < 48rem) {
+    .preview-heading {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        min-height: 64px;
+        margin: -16px -16px 8px;
+        padding: 10px 8px 8px 16px;
+        background: var(--card);
+    }
+
+    .preview-search-input {
+        width: 100%;
+        height: 44px;
+        padding: 0 44px 0 40px;
+        border: 1px solid var(--input);
+        border-radius: 10px;
+        background: color-mix(in oklch, var(--input) 30%, transparent);
+        color: var(--foreground);
+        font-size: 16px;
+        outline: none;
+    }
+
+    .preview-search-input::-webkit-search-cancel-button {
+        display: none;
+    }
+
+    .preview-search-input:focus-visible {
+        border-color: var(--ring);
+        box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 35%, transparent);
+    }
+
+    .preview-search-cancel {
+        flex: none;
+        height: 44px;
+        padding: 0 8px;
+        border: 0;
+        background: none;
+        color: var(--foreground);
+        font: inherit;
+        font-size: 14px;
+        font-weight: 500;
+    }
+}

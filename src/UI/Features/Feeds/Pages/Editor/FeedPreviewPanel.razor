@@ -24,69 +24,93 @@
 @inject RatingContext RatingContext
 
 <BbCard data-preview-state="@PreviewState" Class="flex-1 min-w-0 flex flex-col overflow-hidden rounded-lg bg-card border border-border shadow-sm max-md:-mx-4 max-md:overflow-visible max-md:rounded-none max-md:border-x-0 max-md:shadow-none">
-    <div class="shrink-0 sticky top-0 z-20 px-6 pt-6 pb-4 border-b flex items-center gap-2 bg-card rounded-t-lg max-md:rounded-none max-md:px-4">
-        <BbInput Placeholder="Search media..."
-                 Class="w-full"
-                 Value="@_searchQuery"
-                 ValueChanged="OnSearchQueryChanged"
-                 UpdateTiming="UpdateTiming.Debounced"
-                 DebounceInterval="250"
-                 Disabled="IsLoading"/>
-        <LucideIcon Name="search" Class="text-muted-foreground shrink-0"/>
-        @if (HasResults)
-        {
-            <BbAlertDialog @bind-Open="_refreshDialogOpen">
-                <BbAlertDialogTrigger>
-                    <BbTooltip>
-                        <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
-                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Refresh assets">
-                                <LucideIcon Name="refresh-cw" Size="16"/>
-                            </BbButton>
-                        </BbTooltipTrigger>
-                        <BbTooltipContent data-label-tip>Refresh assets</BbTooltipContent>
-                    </BbTooltip>
-                </BbAlertDialogTrigger>
-                <BbAlertDialogContent>
-                    <BbAlertDialogHeader>
-                        <BbAlertDialogTitle>Refresh assets?</BbAlertDialogTitle>
-                        <BbAlertDialogDescription>
-                            This drops the cached metadata for every item shown and re-fetches it from your providers. It may take a while for large lists.
-                        </BbAlertDialogDescription>
-                    </BbAlertDialogHeader>
-                    <BbAlertDialogFooter data-dialog-actions>
-                        <BbAlertDialogCancel>
-                            <BbButton data-dialog-cancel Variant="ButtonVariant.Outline">Cancel</BbButton>
-                        </BbAlertDialogCancel>
-                        <BbButton data-dialog-commit Variant="ButtonVariant.Default" OnClick="OnRefreshConfirmedAsync">Refresh</BbButton>
-                    </BbAlertDialogFooter>
-                </BbAlertDialogContent>
-            </BbAlertDialog>
-        }
-    </div>
+    @if (!IsPhone)
+    {
+        <div class="shrink-0 sticky top-0 z-20 px-6 pt-6 pb-4 border-b flex items-center gap-2 bg-card rounded-t-lg">
+            <BbInput Placeholder="Search media..."
+                     Class="w-full"
+                     Value="@_searchQuery"
+                     ValueChanged="OnSearchQueryChanged"
+                     UpdateTiming="UpdateTiming.Debounced"
+                     DebounceInterval="250"
+                     Disabled="IsLoading"/>
+            <LucideIcon Name="search" Class="text-muted-foreground shrink-0"/>
+            @if (HasResults)
+            {
+                <BbTooltip>
+                    <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
+                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Refresh assets" OnClick="() => _refreshDialogOpen = true">
+                            <LucideIcon Name="refresh-cw" Size="16"/>
+                        </BbButton>
+                    </BbTooltipTrigger>
+                    <BbTooltipContent data-label-tip>Refresh assets</BbTooltipContent>
+                </BbTooltip>
+            }
+        </div>
+    }
+    <BbAlertDialog @bind-Open="_refreshDialogOpen">
+        <BbAlertDialogContent>
+            <BbAlertDialogHeader>
+                <BbAlertDialogTitle>Refresh assets?</BbAlertDialogTitle>
+                <BbAlertDialogDescription>
+                    This drops the cached metadata for every item shown and re-fetches it from your providers. It may take a while for large lists.
+                </BbAlertDialogDescription>
+            </BbAlertDialogHeader>
+            <BbAlertDialogFooter data-dialog-actions>
+                <BbAlertDialogCancel>
+                    <BbButton data-dialog-cancel Variant="ButtonVariant.Outline">Cancel</BbButton>
+                </BbAlertDialogCancel>
+                <BbButton data-dialog-commit Variant="ButtonVariant.Default" OnClick="OnRefreshConfirmedAsync">Refresh</BbButton>
+            </BbAlertDialogFooter>
+        </BbAlertDialogContent>
+    </BbAlertDialog>
     <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 pb-4 pt-4 flex flex-col max-md:overflow-visible max-md:px-4" style="scrollbar-gutter: stable;">
+        @if (HasItems && IsPhone)
+        {
+            <div class="preview-heading" data-preview-heading>
+                @if (_searching)
+                {
+                    <div class="relative min-w-0 flex-1">
+                        <LucideIcon Name="search" Size="16" Class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
+                        <input @ref="_phoneSearch"
+                               type="search"
+                               class="preview-search-input"
+                               placeholder="Search titles"
+                               aria-label="Search titles"
+                               enterkeyhint="search"
+                               value="@_searchQuery"
+                               @oninput="OnPhoneTypedAsync"/>
+                        @if (_searchQuery.Length > 0)
+                        {
+                            <button type="button" class="absolute right-1 top-1/2 grid size-9 -translate-y-1/2 place-items-center text-muted-foreground" aria-label="Clear search" @onclick="ClearSearch">
+                                <LucideIcon Name="circle-x" Size="18"/>
+                            </button>
+                        }
+                    </div>
+                    <button type="button" class="preview-search-cancel" @onclick="CloseSearch">Cancel</button>
+                }
+                else
+                {
+                    <div class="min-w-0 flex-1">@Heading</div>
+                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Search titles" Disabled="IsLoading" OnClick="OpenSearch">
+                        <LucideIcon Name="search" Size="18"/>
+                    </BbButton>
+                    @if (HasResults)
+                    {
+                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Refresh assets" OnClick="() => _refreshDialogOpen = true">
+                            <LucideIcon Name="refresh-cw" Size="18"/>
+                        </BbButton>
+                    }
+                }
+            </div>
+        }
         @if (HasItems)
         {
             <div class="mb-4 shrink-0 flex items-start justify-between gap-3 max-md:flex-col max-md:items-stretch max-md:gap-2.5">
-                <div>
-                    <h2 class="text-base font-semibold tracking-wide flex items-center gap-2">
-                        <span>Media Results</span>
-                        @if (IsLoading || Updating)
-                        {
-                            <span class="inline-flex" data-preview-busy>
-                                <BbSpinner Size="SpinnerSize.Small"/>
-                            </span>
-                        }
-                    </h2>
-                    <p class="text-sm text-muted-foreground mt-0.5">
-                        <FeedSourceLink Identifier="@(_appliedConfig?.Identifier ?? Config.Identifier)"
-                                        Provider="@(_appliedConfig?.Provider ?? Config.Provider!.Value)"
-                                        Muted="true"/>
-                    </p>
-                    @if (_reloading is { } reloading)
-                    {
-                        <p class="mt-1 text-xs text-muted-foreground" data-preview-reloading>@reloading.Progress</p>
-                    }
-                </div>
+                @if (!IsPhone)
+                {
+                    <div>@Heading</div>
+                }
                 <BbTooltipProvider>
                     <div class="flex items-start transition-opacity @DimClass max-md:-mx-4 max-md:overflow-x-auto max-md:px-4 max-md:[scrollbar-width:none]" data-scroll-x>
                     <div class="stat-badges-row flex items-start text-xs font-medium max-md:gap-1.5">
@@ -357,6 +381,77 @@
 @code {
 
     [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
+    private static readonly TimeSpan SearchPause = TimeSpan.FromMilliseconds(250);
+
+    private bool _searching;
+
+    private bool _focusSearch;
+
+    private int _typed;
+
+    private ElementReference _phoneSearch;
+
+    private RenderFragment Heading =>
+        @<text>
+            <h2 class="text-base font-semibold tracking-wide flex items-center gap-2">
+                <span>Media Results</span>
+                @if (IsLoading || Updating)
+                {
+                    <span class="inline-flex" data-preview-busy>
+                        <BbSpinner Size="SpinnerSize.Small"/>
+                    </span>
+                }
+            </h2>
+            <p class="text-sm text-muted-foreground mt-0.5">
+                <FeedSourceLink Identifier="@(_appliedConfig?.Identifier ?? Config.Identifier)"
+                                Provider="@(_appliedConfig?.Provider ?? Config.Provider!.Value)"
+                                Muted="true"/>
+            </p>
+            @if (_reloading is { } reloading)
+            {
+                <p class="mt-1 text-xs text-muted-foreground" data-preview-reloading>@reloading.Progress</p>
+            }
+        </text>;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_focusSearch)
+        {
+            _focusSearch = false;
+            await _phoneSearch.FocusAsync();
+        }
+    }
+
+    private void OpenSearch()
+    {
+        _searching = true;
+        _focusSearch = true;
+    }
+
+    private async Task OnPhoneTypedAsync(ChangeEventArgs args)
+    {
+        var typed = ++_typed;
+        await Task.Delay(SearchPause);
+        if (typed == _typed)
+        {
+            OnSearchQueryChanged(args.Value as string ?? string.Empty);
+        }
+    }
+
+    private void ClearSearch()
+    {
+        _typed++;
+        OnSearchQueryChanged(string.Empty);
+        _focusSearch = true;
+    }
+
+    private void CloseSearch()
+    {
+        _typed++;
+        _searching = false;
+        OnSearchQueryChanged(string.Empty);
+    }
 
     [Parameter] public required FeedConfig Config { get; set; }
     [Parameter] public FeedId? SavedFeedId { get; set; }
