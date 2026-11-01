@@ -423,6 +423,12 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 		await Expect(FeedEditor.Rows(page).First).ToBeVisibleAsync(Wait.Preview);
 		await Expect(name).ToBeHiddenAsync();
 		await Assert.That(await page.OverflowingAsync()).IsEmpty();
+		var faded = await FeedEditor
+			.Rows(page)
+			.EvaluateAllAsync<string[]>(
+				"rows => rows.map(row => row.querySelector('.search-result-facts')).filter(facts => facts.scrollWidth <= facts.clientWidth && Math.max(...[...facts.children].map(child => child.getBoundingClientRect().right)) > facts.getBoundingClientRect().right - 24).map(facts => facts.textContent.trim())"
+			);
+		await Assert.That(faded).IsEmpty();
 		await page.Toolbar.Button("Settings").TapAsync();
 		await Expect(name).ToBeVisibleAsync();
 		await Expect(page.Toolbar.Button("Save")).ToBeEnabledAsync(Wait.Preview);

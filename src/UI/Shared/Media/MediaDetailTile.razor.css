@@ -256,6 +256,7 @@
 
     .search-result-content {
         display: flex;
+        flex: 1;
         flex-direction: column;
         gap: 3px;
         padding-left: 12px;
@@ -293,7 +294,7 @@
         flex-wrap: nowrap;
         overflow: hidden;
         white-space: nowrap;
-        mask-image: linear-gradient(to right, #000 85%, transparent);
+        mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
     }
 
     .result-icons {
