@@ -52,21 +52,22 @@ public class PosterTrackTests : BunitContext
 	}
 
 	[Test]
-	public async Task Dispose_WhileItsModuleIsStillLoading_ReportsNoError()
+	public async Task Dispose_WhileItsModuleIsStillLoading_StopsTheWatcherOnceItStarts()
 	{
 		var import = new TaskCompletionSource<IJSObjectReference>();
 		var js = IJSRuntime.Mock();
 		js.InvokeAsync<IJSObjectReference>(Any<string>(), Any<object?[]?>()).Returns((_, _) => new ValueTask<IJSObjectReference>(import.Task));
 		Services.AddSingleton(js.Object);
+		var watcher = IJSObjectReference.Mock();
 		var module = IJSObjectReference.Mock();
-		module
-			.InvokeAsync<IJSObjectReference>(Any<string>(), Any<object?[]?>())
-			.Throws(new ObjectDisposedException("DotNetObjectReference`1[[UI.Features.Home.Components.PosterTrack]]"));
+		module.InvokeAsync<IJSObjectReference?>(Any<string>(), Any<object?[]?>()).Returns(watcher.Object);
 		Render<PosterTrack>(parameters => parameters.Add(track => track.Ids, [First]).Add(track => track.Media, new Dictionary<MediaId, MatchedMedia>()));
 
-		await Renderer.Dispatcher.InvokeAsync(DisposeComponentsAsync);
+		var disposing = Renderer.Dispatcher.InvokeAsync(DisposeComponentsAsync);
 		await Renderer.Dispatcher.InvokeAsync(() => import.SetResult(module.Object));
+		await disposing;
 
+		watcher.DisposeAsync().WasCalled(Times.Once);
 		await Assert.That(Renderer.UnhandledException.IsCompleted).IsFalse();
 	}
 
