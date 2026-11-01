@@ -309,13 +309,14 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	public async Task RunHistory_RunTapped_OpensInASheet()
 	{
 		var (page, card) = await FeedsWithOneAsync();
-		var edit = await card.Locator("a.feed-card-link").GetAttributeAsync("href");
+		var edit = await card.Locator("a.feed-row-edit").GetAttributeAsync("href");
 		var name = await card.GetAttributeAsync("aria-label");
-		await card.Labelled("Run").TapAsync();
+		await card.Labelled($"Open {name}").TapAsync();
+		await page.GetByRole(AriaRole.Dialog).GetByRole(AriaRole.Button, new LocatorGetByRoleOptions { Name = "Run now" }).TapAsync();
 		var confirm = page.GetByRole(AriaRole.Dialog).Locator("[data-dialog-commit]");
 		await Expect(confirm).ToBeEnabledAsync(Wait.Preview);
 		await confirm.TapAsync();
-		await Expect(card.GetByTestId("last-run-bar")).ToBeVisibleAsync(Wait.Preview);
+		await Expect(card.Locator(".feed-row-sub .is-added")).ToBeVisibleAsync(Wait.Preview);
 		var runs = edit!.Replace("/feeds/edit/", "/feeds/", StringComparison.Ordinal) + "/runs";
 		await page.VisitAsync(runs);
 		var item = page.Locator(".runs-item").First;
@@ -341,7 +342,8 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	{
 		var (page, card) = await FeedsWithOneAsync();
 
-		await card.Labelled("Delete").TapAsync();
+		await card.Labelled($"Open {await card.GetAttributeAsync("aria-label")}").TapAsync();
+		await page.GetByRole(AriaRole.Dialog).GetByRole(AriaRole.Button, new LocatorGetByRoleOptions { Name = "Delete" }).TapAsync();
 		await Expect(page.AlertDialog).ToBeVisibleAsync();
 		await page.GoBackAsync();
 

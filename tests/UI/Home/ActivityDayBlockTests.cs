@@ -136,16 +136,16 @@ public class ActivityDayBlockTests : BunitContext
 	}
 
 	[Test]
-	public async Task Phone_DayWithManyTitles_ShowsSevenFullRowsAndTheRestOnATap()
+	public async Task Phone_DayWithManyTitles_ShowsSevenFullRowsAndTheRestOnceScrolledToTheEnd()
 	{
 		var day = Day(added: 25);
 		var cut = this.RenderOnPhone<ActivityDayBlock>(parameters =>
 			parameters.Add(block => block.Day, day).Add(block => block.Today, Today).Add(block => block.Media, Titled(day))
 		).Component;
-		var more = cut.FindAll(".dtoggle").Single(button => button.TextContent.Contains("more", StringComparison.Ordinal));
-		await Assert.That(more.TextContent.Words()).IsEqualTo("Show 4 more");
+		await Assert.That(cut.FindAll(Tile)).Count().IsEqualTo(21);
+		await Assert.That(cut.FindAll(".dtoggle").Where(button => button.TextContent.Contains("more", StringComparison.Ordinal))).IsEmpty();
 
-		await more.ClickAsync(new());
+		await ReachTheEndAsync(cut);
 
 		await Assert.That(cut.FindAll(Tile)).Count().IsEqualTo(25);
 	}
@@ -169,7 +169,7 @@ public class ActivityDayBlockTests : BunitContext
 	}
 
 	[Test]
-	public async Task Phone_DayWithMoreAddedThanTheCap_FillsTheRestWithRemovedTitlesAndAsksForTheRestOnATap()
+	public async Task Phone_DayWithMoreAddedThanTheCap_FillsTheRestWithRemovedTitlesAndAsksForTheRestAtTheEnd()
 	{
 		var day = Day(added: 18, removed: 5);
 		var requested = new List<MediaId>();
@@ -180,13 +180,12 @@ public class ActivityDayBlockTests : BunitContext
 				.Add(block => block.Media, Titled(day))
 				.Add(block => block.OnNeedMedia, ids => requested.AddRange(ids))
 		).Component;
-		var more = cut.FindAll(".dtoggle").Single(button => button.TextContent.Contains("more", StringComparison.Ordinal));
-		await Assert.That(more.TextContent.Words()).IsEqualTo("Show 2 more");
 		await Assert.That(cut.FindAll(Faded)).Count().IsEqualTo(3);
 
-		await more.ClickAsync(new());
+		await ReachTheEndAsync(cut);
 
 		await Assert.That(requested).IsEquivalentTo([.. day.Added, .. day.Removed]);
+		await Assert.That(cut.FindAll(Faded)).Count().IsEqualTo(5);
 	}
 
 	[Test]
@@ -249,6 +248,9 @@ public class ActivityDayBlockTests : BunitContext
 
 		await Assert.That(cut.Find(".dtop").GetAttribute("aria-expanded")).IsEqualTo("true");
 	}
+
+	private static Task ReachTheEndAsync(IRenderedComponent<ActivityDayBlock> cut) =>
+		cut.InvokeAsync(() => cut.FindComponent<PaginationControls>().Instance.OnEndInView(true));
 
 	private static Dictionary<MediaId, MatchedMedia> Titled(ActivityDay day)
 	{

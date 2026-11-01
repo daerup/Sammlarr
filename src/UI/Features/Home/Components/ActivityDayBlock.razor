@@ -25,7 +25,7 @@
     {
         @if (Day.Feeds.Count > 0)
         {
-            <div class="chips">
+            <div class="chips" data-scroll-x>
                 @foreach (var feed in Day.Feeds)
                 {
                     @if (feed.Gone)
@@ -51,13 +51,7 @@
                 @RemovedHeading
                 @Tiles(ShownRemoved, true)
             }
-            @if (HiddenRows > 0)
-            {
-                <button type="button" class="dtoggle" @onclick="ShowAllRowsAsync">
-                    <LucideIcon Name="chevron-down" Size="13"/>
-                    Show @HiddenRows.ToString("N0") more
-                </button>
-            }
+            <PaginationControls CurrentPage="ShownPages" TotalPages="TilePages" OnReachEnd="ShowMoreTilesAsync"/>
         }
         else
         {
@@ -150,7 +144,9 @@
 
     private IReadOnlyList<MediaId> ShownRemoved => [.. Day.Removed.Take(Math.Max(0, _rowLimit - Day.Added.Count))];
 
-    private int HiddenRows => Math.Max(0, Day.Added.Count + Day.Removed.Count - _rowLimit);
+    private int ShownPages => _rowLimit / RowBatch;
+
+    private int TilePages => (Day.Added.Count + Day.Removed.Count + RowBatch - 1) / RowBatch;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -169,9 +165,9 @@
         await RequestRowMediaAsync();
     }
 
-    private async Task ShowAllRowsAsync()
+    private async Task ShowMoreTilesAsync()
     {
-        _rowLimit = int.MaxValue;
+        _rowLimit += RowBatch;
         await RequestRowMediaAsync();
     }
 

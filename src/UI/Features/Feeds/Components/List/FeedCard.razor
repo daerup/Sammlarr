@@ -2,136 +2,166 @@
 @using UI.Features.Feeds.Pages
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService Branding
+@inject TimeProvider Clock
 
-<article class="feed-card @(Feed.Enabled ? null : "is-paused") @(IsSelecting ? "is-selecting" : null) @(IsSelected ? "is-selected" : null)"
-         style="--brand: @Branding.Color(Feed.Provider.Service)"
-         aria-label="@Feed.Name">
-    @if (IsSelecting)
-    {
-        <button type="button" class="feed-card-select" aria-pressed="@(IsSelected ? "true" : "false")" aria-label="Select @Feed.Name" @onclick="OnToggleSelect"></button>
-    }
-    else
-    {
-        <a class="feed-card-link" href="@EditHref" aria-label="Edit @Feed.Name"></a>
-    }
-
-    <div class="feed-card-head">
+@if (IsPhone)
+{
+    <article class="feed-row @(Feed.Enabled ? null : "is-paused") @(IsSelected ? "is-selected" : null)" aria-label="@Feed.Name">
+        @if (IsSelecting)
+        {
+            <button type="button" class="feed-card-select" aria-pressed="@(IsSelected ? "true" : "false")" aria-label="Select @Feed.Name" @onclick="OnToggleSelect"></button>
+        }
+        else
+        {
+            <button type="button" class="feed-row-open" aria-haspopup="dialog" aria-label="@($"Open {Feed.Name}")" @onclick="() => _sheet = true"></button>
+        }
         @foreach (var brand in Branding.Brands(Feed.Provider.Service))
         {
             <BrandedTile Brand="brand" Size="36" Decorative="true"/>
         }
-        <div class="feed-card-title">
-            <span class="feed-card-name" title="@Feed.Name">@Feed.Name</span>
-            <span class="feed-card-control feed-card-source">
-                <FeedSourceLink Identifier="@Feed.Identifier" Provider="@Feed.Provider" Muted="true" Class="text-[11px] leading-4"/>
+        <span class="feed-row-text">
+            <span class="feed-row-name">@Feed.Name</span>
+            <span class="feed-row-sub" data-testid="feed-row-sub">
+                @Summary
+                @if (LastAdded > 0)
+                {
+                    <b class="is-added">+@LastAdded.ToString("N0")</b>
+                }
             </span>
-        </div>
-        <div class="feed-card-corner">
-            @if (!Feed.Enabled)
-            {
-                <FeedChip Tone="FeedChipTone.Attention" Icon="pause" Title="@(Feed.Schedule is Scheduled ? "Paused: the schedule is on hold" : "Paused")">Paused</FeedChip>
-            }
-            @if (IsSelecting)
-            {
-                <span class="feed-card-tick @(IsSelected ? "is-on" : null)" aria-hidden="true">
-                    <LucideIcon Name="@(IsSelected ? "check" : "circle")" Size="16"/>
-                </span>
-            }
-            else
-            {
-                <button type="button"
-                        class="feed-card-control feed-card-run @RunClass"
-                        aria-label="@RunLabel"
-                        title="@RunLabel"
-                        disabled="@(Row.IsBusy || !Feed.Enabled || RunDisabled)"
-                        @onclick="OnRun">
-                    @if (Row.Job.IsRunning)
-                    {
-                        <LucideIcon Name="loader-circle" Size="15" Class="animate-spin"/>
-                    }
-                    else if (Row.Job.IsQueued)
-                    {
-                        <LucideIcon Name="clock" Size="15"/>
-                    }
-                    else
-                    {
-                        <LucideIcon Name="play" Size="15"/>
-                    }
-                </button>
-            }
-        </div>
-    </div>
-
-    <div class="feed-card-chips">
-        <FeedStrategyChip Strategy="Feed.Strategy"/>
-        <FeedTriggerChip Schedule="Feed.Schedule" NextRun="Row.NextRun" Now="Now"/>
-        <FeedJobChip Job="Row.Job"/>
-    </div>
-
-    <div class="feed-card-stats">
-        <div>
-            <span class="feed-stat-label">Wantlist</span>
-            @if (Row.OnWantlist > 0)
-            {
-                <span class="feed-card-control feed-stat-link">
-                    <AppLink Href="@($"/wantlist?feed={UrlGuid.Encode(Feed.Id.Value)}")"
-                             Title="@($"Show the {"title".ToQuantity(Row.OnWantlist)} this feed put on your wantlist")">@Row.OnWantlist</AppLink>
-                </span>
-            }
-            else
-            {
-                <span class="feed-stat-value is-none">0</span>
-            }
-        </div>
-        <div>
-            <span class="feed-stat-label">Runs</span>
-            @if (History.TotalRuns > 0)
-            {
-                <span class="feed-card-control feed-stat-link">
-                    <AppLink Href="@RunsHref" Title="Open the run history">@History.TotalRuns.ToString("N0")</AppLink>
-                </span>
-            }
-            else
-            {
-                <span class="feed-stat-value is-none">0</span>
-            }
-        </div>
-        <div>
-            <span class="feed-stat-label">All time</span>
-            @if (History.TotalAdded > 0 || History.TotalRemoved > 0)
-            {
-                <span class="feed-stat-value">
-                    <span class="is-added">+@History.TotalAdded.ToString("N0")</span>
-                    @if (History.TotalRemoved > 0)
-                    {
-                        <span class="is-removed">−@History.TotalRemoved.ToString("N0")</span>
-                    }
-                </span>
-            }
-            else
-            {
-                <span class="feed-stat-value is-none">—</span>
-            }
-        </div>
-    </div>
-
-    <div class="feed-card-foot @(JustFinished ? "is-new" : null)">
-        <span class="feed-card-control feed-card-last">
-            <LastRunCell @key="(Feed.Id, RunVersion)" Overview="@Row.Overview" Bar="true" Running="Running" OnOpenLive="OnOpenLive"/>
         </span>
-        <div class="feed-card-actions">
-            <a class="feed-card-control feed-card-icon" href="@EditHref" aria-label="Edit" title="Edit">
-                <LucideIcon Name="pencil" Size="15"/>
+        @if (IsSelecting)
+        {
+            <span class="feed-card-tick @(IsSelected ? "is-on" : null)" aria-hidden="true">
+                <LucideIcon Name="@(IsSelected ? "check" : "circle")" Size="16"/>
+            </span>
+        }
+        else
+        {
+            <a class="feed-row-edit" href="@EditHref" aria-label="Edit @Feed.Name">
+                <LucideIcon Name="pencil" Size="16"/>
             </a>
-            <a class="feed-card-control feed-card-icon" href="@($"/feeds/clone/{UrlGuid.Encode(Feed.Id.Value)}")" aria-label="Duplicate" title="Duplicate">
-                <LucideIcon Name="copy" Size="15"/>
-            </a>
-            <button type="button" class="feed-card-control feed-card-icon is-danger" aria-label="Delete" title="Delete" @onclick="OnDelete">
-                <LucideIcon Name="trash-2" Size="15"/>
-            </button>
+        }
+    </article>
+    <InfoSheet Open="_sheet" OpenChanged="open => _sheet = open" Title="@Feed.Name">
+        <div class="feed-sheet">
+            <FeedSourceLink Identifier="@Feed.Identifier" Provider="@Feed.Provider" Muted="true" Class="text-xs"/>
+            <div class="feed-card-chips">
+                <FeedStrategyChip Strategy="Feed.Strategy"/>
+                <FeedTriggerChip Schedule="Feed.Schedule" NextRun="Row.NextRun" Now="Now"/>
+                <FeedJobChip Job="Row.Job"/>
+            </div>
+            @Stats
+            <div class="feed-sheet-last">
+                <LastRunCell @key="(Feed.Id, RunVersion)" Overview="@Row.Overview" Bar="true" Running="Running" OnOpenLive="OnOpenLive"/>
+            </div>
+            <div class="feed-sheet-actions">
+                <button type="button" class="feed-sheet-action" disabled="@(Row.IsBusy || !Feed.Enabled || RunDisabled)" @onclick="RunFromSheetAsync">
+                    <LucideIcon Name="play" Size="18"/>
+                    <span>@SheetRunLabel</span>
+                </button>
+                <a class="feed-sheet-action" href="@EditHref">
+                    <LucideIcon Name="pencil" Size="18"/>
+                    <span>Edit</span>
+                </a>
+                <a class="feed-sheet-action" href="@CloneHref">
+                    <LucideIcon Name="copy" Size="18"/>
+                    <span>Duplicate</span>
+                </a>
+                <button type="button" class="feed-sheet-action is-danger" @onclick="DeleteFromSheetAsync">
+                    <LucideIcon Name="trash-2" Size="18"/>
+                    <span>Delete</span>
+                </button>
+            </div>
         </div>
-    </div>
-</article>
+    </InfoSheet>
+}
+else
+{
+    <article class="feed-card @(Feed.Enabled ? null : "is-paused") @(IsSelecting ? "is-selecting" : null) @(IsSelected ? "is-selected" : null)"
+             style="--brand: @Branding.Color(Feed.Provider.Service)"
+             aria-label="@Feed.Name">
+        @if (IsSelecting)
+        {
+            <button type="button" class="feed-card-select" aria-pressed="@(IsSelected ? "true" : "false")" aria-label="Select @Feed.Name" @onclick="OnToggleSelect"></button>
+        }
+        else
+        {
+            <a class="feed-card-link" href="@EditHref" aria-label="Edit @Feed.Name"></a>
+        }
+
+        <div class="feed-card-head">
+            @foreach (var brand in Branding.Brands(Feed.Provider.Service))
+            {
+                <BrandedTile Brand="brand" Size="36" Decorative="true"/>
+            }
+            <div class="feed-card-title">
+                <span class="feed-card-name" title="@Feed.Name">@Feed.Name</span>
+                <span class="feed-card-control feed-card-source">
+                    <FeedSourceLink Identifier="@Feed.Identifier" Provider="@Feed.Provider" Muted="true" Class="text-[11px] leading-4"/>
+                </span>
+            </div>
+            <div class="feed-card-corner">
+                @if (!Feed.Enabled)
+                {
+                    <FeedChip Tone="FeedChipTone.Attention" Icon="pause" Title="@(Feed.Schedule is Scheduled ? "Paused: the schedule is on hold" : "Paused")">Paused</FeedChip>
+                }
+                @if (IsSelecting)
+                {
+                    <span class="feed-card-tick @(IsSelected ? "is-on" : null)" aria-hidden="true">
+                        <LucideIcon Name="@(IsSelected ? "check" : "circle")" Size="16"/>
+                    </span>
+                }
+                else
+                {
+                    <button type="button"
+                            class="feed-card-control feed-card-run @RunClass"
+                            aria-label="@RunLabel"
+                            title="@RunLabel"
+                            disabled="@(Row.IsBusy || !Feed.Enabled || RunDisabled)"
+                            @onclick="OnRun">
+                        @if (Row.Job.IsRunning)
+                        {
+                            <LucideIcon Name="loader-circle" Size="15" Class="animate-spin"/>
+                        }
+                        else if (Row.Job.IsQueued)
+                        {
+                            <LucideIcon Name="clock" Size="15"/>
+                        }
+                        else
+                        {
+                            <LucideIcon Name="play" Size="15"/>
+                        }
+                    </button>
+                }
+            </div>
+        </div>
+
+        <div class="feed-card-chips">
+            <FeedStrategyChip Strategy="Feed.Strategy"/>
+            <FeedTriggerChip Schedule="Feed.Schedule" NextRun="Row.NextRun" Now="Now"/>
+            <FeedJobChip Job="Row.Job"/>
+        </div>
+
+        @Stats
+
+        <div class="feed-card-foot @(JustFinished ? "is-new" : null)">
+            <span class="feed-card-control feed-card-last">
+                <LastRunCell @key="(Feed.Id, RunVersion)" Overview="@Row.Overview" Bar="true" Running="Running" OnOpenLive="OnOpenLive"/>
+            </span>
+            <div class="feed-card-actions">
+                <a class="feed-card-control feed-card-icon" href="@EditHref" aria-label="Edit" title="Edit">
+                    <LucideIcon Name="pencil" Size="15"/>
+                </a>
+                <a class="feed-card-control feed-card-icon" href="@CloneHref" aria-label="Duplicate" title="Duplicate">
+                    <LucideIcon Name="copy" Size="15"/>
+                </a>
+                <button type="button" class="feed-card-control feed-card-icon is-danger" aria-label="Delete" title="Delete" @onclick="OnDelete">
+                    <LucideIcon Name="trash-2" Size="15"/>
+                </button>
+            </div>
+        </div>
+    </article>
+}
 
 @code {
     [Parameter, EditorRequired] public required FeedRow Row { get; set; }
@@ -158,14 +188,42 @@
 
     [Parameter] public EventCallback OnOpenLive { get; set; }
 
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
+    private bool _sheet;
+
     private Feed Feed => Row.Feed;
 
     private FeedRunHistory History => Row.Overview.History;
 
-
     private string EditHref => $"/feeds/edit/{UrlGuid.Encode(Feed.Id.Value)}";
 
+    private string CloneHref => $"/feeds/clone/{UrlGuid.Encode(Feed.Id.Value)}";
+
     private string RunsHref => $"/feeds/{UrlGuid.Encode(Feed.Id.Value)}/runs";
+
+    private int LastAdded => Row.Overview.LastRun.Map(run => run.Counts.Added).GetValueOr(0);
+
+    private string Summary => string.Join(" · ", new[] { Feed.Enabled ? null : "Paused", StrategyName, TriggerName, LastRunText }.OfType<string>());
+
+    private string StrategyName => Feed.Strategy is Mirror ? "Mirror" : "Append";
+
+    private string TriggerName => Feed.Schedule is Scheduled ? ScheduleText.Describe(Feed.Schedule) : "Manual";
+
+    private string LastRunText
+    {
+        get
+        {
+            return (Row.Job.IsRunning, Row.Job.IsQueued) switch
+            {
+                (true, _) => "Running now",
+                (_, true) => "Queued",
+                _ => Row.Overview.LastRun.Map(run => run.StartedAt.Humanize(Clock.GetUtcNow())).GetValueOr("never run"),
+            };
+        }
+    }
+
+    private string SheetRunLabel => RunLabel == "Run" ? "Run now" : RunLabel;
 
     private string RunLabel
     {
@@ -194,4 +252,64 @@
             };
         }
     }
+
+    private async Task RunFromSheetAsync()
+    {
+        _sheet = false;
+        await OnRun.InvokeAsync();
+    }
+
+    private async Task DeleteFromSheetAsync()
+    {
+        _sheet = false;
+        await OnDelete.InvokeAsync();
+    }
+
+    private RenderFragment Stats =>
+        @<div class="feed-card-stats">
+            <div>
+                <span class="feed-stat-label">Wantlist</span>
+                @if (Row.OnWantlist > 0)
+                {
+                    <span class="feed-card-control feed-stat-link">
+                        <AppLink Href="@($"/wantlist?feed={UrlGuid.Encode(Feed.Id.Value)}")"
+                                 Title="@($"Show the {"title".ToQuantity(Row.OnWantlist)} this feed put on your wantlist")">@Row.OnWantlist</AppLink>
+                    </span>
+                }
+                else
+                {
+                    <span class="feed-stat-value is-none">0</span>
+                }
+            </div>
+            <div>
+                <span class="feed-stat-label">Runs</span>
+                @if (History.TotalRuns > 0)
+                {
+                    <span class="feed-card-control feed-stat-link">
+                        <AppLink Href="@RunsHref" Title="Open the run history">@History.TotalRuns.ToString("N0")</AppLink>
+                    </span>
+                }
+                else
+                {
+                    <span class="feed-stat-value is-none">0</span>
+                }
+            </div>
+            <div>
+                <span class="feed-stat-label">All time</span>
+                @if (History.TotalAdded > 0 || History.TotalRemoved > 0)
+                {
+                    <span class="feed-stat-value">
+                        <span class="is-added">+@History.TotalAdded.ToString("N0")</span>
+                        @if (History.TotalRemoved > 0)
+                        {
+                            <span class="is-removed">−@History.TotalRemoved.ToString("N0")</span>
+                        }
+                    </span>
+                }
+                else
+                {
+                    <span class="feed-stat-value is-none">—</span>
+                }
+            </div>
+        </div>;
 }

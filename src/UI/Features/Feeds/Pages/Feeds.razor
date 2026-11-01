@@ -355,7 +355,7 @@
 
     private bool HasFeeds => _feeds.Count > 0;
 
-    private bool ShowsLiveView => _live.Match(_ => true, () => !_isLoading && _watching && HasFeeds);
+    private bool ShowsLiveView => _live.Match(_ => true, () => !IsPhone && !_isLoading && _watching && HasFeeds);
 
     [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)]
     private bool IsPhone { get; set; }

@@ -27,6 +27,7 @@ using Observability.Usage;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Components.Runs;
+using UI.Shared.Common;
 using UI.Shared.Layout;
 using UI.Shared.Services;
 using FeedsPage = UI.Features.Feeds.Pages.Feeds;
@@ -220,6 +221,35 @@ public class FeedsPageTests : BunitContext
 	public async Task SelectMode_OnAPhone_PutsTheFeedBulkActionsInTheToolbar()
 	{
 		RegisterServices([Overview()]);
+		var cut = RenderPhonePage();
+
+		await cut.FindAll(".page .toolbar-slot").Single(slot => slot.TextContent.Trim() == "Select").ClickAsync(new());
+		await cut.Find(".feed-card-select").ClickAsync(new());
+
+		var slots = cut.FindAll(".bulk .toolbar-slot");
+		await Assert.That(slots.Select(slot => slot.TextContent.Trim())).IsEquivalentTo(["Run", "Pause", "Delete"], CollectionOrdering.Matching);
+		await Assert.That(slots.Count(slot => slot.HasAttribute("disabled"))).IsEqualTo(0);
+		await Assert.That(slots[2].ClassList).Contains("is-danger");
+	}
+
+	[Test]
+	public async Task Row_OnAPhone_EndsInEditAndOpensASheetWithTheFeedsActions()
+	{
+		RegisterServices([Overview()]);
+		var cut = RenderPhonePage();
+
+		await Assert.That(cut.Find(".feed-row-edit").GetAttribute("href")).IsEqualTo($"/feeds/edit/{UrlGuid.Encode(Comedy.Value)}");
+		await Assert.That(cut.FindAll("#feed-run-live")).IsEmpty();
+		await cut.Find(".feed-row-open").ClickAsync(new());
+
+		var actions = cut.WaitForElement("[role=dialog] .feed-sheet-actions");
+		await Assert
+			.That(actions.QuerySelectorAll(".feed-sheet-action").Select(action => action.TextContent.Trim()))
+			.IsEquivalentTo(["Run now", "Edit", "Duplicate", "Delete"], CollectionOrdering.Matching);
+	}
+
+	private IRenderedComponent<IComponent> RenderPhonePage()
+	{
 		RenderTree.TryAdd<CascadingValue<bool>>(cascade => cascade.Add(value => value.Name, PhoneLayout.IsPhoneCascade).Add(value => value.Value, true));
 		var cut = Render(builder =>
 		{
@@ -230,15 +260,8 @@ public class FeedsPageTests : BunitContext
 			builder.OpenComponent<FeedsPage>(3);
 			builder.CloseComponent();
 		});
-		cut.WaitForState(() => cut.FindAll(".feed-card").Count == 1);
-
-		await cut.FindAll(".page .toolbar-slot").Single(slot => slot.TextContent.Trim() == "Select").ClickAsync(new());
-		await cut.Find(".feed-card-select").ClickAsync(new());
-
-		var slots = cut.FindAll(".bulk .toolbar-slot");
-		await Assert.That(slots.Select(slot => slot.TextContent.Trim())).IsEquivalentTo(["Run", "Pause", "Delete"], CollectionOrdering.Matching);
-		await Assert.That(slots.Count(slot => slot.HasAttribute("disabled"))).IsEqualTo(0);
-		await Assert.That(slots[2].ClassList).Contains("is-danger");
+		cut.WaitForState(() => cut.FindAll(".feed-row").Count == 1);
+		return cut;
 	}
 
 	private static RenderFragment Outlet(string name, string section)
