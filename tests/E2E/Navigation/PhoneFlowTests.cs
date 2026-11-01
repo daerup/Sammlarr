@@ -122,6 +122,7 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 		await page.Keyboard.PressAsync("Enter");
 		await Expect(field).Not.ToBeFocusedAsync();
 		await Expect(search.GetByTestId("search-empty")).ToBeVisibleAsync();
+		await page.WaitForFunctionAsync("() => Math.abs(document.querySelector('.search-modal-body').getBoundingClientRect().bottom - innerHeight) < 1");
 		await search.Button("Back").TapAsync();
 		await Expect(search).ToHaveCountAsync(0);
 		await page.WaitForFunctionAsync("() => history.state?.sheet === undefined");
@@ -146,6 +147,20 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 
 		await Assert.That(boxes).IsNotEmpty();
 		await Assert.That(boxes.All(box => Math.Abs(box[0]) < 1 && Math.Abs(box[1]) < 1)).IsTrue();
+	}
+
+	[Test]
+	public async Task SettingsPage_ScrolledToTheEnd_LeavesRoomUnderTheLastCard()
+	{
+		var page = await E2EApp.AdminAt(SettingsPage.Section("about"));
+		var last = page.Locator("main .section-card").Last;
+		await Expect(last).ToBeVisibleAsync(Wait.Settle);
+
+		var room = await last.EvaluateAsync<double>(
+			"card => { let scroller = card.parentElement; while (!/auto|scroll/.test(getComputedStyle(scroller).overflowY)) scroller = scroller.parentElement; scroller.scrollTo({ top: scroller.scrollHeight, behavior: 'instant' }); return scroller.getBoundingClientRect().bottom - card.getBoundingClientRect().bottom; }"
+		);
+
+		await Assert.That(room).IsGreaterThanOrEqualTo(24);
 	}
 
 	[Test]

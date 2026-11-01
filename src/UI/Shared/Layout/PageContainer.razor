@@ -16,7 +16,7 @@
                     Actions="@HeaderRow"
                     Class="@($"px-6 pb-2 shrink-0 max-md:px-4 max-md:pt-2 {(PhoneHeader ? null : "max-md:hidden")}")"/>
     }
-    <div class="flex-1 min-h-0 overflow-y-auto px-6 py-2 max-md:flex-none max-md:overflow-visible max-md:px-4">
+    <div class="flex-1 min-h-0 overflow-y-auto px-6 py-2 max-md:flex-none max-md:overflow-visible max-md:px-4 max-md:pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
         @ChildContent
     </div>
 </div>
