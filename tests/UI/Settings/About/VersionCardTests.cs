@@ -2,6 +2,7 @@ using BlazorBlueprint.Components;
 using Bunit;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.About;
+using UI.Shared.Branding;
 using UI.Shared.Services;
 
 namespace UI.Tests.Settings.About;
@@ -78,6 +79,15 @@ public class VersionCardTests : BunitContext
 				"https://github.com/daerup/Sammlarr/releases/tag/v1.4.0",
 				"https://github.com/daerup/Sammlarr",
 			]);
+	}
+
+	[Test]
+	public void Card_OnPhones_DrawsTheLogoAtTwiceTheDesktopSize()
+	{
+		var cut = Render<VersionCard>(parameters => parameters.Add(card => card.Version, new AppVersion("1.4.0")).Add(card => card.Repository, "daerup/Sammlarr"));
+
+		cut.Find("[data-testid=version-logo] svg").MarkupMatches(Render<SammlarrLogo>(logo => logo.Add(l => l.Size, 24).Add(l => l.WordSize, 14)));
+		cut.Find("[data-testid=version-logo-phone] svg").MarkupMatches(Render<SammlarrLogo>(logo => logo.Add(l => l.Size, 48).Add(l => l.WordSize, 28)));
 	}
 
 	[Test]
