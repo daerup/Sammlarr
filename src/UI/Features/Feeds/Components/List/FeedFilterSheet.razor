@@ -9,6 +9,7 @@
              OnApply="OnApply"
              Sorts="Sorts"
              Groups="Groups"
+             Search="Search"
              Clear="filter => filter.ClearFilters()"
              Count="Count"
              Noun="feed"/>
@@ -22,6 +23,8 @@
 
     private static readonly FilterChoice<FeedFilter>[] Sorts =
         [.. Enum.GetValues<FeedSort>().Select(sort => new FilterChoice<FeedFilter>(FeedFilterText.Label(sort), filter => filter.Sort == sort, filter => filter with { Sort = sort }))];
+
+    private static readonly FilterSearch<FeedFilter> Search = new("Search feeds", filter => filter.Search, (filter, search) => filter with { Search = search });
 
     private static readonly FilterGroup<FeedFilter> Statuses =
         new("Status", [.. Enum.GetValues<FeedStatus>().Select(status => FilterChoices<FeedFilter>.Toggle(FeedFilterText.Label(status), status, filter => filter.Statuses, (filter, statuses) => filter with { Statuses = statuses }))]);

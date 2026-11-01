@@ -4,6 +4,7 @@ using BlazorBlueprint.Primitives;
 using Bunit;
 using Domain.Media;
 using Domain.Providers;
+using Microsoft.AspNetCore.Components;
 using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Components.List;
 using UI.Features.Feeds.Pages;
@@ -70,6 +71,33 @@ public class FilterSheetTests : BunitContext
 	}
 
 	[Test]
+	public async Task Search_CountsAsYouTypeAndCommitsWithTheRest()
+	{
+		var portal = RenderListSheet(ListFilter.None);
+
+		await portal.Find("input[type=search]").InputAsync(new ChangeEventArgs { Value = "Dune" });
+
+		await Assert.That(portal.Find("[data-dialog-commit]").TextContent.Trim()).IsEqualTo("Show 1 title");
+		await Assert.That(_applied).IsNull();
+		await portal.Find("[data-dialog-commit]").ClickAsync(new());
+		await Assert.That(_applied!.Search).IsEqualTo("Dune");
+		await Assert.That(_open).IsFalse();
+	}
+
+	[Test]
+	public async Task Search_Clear_EmptiesTheDraft()
+	{
+		var portal = RenderListSheet(ListFilter.None with { Search = "da" });
+		await Assert.That(portal.Find("input[type=search]").GetAttribute("value")).IsEqualTo("da");
+
+		await portal.Find("[aria-label='Clear search']").ClickAsync(new());
+
+		await Assert.That(portal.Find("input[type=search]").GetAttribute("value")).IsEqualTo(string.Empty);
+		await portal.Find("[data-dialog-commit]").ClickAsync(new());
+		await Assert.That(_applied!.Search).IsNull();
+	}
+
+	[Test]
 	public async Task Groups_WithoutChoices_AreLeftOut()
 	{
 		var portal = RenderListSheet(ListFilter.None);
@@ -106,7 +134,13 @@ public class FilterSheetTests : BunitContext
 				.Add(sheet => sheet.Filter, filter)
 				.Add(sheet => sheet.OnApply, applied => _applied = applied)
 				.Add(sheet => sheet.Sources, sources ?? [])
-				.Add(sheet => sheet.Count, draft => draft.Type == MediaType.Movie ? 3 : 7)
+				.Add(
+					sheet => sheet.Count,
+					draft =>
+						draft.Search is not null ? 1
+						: draft.Type == MediaType.Movie ? 3
+						: 7
+				)
 		);
 		portal.WaitForElement(".filter-sheet-body");
 		return portal;

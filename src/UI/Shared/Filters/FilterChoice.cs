@@ -4,6 +4,8 @@ public sealed record FilterChoice<TFilter>(string Label, Func<TFilter, bool> IsO
 
 public sealed record FilterGroup<TFilter>(string Title, IReadOnlyList<FilterChoice<TFilter>> Choices, bool Single = false);
 
+public sealed record FilterSearch<TFilter>(string Placeholder, Func<TFilter, string?> Text, Func<TFilter, string?, TFilter> With);
+
 internal static class FilterChoices<TFilter>
 {
 	internal static FilterChoice<TFilter> Toggle<T>(

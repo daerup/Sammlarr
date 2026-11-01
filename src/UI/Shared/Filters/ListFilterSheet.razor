@@ -4,6 +4,7 @@
              OnApply="OnApply"
              Sorts="Sorts"
              Groups="Groups"
+             Search="Search"
              Clear="filter => filter.ClearFilters()"
              Count="Count"
              Noun="title"/>
@@ -18,6 +19,8 @@
 
     private static readonly FilterChoice<ListFilter>[] Sorts =
         [.. Enum.GetValues<ListSort>().Select(sort => new FilterChoice<ListFilter>(ListFilterText.Label(sort), filter => filter.Sort == sort, filter => filter with { Sort = sort }))];
+
+    private static readonly FilterSearch<ListFilter> Search = new("Search titles", filter => filter.Search, (filter, search) => filter with { Search = search });
 
     private static readonly FilterGroup<ListFilter> Types = new("Type", [Type(null), Type(MediaType.Movie), Type(MediaType.Show)], Single: true);
 

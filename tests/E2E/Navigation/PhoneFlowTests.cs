@@ -532,15 +532,11 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 		string[] slots = ["Select", "Filter", "Sync"];
 		var page = await WantlistWithAsync(TrendingTiles.Title);
 		var labels = page.Toolbar.Locator(".toolbar-slot-label:visible");
-		var search = page.GetByRole(AriaRole.Searchbox);
 
 		await Expect(labels).ToHaveTextAsync(slots, Wait.Settle);
 		await Expect(page.ButtonContaining("Bulk edit")).ToBeHiddenAsync();
 		await Expect(page.GetByRole(AriaRole.Group, new PageGetByRoleOptions { Name = "Wantlist sync", Exact = true })).ToBeHiddenAsync();
-		await search.FocusAsync();
-		await Expect(page.Toolbar).ToBeHiddenAsync();
-		await search.BlurAsync();
-		await Expect(page.Toolbar).ToBeVisibleAsync();
+		await Expect(page.GetByRole(AriaRole.Searchbox)).ToHaveCountAsync(0);
 		await page.Toolbar.Button("Select").TapAsync();
 		await Expect(page.Locator("header .phone-select-bar [role=status]")).ToHaveTextAsync("0 selected");
 	}
@@ -592,6 +588,32 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 		await Expect(sheet).ToHaveCountAsync(0);
 		await Expect(title).ToBeHiddenAsync();
 		await page.WaitForFunctionAsync("() => history.state?.sheet === undefined");
+	}
+
+	[Test]
+	public async Task Search_InTheFilterSheet_NarrowsTheListUntilItsChipIsTapped()
+	{
+		var page = await WantlistWithAsync(TrendingTiles.Title);
+		var title = page.Heading(TrendingTiles.Title);
+		var sheet = page.Modal("Filter and sort");
+		var search = sheet.GetByRole(AriaRole.Searchbox, new LocatorGetByRoleOptions { Name = "Search titles" });
+		var chip = page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Clear the search for zzz" });
+		await Expect(title).ToBeVisibleAsync(Wait.Settle);
+
+		await page.Toolbar.ButtonContaining("Filter").TapAsync();
+		await search.FillAsync("zzz");
+		await Expect(sheet.Locator("[data-dialog-commit]")).ToHaveTextAsync("Show 0 titles");
+		await Expect(page.Toolbar).ToBeHiddenAsync();
+		await search.PressAsync("Enter");
+		await Expect(search).Not.ToBeFocusedAsync();
+		await sheet.Locator("[data-dialog-commit]").TapAsync();
+
+		await Expect(sheet).ToHaveCountAsync(0);
+		await Expect(title).ToBeHiddenAsync();
+		await Expect(chip).ToHaveTextAsync("“zzz”");
+		await chip.TapAsync();
+		await Expect(chip).ToHaveCountAsync(0);
+		await Expect(title).ToBeVisibleAsync();
 	}
 
 	[Test]

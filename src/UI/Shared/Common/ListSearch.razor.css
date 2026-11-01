@@ -28,15 +28,29 @@
     box-shadow: none;
 }
 
-@media (width < 48rem) {
-    .list-search {
-        width: 100%;
-        height: 44px;
-    }
-}
-
-@media (width < 48rem), (pointer: coarse) {
+@media (pointer: coarse) {
     .list-search-input {
         font-size: 16px;
     }
+}
+
+.list-search-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    height: 34px;
+    padding: 0 10px 0 12px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    font-size: 13px;
+}
+
+.list-search-chip-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
