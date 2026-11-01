@@ -20,13 +20,9 @@
 
 @media (width < 48rem) {
     ::deep .push-badge {
-        width: 28px;
-        height: 28px;
+        width: 24px;
+        height: 24px;
         padding: 0 !important;
-        border: 0 !important;
-        border-radius: 9999px !important;
-        background-color: rgb(0 0 0 / 0.45) !important;
-        backdrop-filter: blur(6px);
     }
 
     ::deep .push-badge svg {
