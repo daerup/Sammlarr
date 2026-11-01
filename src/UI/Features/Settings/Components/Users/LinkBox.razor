@@ -1,13 +1,27 @@
+@implements IAsyncDisposable
 @inject IJSRuntime JS
 
-<div class="flex w-full min-w-0 flex-col gap-1.5">
+<div class="flex w-full min-w-0 flex-col gap-1.5 max-md:gap-2">
     <div class="flex h-10 w-full min-w-0 items-center gap-2 rounded-lg border border-dashed bg-muted pl-3 pr-1.5 font-mono text-sm">
         <span class="min-w-0 flex-1 truncate select-all" data-link>@Link</span>
-        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="CopyAsync">
-            <LucideIcon Name="@(_copied ? "check" : "copy")" Size="13" Class="mr-1.5"/>
-            @(_copied ? "Copied" : "Copy")
-        </BbButton>
+        @if (!IsPhone)
+        {
+            @CopyButton(false)
+        }
     </div>
+    @if (IsPhone)
+    {
+        <div class="flex gap-2" data-testid="link-actions">
+            @CopyButton(true)
+            @if (_canShare == true)
+            {
+                <BbButton Variant="ButtonVariant.Outline" Class="flex-1" OnClick="ShareAsync">
+                    <LucideIcon Name="share" Size="15" Class="mr-1.5"/>
+                    Share
+                </BbButton>
+            }
+        </div>
+    }
     @if (_manual)
     {
         <p class="text-xs text-muted-foreground" role="status">This browser only copies on https. Select the link and copy it by hand.</p>
@@ -15,16 +29,34 @@
 </div>
 
 @code {
+    private const string Module = "./js/share.js";
+
     [Parameter] [EditorRequired] public required string Link { get; set; }
+
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
 
     private bool _copied;
 
     private bool _manual;
 
+    private bool? _canShare;
+
+    private IJSObjectReference? _module;
+
     protected override void OnParametersSet()
     {
         _copied = false;
         _manual = false;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (IsPhone && _canShare is null)
+        {
+            _module = await JS.InvokeAsync<IJSObjectReference>("import", Module);
+            _canShare = await _module.InvokeAsync<bool>("canShare");
+            StateHasChanged();
+        }
     }
 
     private async Task CopyAsync()
@@ -39,4 +71,30 @@
             _manual = true;
         }
     }
+
+    private async Task ShareAsync()
+    {
+        if (!await _module!.InvokeAsync<bool>("share", Link))
+        {
+            await CopyAsync();
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_module is not null)
+            {
+                await _module.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException) { }
+    }
+
+    private RenderFragment CopyButton(bool wide) =>
+        @<BbButton Variant="ButtonVariant.Outline" Size="@(wide ? ButtonSize.Default : ButtonSize.Small)" Class="@(wide ? "flex-1" : null)" OnClick="CopyAsync">
+            <LucideIcon Name="@(_copied ? "check" : "copy")" Size="13" Class="mr-1.5"/>
+            @(_copied ? "Copied" : "Copy")
+        </BbButton>;
 }
