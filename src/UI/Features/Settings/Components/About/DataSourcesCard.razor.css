@@ -121,6 +121,24 @@
     font-size: 11.5px;
 }
 
+.source-band-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px 8px;
+}
+
+.source-band-divider .source-band-title {
+    font-size: 12px;
+    color: var(--muted-foreground);
+}
+
+.source-band-rule {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
 .source-band .source-row {
     padding: 9px 0;
 }
@@ -207,7 +225,9 @@
 
 @media (width < 48rem) {
     .source-band {
-        padding-inline: 0;
+        padding: 0;
+        border-top: 0;
+        background: none;
     }
 
     .source-band-head {

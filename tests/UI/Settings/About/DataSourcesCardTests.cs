@@ -51,6 +51,17 @@ public class DataSourcesCardTests : BunitContext
 	}
 
 	[Test]
+	public async Task Band_OnPhones_IsALabelledDividerWithTheNoteBehindAnInfoTip()
+	{
+		var cut = this.RenderOnPhone<DataSourcesCard>(_ => { });
+
+		await Assert.That(cut.Component.Find(".source-band-divider .source-band-title").TextContent).IsEqualTo("Pages and ratings");
+		await Assert.That(cut.Component.FindAll(".source-band-note")).IsEmpty();
+		cut.Component.Find("[data-testid=source-band-tip]").Click();
+		await Assert.That(cut.Portal.WaitForElement("[role=dialog]").TextContent).Contains("These reach Sammlarr only through other services.");
+	}
+
+	[Test]
 	public async Task Band_HoldsTheTvdbFirstAndThenTheRatingSites_AndTheTvdbIsNotAServiceAsked()
 	{
 		var cut = Render<DataSourcesCard>();

@@ -12,11 +12,27 @@
         @Row(_sources.Row(remote), Note(remote))
     }
     <div class="source-band" data-testid="source-band">
-        <div class="source-band-head">
-            <LucideIcon Name="link" Size="13"/>
-            <span class="source-band-title">Pages and ratings</span>
-            <span class="source-band-note">Reach Sammlarr only through other services</span>
-        </div>
+        @if (IsPhone)
+        {
+            <div class="source-band-divider">
+                <span class="source-band-title">@BandTitle</span>
+                <DetailTip Title="@BandTitle" PhoneLabel="@($"About {BandTitle.ToLowerInvariant()}")" PhoneClass="relative grid place-items-center text-muted-foreground after:absolute after:-inset-2.5" data-testid="source-band-tip">
+                    <Trigger>
+                        <LucideIcon Name="info" Size="13"/>
+                    </Trigger>
+                    <Detail>These reach Sammlarr only through other services.</Detail>
+                </DetailTip>
+                <span class="source-band-rule"></span>
+            </div>
+        }
+        else
+        {
+            <div class="source-band-head">
+                <LucideIcon Name="link" Size="13"/>
+                <span class="source-band-title">@BandTitle</span>
+                <span class="source-band-note">Reach Sammlarr only through other services</span>
+            </div>
+        }
         @foreach (var provider in DataSources.Reached)
         {
             @Row(_sources.Row(provider), Note(provider))
@@ -63,6 +79,8 @@
 
 @code {
     [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
+    private const string BandTitle = "Pages and ratings";
 
     private static readonly RenderFragment Nothing = _ => { };
 
