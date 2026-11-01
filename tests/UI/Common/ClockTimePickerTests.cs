@@ -23,14 +23,14 @@ public class ClockTimePickerTests : BunitContext
 		await Assert.That(picker.Component.Find(".clock-field").TextContent.Trim()).IsEqualTo("06:30");
 
 		await picker.Component.Find(".clock-field").ClickAsync(new());
-		await picker.Portal.WaitForElement("[aria-label='Hour 07']").ClickAsync(new());
+		picker.Portal.WaitForElement("[aria-label='Hour 07']");
+		await picker.Portal.FindAndClickAsync(() => picker.Portal.Find("[aria-label='Hour 07']"));
 		await Assert.That(picker.Portal.Find("[role=dialog]").TextContent).Contains("Pick the minute");
-		await picker.Portal.Find("[aria-label='Minute 45']").ClickAsync(new());
+		await picker.Portal.FindAndClickAsync(() => picker.Portal.Find("[aria-label='Minute 45']"));
 		await Assert.That(_set).IsNull();
 
-		var set = picker.Portal.Find("[data-dialog-commit]");
-		await Assert.That(set.TextContent.Trim()).IsEqualTo("Set 07:45");
-		await set.ClickAsync(new());
+		await Assert.That(picker.Portal.Find("[data-dialog-commit]").TextContent.Trim()).IsEqualTo("Set 07:45");
+		await picker.Portal.FindAndClickAsync(() => picker.Portal.Find("[data-dialog-commit]"));
 
 		await Assert.That(_set).IsEqualTo(new TimeSpan(7, 45, 0));
 	}
@@ -41,8 +41,9 @@ public class ClockTimePickerTests : BunitContext
 		var picker = PhonePicker(new TimeSpan(6, 30, 0));
 
 		await picker.Component.Find(".clock-field").ClickAsync(new());
-		await picker.Portal.WaitForElement("[aria-label='Hour 09']").ClickAsync(new());
-		await picker.Portal.Find("[data-dialog-cancel]").ClickAsync(new());
+		picker.Portal.WaitForElement("[aria-label='Hour 09']");
+		await picker.Portal.FindAndClickAsync(() => picker.Portal.Find("[aria-label='Hour 09']"));
+		await picker.Portal.FindAndClickAsync(() => picker.Portal.Find("[data-dialog-cancel]"));
 
 		await Assert.That(_set).IsNull();
 		await Assert.That(picker.Component.Find(".clock-field").TextContent.Trim()).IsEqualTo("06:30");
@@ -59,12 +60,12 @@ public class ClockTimePickerTests : BunitContext
 		await Assert.That(cut.FindComponents<BbTimeInput>()).HasSingleItem();
 
 		await cut.Find("[aria-label='Open time picker']").ClickAsync(new());
-		await portal.WaitForElement("[aria-label='Hour 22']").ClickAsync(new());
-		await portal.Find("[aria-label='Minute 15']").ClickAsync(new());
+		portal.WaitForElement("[aria-label='Hour 22']");
+		await portal.FindAndClickAsync(() => portal.Find("[aria-label='Hour 22']"));
+		await portal.FindAndClickAsync(() => portal.Find("[aria-label='Minute 15']"));
 		await Assert.That(set).IsNull();
 
-		var button = portal.FindAll("button").Single(button => button.TextContent.Trim() == "Set 22:15");
-		await button.ClickAsync(new());
+		await portal.FindAndClickAsync(() => portal.FindAll("button").Single(button => button.TextContent.Trim() == "Set 22:15"));
 
 		await Assert.That(set).IsEqualTo(new TimeSpan(22, 15, 0));
 	}
