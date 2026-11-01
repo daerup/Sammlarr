@@ -3,6 +3,7 @@ using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
 using Microsoft.AspNetCore.Components;
+using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Components;
 
 namespace UI.Tests.Feeds;
@@ -33,6 +34,16 @@ public class SchedulePickerTests : BunitContext
 		{
 			(CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture) = (culture, uiCulture);
 		}
+	}
+
+	[Test]
+	public async Task Expression_LabelsItsSixFieldsInFullWords()
+	{
+		var cut = Picker("0 0 6 1 * *");
+
+		await Assert
+			.That(cut.FindAll("[data-testid=cron-fields] > div > span.select-none:first-of-type").Select(label => label.TextContent))
+			.IsEquivalentTo(["Second", "Minute", "Hour", "Day of month", "Month", "Day of week"], CollectionOrdering.Matching);
 	}
 
 	[Test]
