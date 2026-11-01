@@ -163,10 +163,10 @@ public class FeedConfigurationTests
 		await FeedEditor.Option(page, "Trigger", "Scheduled").ClickAsync();
 		await FeedEditor.LoadAsync(page);
 		await page.Button("Open time picker").ClickAsync();
-		await Expect(page.Button("Now")).ToBeVisibleAsync();
+		await Expect(page.Button("Pick the hour")).ToBeVisibleAsync();
 
 		await page.Labelled("Hour").ClickAsync();
-		await Expect(page.Button("Now")).ToBeHiddenAsync();
+		await Expect(page.Button("Pick the hour")).ToBeHiddenAsync();
 		await page.Keyboard.TypeAsync("25");
 		await page.Labelled("Minute").ClickAsync();
 		await page.Keyboard.TypeAsync("75");

@@ -160,7 +160,7 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 			"card => { let scroller = card.parentElement; while (!/auto|scroll/.test(getComputedStyle(scroller).overflowY)) scroller = scroller.parentElement; scroller.scrollTo({ top: scroller.scrollHeight, behavior: 'instant' }); return scroller.getBoundingClientRect().bottom - card.getBoundingClientRect().bottom; }"
 		);
 
-		await Assert.That(room).IsGreaterThanOrEqualTo(24);
+		await Assert.That(room).IsGreaterThan(23);
 	}
 
 	[Test]

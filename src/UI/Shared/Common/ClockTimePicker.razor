@@ -109,9 +109,9 @@ else
     private RenderFragment Panel =>
         @<div class="clock-panel">
             <div class="clock-head">
-                <button type="button" class="@SegmentClass(ClockDialKind.Hour)" aria-label="Hour" aria-pressed="@(_stage == ClockDialKind.Hour ? "true" : "false")" @onclick="() => _stage = ClockDialKind.Hour">@_draft.Hours.ToString("00", CultureInfo.InvariantCulture)</button>
+                <button type="button" class="@SegmentClass(ClockDialKind.Hour)" aria-label="Pick the hour" aria-pressed="@(_stage == ClockDialKind.Hour ? "true" : "false")" @onclick="() => _stage = ClockDialKind.Hour">@_draft.Hours.ToString("00", CultureInfo.InvariantCulture)</button>
                 <span class="clock-colon" aria-hidden="true">:</span>
-                <button type="button" class="@SegmentClass(ClockDialKind.Minute)" aria-label="Minute" aria-pressed="@(_stage == ClockDialKind.Minute ? "true" : "false")" @onclick="() => _stage = ClockDialKind.Minute">@_draft.Minutes.ToString("00", CultureInfo.InvariantCulture)</button>
+                <button type="button" class="@SegmentClass(ClockDialKind.Minute)" aria-label="Pick the minute" aria-pressed="@(_stage == ClockDialKind.Minute ? "true" : "false")" @onclick="() => _stage = ClockDialKind.Minute">@_draft.Minutes.ToString("00", CultureInfo.InvariantCulture)</button>
             </div>
             <ClockDial Kind="_stage" Value="@(_stage == ClockDialKind.Hour ? _draft.Hours : _draft.Minutes)" ValueChanged="PickAsync"/>
         </div>;
