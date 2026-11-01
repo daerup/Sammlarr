@@ -298,6 +298,44 @@ public class GlobalSearchTests : BunitContext
 			);
 	}
 
+	[Test]
+	public async Task Phone_BeforeTyping_NamesTheSourceAndSaysWhatSearchIsFor()
+	{
+		var cut = this.RenderOnPhone<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true)).Component;
+
+		await Assert.That(cut.Find("#search-input").GetAttribute("placeholder")).IsEqualTo("Search Plex");
+		await Assert.That(cut.Find("[data-testid=search-empty]").TextContent.Trim()).IsEqualTo("Find a movie or show and add it to a list.");
+		await Assert.That(cut.FindAll("button").Select(button => button.GetAttribute("aria-label"))).Contains("Back");
+	}
+
+	[Test]
+	public async Task Phone_Typing_SearchesOnceTheTypingPauses()
+	{
+		var cut = this.RenderOnPhone<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true)).Component;
+
+		var first = cut.Find("#search-input").InputAsync(new ChangeEventArgs { Value = "Mov" });
+		await cut.Find("#search-input").InputAsync(new ChangeEventArgs { Value = Movie });
+		await first;
+
+		cut.WaitForState(() => cut.FindAll(".search-result-row").Count == 2, TimeSpan.FromSeconds(3));
+		_search.SearchAsync(Movie, Any(), Any()).WasCalled(Times.Once);
+		_search.SearchAsync("Mov", Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task Phone_Clear_EmptiesTheFieldAndTheResults()
+	{
+		var cut = this.RenderOnPhone<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true)).Component;
+		await cut.Find("#search-input").InputAsync(new ChangeEventArgs { Value = Movie });
+		cut.WaitForState(() => cut.FindAll(".search-result-row").Count == 2, TimeSpan.FromSeconds(3));
+
+		await cut.Find("[aria-label='Clear search']").ClickAsync(new());
+
+		await Assert.That(cut.FindAll(".search-result-row")).IsEmpty();
+		await Assert.That(cut.Find("#search-input").GetAttribute("value")).IsEmpty();
+		await Assert.That(cut.FindAll("[data-testid=search-empty]")).HasSingleItem();
+	}
+
 	private async Task<IRenderedComponent<GlobalSearch>> SearchForTheMovieAsync()
 	{
 		var cut = Render<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true));

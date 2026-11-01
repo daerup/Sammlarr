@@ -121,7 +121,8 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 		);
 		await page.Keyboard.PressAsync("Enter");
 		await Expect(field).Not.ToBeFocusedAsync();
-		await search.Button("Cancel").TapAsync();
+		await Expect(search.GetByTestId("search-empty")).ToBeVisibleAsync();
+		await search.Button("Back").TapAsync();
 		await Expect(search).ToHaveCountAsync(0);
 		await page.WaitForFunctionAsync("() => history.state?.sheet === undefined");
 

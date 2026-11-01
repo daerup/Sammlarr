@@ -51,8 +51,8 @@ public class MediaDetailTileTests : BunitContext
 		var cut = Render<MediaDetailTile>(parameters =>
 			parameters
 				.Add(tile => tile.Media, found)
-				.Add(tile => tile.TitleMarks, (RenderFragment)(builder => builder.AddMarkupContent(0, "<i data-mark></i>")))
-				.Add(tile => tile.Note, (RenderFragment)(builder => builder.AddMarkupContent(0, "Past the import limit")))
+				.Add(tile => tile.TitleMarks, builder => builder.AddMarkupContent(0, "<i data-mark></i>"))
+				.Add(tile => tile.Note, builder => builder.AddMarkupContent(0, "Past the import limit"))
 		);
 
 		await Assert.That(cut.FindAll(".search-result-title .title-marks [data-mark]")).HasSingleItem();
