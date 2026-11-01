@@ -55,6 +55,29 @@ public class NotificationTargetDialogTests : BunitContext
 		_targets.CreateAsync(Is<NotificationTarget>(target => IsTheWebhook(target, secret)), Any()).WasCalled(Times.Once);
 	}
 
+	[Test]
+	public async Task Footer_IsCancelAndSave_WithTestConnectionAboveIt()
+	{
+		var cut = Render<NotificationTargetDialog>();
+
+		var footer = cut.Find("[data-dialog-actions]");
+		await Assert.That(footer.QuerySelector("[data-dialog-cancel]")!.TextContent.Trim()).IsEqualTo("Cancel");
+		await Assert.That(footer.QuerySelector("[data-dialog-commit]")!.TextContent.Trim()).IsEqualTo("Save");
+		await Assert.That(footer.TextContent).DoesNotContain("Test connection");
+	}
+
+	[Test]
+	public async Task Footer_AfterSavingAWebhook_IsTheDoneButton()
+	{
+		var cut = Render<NotificationTargetDialog>();
+		await TypeAsync(cut, "My webhook", "Home Assistant");
+		await TypeAsync(cut, Url, Url);
+
+		await Button(cut, "Save").ClickAsync(new());
+
+		await Assert.That(cut.Find("[data-dialog-actions] [data-dialog-commit]").TextContent.Trim()).IsEqualTo("Done");
+	}
+
 	private static Task TypeAsync(IRenderedComponent<NotificationTargetDialog> cut, string placeholder, string text) =>
 		cut.InvokeAsync(() => cut.FindComponents<BbInput>().Single(input => input.Instance.Placeholder == placeholder).Instance.ValueChanged.InvokeAsync(text));
 
