@@ -1,0 +1,77 @@
+@using System.Globalization
+
+<div class="clock-dial" data-kind="@Kind">
+    <svg class="clock-dial-face" viewBox="0 0 240 240" aria-hidden="true" focusable="false">
+        <circle class="clock-dial-plate" cx="120" cy="120" r="116"/>
+        <line class="clock-dial-hand" x1="120" y1="120" x2="@Number(X(Hand))" y2="@Number(Y(Hand))"/>
+        <circle class="clock-dial-pin" cx="120" cy="120" r="3"/>
+        <circle class="clock-dial-knob" cx="@Number(X(Hand))" cy="@Number(Y(Hand))" r="16"/>
+    </svg>
+    @foreach (var mark in Marks)
+    {
+        <button type="button" @key="mark.Value" class="@MarkClass(mark)" style="@Place(mark)" aria-label="@mark.Label" aria-pressed="@(mark.Value == Value ? "true" : "false")"
+                @onclick="() => ValueChanged.InvokeAsync(mark.Value)">@mark.Text</button>
+    }
+</div>
+
+@code {
+    [Parameter] public ClockDialKind Kind { get; set; }
+
+    [Parameter] public int Value { get; set; }
+
+    [Parameter] public EventCallback<int> ValueChanged { get; set; }
+
+    private const double Centre = 120;
+
+    private const double Outer = 98;
+
+    private const double Inner = 62;
+
+    private sealed record Mark(int Value, string Text, Spot Spot, string Label);
+
+    private readonly record struct Spot(double Degrees, double Radius);
+
+    private IEnumerable<Mark> Marks
+    {
+        get
+        {
+            return Kind switch
+            {
+                ClockDialKind.Hour => Enumerable.Range(0, 12).SelectMany(step => new[] { Hour(step == 0 ? 12 : step, step, Outer), Hour(step == 0 ? 0 : step + 12, step, Inner) }),
+                ClockDialKind.Minute => Enumerable.Range(0, 12).Select(step => new Mark(step * 5, Two(step * 5), new Spot(step * 30, Outer), $"Minute {Two(step * 5)}")),
+            };
+        }
+    }
+
+    private Spot Hand
+    {
+        get
+        {
+            return Kind switch
+            {
+                ClockDialKind.Hour => new Spot(Value % 12 * 30, Value is >= 1 and <= 12 ? Outer : Inner),
+                ClockDialKind.Minute => new Spot(Value * 6, Outer),
+            };
+        }
+    }
+
+    private static Mark Hour(int hour, int step, double radius) =>
+        new(hour, radius == Outer ? hour.ToString(CultureInfo.InvariantCulture) : Two(hour), new Spot(step * 30, radius), $"Hour {Two(hour)}");
+
+    private string MarkClass(Mark mark)
+    {
+        var inner = mark.Spot.Radius == Inner ? " is-inner" : string.Empty;
+        var on = mark.Value == Value ? " is-on" : string.Empty;
+        return $"clock-dial-mark{inner}{on}";
+    }
+
+    private static string Place(Mark mark) => string.Create(CultureInfo.InvariantCulture, $"left: {X(mark.Spot):0.##}px; top: {Y(mark.Spot):0.##}px");
+
+    private static double X(Spot spot) => Centre + spot.Radius * Math.Sin(spot.Degrees * Math.PI / 180);
+
+    private static double Y(Spot spot) => Centre - spot.Radius * Math.Cos(spot.Degrees * Math.PI / 180);
+
+    private static string Number(double value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+
+    private static string Two(int value) => value.ToString("00", CultureInfo.InvariantCulture);
+}

@@ -297,21 +297,7 @@
 
     private RenderFragment TimeEntry(TimeSpan? time, Action<TimeSpan?> changed)
     {
-        return @<div class="relative w-fit">
-                   <BbTimeInput Value="time"
-                                ValueChanged="changed"
-                                Format="TimeFormat.Hour24"
-                                MinuteStep="5"
-                                ShowPicker="false"
-                                Class="pe-11"
-                                data-clamp/>
-                   <BbTimePicker Value="time"
-                                 ValueChanged="changed"
-                                 Format="TimeFormat.Hour24"
-                                 MinuteStep="5"
-                                 AriaLabel="Open time picker"
-                                 Class="absolute end-3 top-1.5 h-7 w-7 justify-center border-0 bg-transparent px-0 py-0 [&>span]:hidden [&>svg]:me-0"/>
-               </div>;
+        return @<ClockTimePicker Value="time" ValueChanged="changed" Title="Run at"/>;
     }
 
     private void TransferScheduleConfig(ScheduleMode from, ScheduleMode to)

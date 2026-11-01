@@ -1,0 +1,58 @@
+.clock-field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    border: 1px solid var(--input);
+    border-radius: var(--radius);
+    background: color-mix(in oklch, var(--input) 30%, transparent);
+    color: var(--foreground);
+    font: inherit;
+    font-size: 16px;
+    font-variant-numeric: tabular-nums;
+}
+
+.clock-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 12px;
+}
+
+.clock-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.clock-segment {
+    display: grid;
+    place-items: center;
+    width: 72px;
+    height: 56px;
+    border: 1px solid var(--input);
+    border-radius: var(--radius);
+    background: var(--background);
+    color: var(--muted-foreground);
+    font: inherit;
+    font-size: 30px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+}
+
+.clock-segment.is-on {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 35%, transparent);
+    color: var(--foreground);
+}
+
+.clock-colon {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--muted-foreground);
+}

@@ -1,0 +1,60 @@
+.clock-dial {
+    position: relative;
+    width: 240px;
+    height: 240px;
+    flex: none;
+}
+
+.clock-dial-face {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.clock-dial-plate {
+    fill: color-mix(in oklch, var(--muted) 55%, transparent);
+    stroke: var(--border);
+}
+
+.clock-dial-hand {
+    stroke: var(--primary);
+    stroke-width: 1.5;
+}
+
+.clock-dial-pin,
+.clock-dial-knob {
+    fill: var(--primary);
+}
+
+.clock-dial-mark {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 9999px;
+    background: transparent;
+    color: var(--foreground);
+    font: inherit;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+}
+
+.clock-dial-mark.is-inner {
+    color: var(--muted-foreground);
+    font-size: 12px;
+}
+
+.clock-dial-mark.is-on {
+    color: var(--primary-foreground);
+    font-weight: 600;
+}
+
+.clock-dial-mark:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 1px;
+}

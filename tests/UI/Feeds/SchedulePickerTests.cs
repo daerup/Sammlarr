@@ -89,16 +89,16 @@ public class SchedulePickerTests : BunitContext
 	}
 
 	[Test]
-	public async Task Clock_OpensTheSteppingPicker_WhoseChoiceReplacesTheTypedTime()
+	public async Task Clock_HourThenMinute_ReplacesTheTypedTime()
 	{
 		var cut = Picker("0 0 23 * * *");
 
 		await Assert.That(cut.FindAll("button[aria-label='Open time picker']")).Count().IsEqualTo(1);
 		cut.Find("button[aria-label='Open time picker']").Click();
-		cut.FindAll("[role=dialog] button").Single(button => button.TextContent.Trim() == "Clear").Click();
+		cut.WaitForElement("[role=dialog] [aria-label='Hour 07']").Click();
+		cut.Find("[role=dialog] [aria-label='Minute 45']").Click();
 
-		await Assert.That(_schedule).IsNull();
-		await Assert.That(cut.Find("input[aria-label=Hour]").GetAttribute("value")).IsEmpty();
+		await Assert.That(_schedule).IsEqualTo("0 45 7 * * *");
 	}
 
 	private IRenderedComponent<IComponent> Picker(string? schedule)

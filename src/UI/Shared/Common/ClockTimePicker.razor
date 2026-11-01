@@ -1,0 +1,118 @@
+@using System.Globalization
+
+@if (IsPhone)
+{
+    <button type="button" class="clock-field" aria-haspopup="dialog" aria-label="@($"{Title}, {Shown}")" @onclick="Open">
+        <span>@Shown</span>
+        <LucideIcon Name="clock" Size="16" Class="text-muted-foreground"/>
+    </button>
+    <BbDialog Open="_open" OpenChanged="open => _open = open">
+        <BbDialogContent>
+            <BbDialogHeader>
+                <BbDialogTitle>@Title</BbDialogTitle>
+                <BbDialogDescription>@(_stage == ClockDialKind.Hour ? "Pick the hour" : "Pick the minute")</BbDialogDescription>
+            </BbDialogHeader>
+            @Panel
+            <BbDialogFooter data-dialog-actions>
+                <BbButton data-dialog-cancel Variant="ButtonVariant.Outline" OnClick="() => _open = false">Cancel</BbButton>
+                <BbButton data-dialog-commit OnClick="SetAsync">Set @Format(_draft)</BbButton>
+            </BbDialogFooter>
+        </BbDialogContent>
+    </BbDialog>
+}
+else
+{
+    <div class="relative w-fit">
+        <BbTimeInput Value="Value"
+                     ValueChanged="ValueChanged"
+                     Format="TimeFormat.Hour24"
+                     MinuteStep="5"
+                     ShowPicker="false"
+                     Class="pe-11"
+                     data-clamp/>
+        <BbPopover Open="_open" OpenChanged="OpenChanged">
+            <BbPopoverTrigger AsChild="false" class="absolute end-3 top-1.5 grid h-7 w-7 place-items-center text-muted-foreground hover:text-foreground" aria-label="Open time picker">
+                <LucideIcon Name="clock" Size="16"/>
+            </BbPopoverTrigger>
+            <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.Start" Class="w-auto p-3">
+                @Panel
+            </BbPopoverContent>
+        </BbPopover>
+    </div>
+}
+
+@code {
+    [Parameter] public TimeSpan? Value { get; set; }
+
+    [Parameter] public EventCallback<TimeSpan?> ValueChanged { get; set; }
+
+    [Parameter] public string Title { get; set; } = "Time";
+
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
+    private bool _open;
+
+    private TimeSpan _draft;
+
+    private ClockDialKind _stage = ClockDialKind.Hour;
+
+    private string Shown => Value is { } time ? Format(time) : "--:--";
+
+    private void Open()
+    {
+        Begin();
+        _open = true;
+    }
+
+    private void Begin()
+    {
+        _draft = Value ?? TimeSpan.Zero;
+        _stage = ClockDialKind.Hour;
+    }
+
+    private void OpenChanged(bool open)
+    {
+        if (open)
+        {
+            Begin();
+        }
+
+        _open = open;
+    }
+
+    private async Task PickAsync(int value)
+    {
+        if (_stage == ClockDialKind.Hour)
+        {
+            _draft = new TimeSpan(value, _draft.Minutes, 0);
+            _stage = ClockDialKind.Minute;
+            return;
+        }
+
+        _draft = new TimeSpan(_draft.Hours, value, 0);
+        if (!IsPhone)
+        {
+            await SetAsync();
+        }
+    }
+
+    private async Task SetAsync()
+    {
+        _open = false;
+        await ValueChanged.InvokeAsync(_draft);
+    }
+
+    private static string Format(TimeSpan time) => time.ToString(@"hh\:mm", CultureInfo.InvariantCulture);
+
+    private string SegmentClass(ClockDialKind stage) => stage == _stage ? "clock-segment is-on" : "clock-segment";
+
+    private RenderFragment Panel =>
+        @<div class="clock-panel">
+            <div class="clock-head">
+                <button type="button" class="@SegmentClass(ClockDialKind.Hour)" aria-label="Hour" aria-pressed="@(_stage == ClockDialKind.Hour ? "true" : "false")" @onclick="() => _stage = ClockDialKind.Hour">@_draft.Hours.ToString("00", CultureInfo.InvariantCulture)</button>
+                <span class="clock-colon" aria-hidden="true">:</span>
+                <button type="button" class="@SegmentClass(ClockDialKind.Minute)" aria-label="Minute" aria-pressed="@(_stage == ClockDialKind.Minute ? "true" : "false")" @onclick="() => _stage = ClockDialKind.Minute">@_draft.Minutes.ToString("00", CultureInfo.InvariantCulture)</button>
+            </div>
+            <ClockDial Kind="_stage" Value="@(_stage == ClockDialKind.Hour ? _draft.Hours : _draft.Minutes)" ValueChanged="PickAsync"/>
+        </div>;
+}
