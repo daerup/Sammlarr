@@ -135,7 +135,9 @@ public class UiInvariantTests
 	[Test]
 	public async Task UnmatchedTile_InTheLightTheme_KeepsItsTitleReadable()
 	{
-		var page = await E2EApp.AdminAt(SettingsPage.Section("testing"));
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		await page.AddInitScriptAsync("localStorage.setItem('bb-theme', JSON.stringify({ isDarkMode: false }))");
+		await page.VisitAsync(SettingsPage.Section("testing"));
 		await Expect(page.Locator("html")).Not.ToHaveClassAsync(new Regex("dark"));
 		var tile = page.Locator("[data-testid=media-tile]", new PageLocatorOptions { HasText = "Unmatched Title" });
 		await Expect(tile).ToBeVisibleAsync(Wait.Settle);
@@ -194,21 +196,33 @@ public class UiInvariantTests
 	}
 
 	[Test]
+	public async Task Theme_WithNothingSaved_PaintsDarkBeforeTheAppStarts()
+	{
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		await page.RouteAsync("**/_framework/blazor.web*.js", route => route.AbortAsync());
+
+		await page.GotoAsync(Routes.Feeds);
+
+		await Expect(page.Locator("html")).ToHaveClassAsync(new Regex("dark"));
+		await Assert.That(await page.EvaluateAsync<string>("() => getComputedStyle(document.documentElement).colorScheme")).IsEqualTo("dark");
+	}
+
+	[Test]
 	public async Task ThemeToggle_WhenFlipped_PersistsAcrossNavigation()
 	{
 		var page = await E2EApp.AdminAt(Routes.Feeds);
-		await Expect(page.Locator("html")).Not.ToHaveClassAsync(new Regex("dark"));
+		await ShouldBeDarkAsync(page);
 
 		await Expect(page.Locator("html"))
 			.ToHaveAttributeAsync("data-base-color", new Regex("."), new LocatorAssertionsToHaveAttributeOptions { Timeout = Wait.Settle });
-		await page.GetByLabel("Switch to dark mode").ClickAsync();
+		await page.GetByLabel("Switch to light mode").ClickAsync();
 
-		await ShouldBeDarkAsync(page);
-		await page.WaitForFunctionAsync("JSON.parse(localStorage.getItem('bb-theme') ?? '{}').isDarkMode === true");
+		await ShouldBeLightAsync(page);
+		await page.WaitForFunctionAsync("JSON.parse(localStorage.getItem('bb-theme') ?? '{}').isDarkMode === false");
 
 		await page.VisitAsync(Routes.Browse);
 
-		await ShouldBeDarkAsync(page);
+		await ShouldBeLightAsync(page);
 	}
 
 	[Test]
@@ -254,5 +268,11 @@ public class UiInvariantTests
 	{
 		await Expect(page.Locator("html")).ToHaveClassAsync(new Regex("dark"), new LocatorAssertionsToHaveClassOptions { Timeout = Wait.Settle });
 		await Expect(page.GetByLabel("Switch to light mode")).ToBeVisibleAsync(Wait.Settle);
+	}
+
+	private static async Task ShouldBeLightAsync(IPage page)
+	{
+		await Expect(page.Locator("html")).Not.ToHaveClassAsync(new Regex("dark"), new LocatorAssertionsToHaveClassOptions { Timeout = Wait.Settle });
+		await Expect(page.GetByLabel("Switch to dark mode")).ToBeVisibleAsync(Wait.Settle);
 	}
 }
