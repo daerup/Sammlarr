@@ -164,6 +164,20 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	}
 
 	[Test]
+	public async Task Logo_TappedInTheMenu_Hops()
+	{
+		var page = await E2EApp.AdminAt(Routes.Home);
+		await page.Button("Open menu").TapAsync();
+		var logo = page.Modal("Menu").Locator(".sammlarr-logo");
+
+		await logo.TapAsync();
+
+		await Expect(logo).ToHaveClassAsync(new Regex("is-hopping"));
+		await page.WaitForFunctionAsync("() => document.querySelector('[role=dialog] .sammlarr-bird').getAnimations().length > 0");
+		await Expect(logo).Not.ToHaveClassAsync(new Regex("is-hopping"));
+	}
+
+	[Test]
 	public async Task Providers_OnAPhone_ListTheServicesWithinTheScreen()
 	{
 		var page = await E2EApp.AdminAt(SettingsPage.Section("providers"));

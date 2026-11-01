@@ -85,6 +85,29 @@ a.active .sammlarr-tilt {
     }
 }
 
+@media (hover: none), (pointer: coarse) {
+    .sammlarr-logo {
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+}
+
+.sammlarr-logo.is-hopping .sammlarr-bird {
+    animation: sammlarr-hop 1s ease-in-out;
+}
+
+.sammlarr-logo.is-hopping .sammlarr-tail {
+    animation: sammlarr-flick 1s ease-in-out;
+}
+
+.sammlarr-logo.is-hopping .sammlarr-star {
+    animation: sammlarr-shine 1s ease-in-out;
+}
+
+.sammlarr-logo.is-hopping .sammlarr-rays {
+    animation: sammlarr-rays 1s ease-in-out;
+}
+
 @keyframes sammlarr-hop {
     0% { translate: 0 0; scale: 1 1; }
     14% { translate: 0 0; scale: 1.05 0.9; }
