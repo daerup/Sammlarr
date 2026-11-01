@@ -36,16 +36,16 @@
             </BbButton>
         </BbDropdownMenuTrigger>
         <BbDropdownMenuContent Align="PopoverAlign.End" Class="p-0 overflow-hidden">
-            <div class="relative" style="width: 17rem;">
+            <div class="relative w-[17rem] max-md:w-full">
                 @if (_accountUrl is not null)
                 {
                     <a href="@_accountUrl" target="_blank" rel="noopener noreferrer"
-                       class="absolute top-3 right-3 z-10 text-muted-foreground/60 hover:text-foreground transition-colors"
+                       class="absolute top-3 right-3 z-10 text-muted-foreground/60 hover:text-foreground transition-colors max-md:hidden"
                        aria-label="@($"Open {_branding.NickName} account in new tab")">
                         <LucideIcon Name="external-link" Size="14"/>
                     </a>
                 }
-                <div class="px-4 py-4 border-b border-border/60" style="@headerStyle">
+                <div class="px-4 py-4 border-b border-border/60 max-md:!bg-none max-md:px-5" style="@headerStyle">
                     <div class="flex items-center gap-3">
                         <BbAvatar Size="AvatarSize.Large" Class="avatar-rect">
                             <BbAvatarImage Source="@_avatarUrl" Alt="@_displayName"/>
@@ -67,7 +67,14 @@
                     </div>
                 </div>
 
-                <form action="/auth/logout" method="post" class="p-2">
+                @if (_accountUrl is not null)
+                {
+                    <a href="@_accountUrl" target="_blank" rel="noopener noreferrer" class="flex h-[52px] items-center gap-3.5 px-5 text-sm md:hidden" data-testid="profile-account-row">
+                        <LucideIcon Name="external-link" Size="18" Class="text-muted-foreground"/>
+                        <span>Open your @_branding.NickName account</span>
+                    </a>
+                }
+                <form action="/auth/logout" method="post" class="p-2 max-md:p-0">
                     <AntiforgeryToken/>
                     <input type="hidden" name="returnUrl" value="@ReturnUrl"/>
                     <HoverButton Preset="HoverButtonPreset.Destructive"
@@ -75,7 +82,7 @@
                                  Text="Sign out"
                                  Type="ButtonType.Submit"
                                  Border="false"
-                                 Class="w-full"/>
+                                 Class="w-full max-md:h-[52px] max-md:justify-start max-md:rounded-none max-md:px-5"/>
                 </form>
             </div>
         </BbDropdownMenuContent>

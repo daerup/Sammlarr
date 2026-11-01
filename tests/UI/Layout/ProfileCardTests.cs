@@ -53,6 +53,26 @@ public class ProfileCardTests : BunitContext
 	}
 
 	[Test]
+	public async Task Card_OnPhones_FillsTheSheetAndNamesTheAccountLinkInARow()
+	{
+		var cut = await RenderOpenCardAsync(OnArr);
+
+		var row = cut.WaitForElement("[data-testid=profile-account-row]");
+		await Assert.That(row.TextContent.Trim()).IsEqualTo("Open your Plex account");
+		await Assert.That(row.GetAttribute("href")).IsEqualTo("https://app.plex.tv/desktop/#!/settings/account");
+		await Assert.That(cut.Find("[data-testid=profile-account-row]").ParentElement!.ClassList).Contains("max-md:w-full");
+	}
+
+	[Test]
+	public async Task Card_WithoutAnAccountPage_ShowsNoAccountRow()
+	{
+		var cut = await RenderOpenCardAsync(OnArr with { AuthProvider = AuthProvider.Local });
+
+		cut.WaitForElement("form[action='/auth/logout']");
+		await Assert.That(cut.FindAll("[data-testid=profile-account-row]")).IsEmpty();
+	}
+
+	[Test]
 	public async Task Avatar_ForAnAccountWithoutAPicture_DrawsTheirBird()
 	{
 		var cut = await RenderOpenCardAsync(OnArr with { AuthProvider = AuthProvider.Local });
