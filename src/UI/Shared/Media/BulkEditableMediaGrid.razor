@@ -38,7 +38,7 @@
                            OnClick="@(() => HandleTileClickAsync(item))"/>
             @if (IsEditMode)
             {
-                <div data-testid="selection-layer" class="absolute inset-0 z-10 rounded-lg max-md:rounded-[14px] cursor-pointer select-none" @onclick="e => HandleSelectionClick(mediaId, e)" @onclick:stopPropagation="true"></div>
+                <div data-testid="selection-layer" data-long-press class="absolute inset-0 z-10 rounded-lg max-md:rounded-[14px] cursor-pointer select-none [-webkit-touch-callout:none]" @onclick="e => HandleSelectionClick(mediaId, e)" @onclick:stopPropagation="true"></div>
                 <div class="absolute top-3 right-3 z-20 pointer-events-none max-md:top-1.5 max-md:right-1.5">
                     <div data-testid="selection-badge" class="@SelectionPillClass(isSelected)">
                         @if (isSelected)

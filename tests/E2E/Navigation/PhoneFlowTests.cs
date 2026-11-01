@@ -587,6 +587,22 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	}
 #endif
 
+	[Test]
+	public async Task SelectMode_TapThenLongPress_SelectsTheTitlesBetween()
+	{
+		var page = await WantlistWithAsync(TrendingTiles.Title, TrendingTiles.Second, "The Odyssey");
+		var layers = page.Locator("[data-testid='selection-layer']");
+		await page.Toolbar.Button("Select").TapAsync();
+		await layers.Nth(0).TapAsync();
+
+		await layers.Nth(2).HoverAsync();
+		await page.Mouse.DownAsync();
+		await page.WaitForTimeoutAsync(700);
+		await page.Mouse.UpAsync();
+
+		await Expect(page.Locator("header .phone-select-bar [role=status]")).ToHaveTextAsync("3 selected");
+	}
+
 	private static async Task SitsOnTheBottomAsync(IPage page, string selector)
 	{
 		await page.WaitForFunctionAsync($"() => Math.abs(document.querySelector('{selector}').getBoundingClientRect().bottom - innerHeight) < 1");
