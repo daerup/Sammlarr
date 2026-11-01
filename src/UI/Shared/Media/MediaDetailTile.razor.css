@@ -271,6 +271,24 @@
         display: none;
     }
 
+    .title-marks {
+        display: inline-flex;
+        flex: none;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .title-marks ::deep svg {
+        display: block;
+    }
+
+    .search-result-note {
+        position: relative;
+        z-index: 2;
+        align-self: flex-start;
+        padding-top: 2px;
+    }
+
     .search-result-facts {
         flex-wrap: nowrap;
         overflow: hidden;

@@ -2,13 +2,25 @@
     overflow-anchor: none;
 }
 
-::deep .search-result-row {
-    height: 310px;
-    content-visibility: auto;
-    contain-intrinsic-size: auto 310px;
+@media (width >= 48rem) {
+    ::deep .search-result-row {
+        height: 310px;
+        content-visibility: auto;
+        contain-intrinsic-size: auto 310px;
+    }
+
+    ::deep .search-result-row .search-result-poster {
+        width: 192px;
+        height: 288px;
+    }
 }
 
-::deep .search-result-row .search-result-poster {
-    width: 192px;
-    height: 288px;
+@media (width < 48rem) {
+    ::deep .search-result-row.result-grey > div .search-result-main-content {
+        filter: none;
+    }
+
+    ::deep .search-result-row.result-grey .search-result-poster {
+        filter: grayscale(0.75) brightness(70%);
+    }
 }

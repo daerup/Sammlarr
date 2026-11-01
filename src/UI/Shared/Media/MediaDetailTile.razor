@@ -39,6 +39,10 @@
                 </div>
                 <div class="search-result-title flex items-center gap-2 pt-2 min-w-0">
                     <MediaTitleLink Title="@Details.Title" Ids="@_ids" Class="font-bold truncate text-xl max-md:text-[15px] max-md:font-semibold" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
+                    @if (TitleMarks is not null)
+                    {
+                        <span class="title-marks md:hidden">@TitleMarks</span>
+                    }
                 </div>
 
                 @if (Details.Tagline is { } tagline)
@@ -59,6 +63,11 @@
                 @if (Details.Summary is { } summary)
                 {
                     <p class="search-result-summary text-sm text-foreground line-clamp-2 pt-2">@summary</p>
+                }
+
+                @if (Note is not null)
+                {
+                    <div class="search-result-note md:hidden">@Note</div>
                 }
             </div>
         </div>
@@ -83,6 +92,8 @@
     [Parameter] public EventCallback OnFocusIn { get; set; }
     [Parameter] public EventCallback OnFocusOut { get; set; }
     [Parameter] public RenderFragment? Icons { get; set; }
+    [Parameter] public RenderFragment? TitleMarks { get; set; }
+    [Parameter] public RenderFragment? Note { get; set; }
     [Parameter] public EventCallback OnOpen { get; set; }
     [Parameter] public Optional<RatingStrategy> Strategy { get; set; } = new None();
 

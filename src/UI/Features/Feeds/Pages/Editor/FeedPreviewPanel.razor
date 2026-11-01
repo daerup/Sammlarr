@@ -150,7 +150,7 @@
             {
                 <div class="preview-main-results transition-opacity @DimClass">
                 <VirtualizeGuard>
-                    <Virtualize @key="(_filteredResults.Count, IsPhone)" Items="_filteredResults" Context="result" ItemSize="215" OverscanCount="6">
+                    <Virtualize @key="(_filteredResults.Count, IsPhone)" Items="_filteredResults" Context="result" ItemSize="@RowHeight" OverscanCount="6">
                         <ItemContent>
                         @{
                         var item = result.Item;
@@ -179,23 +179,20 @@
                                                  IsFocused="_focusedResult == item.Key"
                                                  OnFocusIn="() => _focusedResult = item.Key"
                                                  OnFocusOut="() => ClearFocus(item)"
-                                                 OnOpen="() => _details = item">
+                                                 OnOpen="() => _details = item"
+                                                 TitleMarks="@(IsPhone ? Marks(isInWantlist, isBlocklisted) : null)"
+                                                 Note="@(IsPhone ? Fate(result, isAtRisk) : null)">
                                     <Icons>
-                                        @if (isAtRisk)
+                                        @if (!IsPhone)
                                         {
-                                            <LeavingIndicator Reason="@PreviewCopy.AtRiskReason(result)" Threshold="MirrorThreshold" Absences="AbsencesOf(item.Identity.Id)"
-                                                              ChildContent="LeavingDetail(result)"/>
+                                            @Fate(result, isAtRisk)
+                                            <WantlistToggle Result="item"
+                                                             IsToggled="isInWantlist"
+                                                             IsToggling="isTogglingWantlist"
+                                                             Item="_wantlist.Find(item.Identity.Id)"
+                                                             OnToggle="ToggleWantlistAsync"/>
+                                            <BlocklistToggleIcon Result="item" IsToggled="isBlocklisted" IsToggling="isTogglingBlocklist" OnToggle="ToggleBlocklistAsync"/>
                                         }
-                                        else
-                                        {
-                                            @Verdict(result)
-                                        }
-                                        <WantlistToggle Result="item"
-                                                         IsToggled="isInWantlist"
-                                                         IsToggling="isTogglingWantlist"
-                                                         Item="_wantlist.Find(item.Identity.Id)"
-                                                         OnToggle="ToggleWantlistAsync"/>
-                                        <BlocklistToggleIcon Result="item" IsToggled="isBlocklisted" IsToggling="isTogglingBlocklist" OnToggle="ToggleBlocklistAsync"/>
                                     </Icons>
                                 </MediaDetailTile>
                             </div>
@@ -210,7 +207,7 @@
                 <div class="mt-4 preview-gone-results transition-opacity @DimClass">
                     <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 pb-2">@PreviewCopy.GoneHeading</p>
                     <VirtualizeGuard>
-                        <Virtualize @key="(_filteredGoneResults.Count, IsPhone)" Items="_filteredGoneResults" Context="gone" ItemSize="215" OverscanCount="6">
+                        <Virtualize @key="(_filteredGoneResults.Count, IsPhone)" Items="_filteredGoneResults" Context="gone" ItemSize="@RowHeight" OverscanCount="6">
                             <ItemContent>
                         @{
                                 var goneItem = gone.Media;
@@ -221,18 +218,23 @@
                                                      IsFocused="_focusedResult == goneItem.Key"
                                                      OnFocusIn="() => _focusedResult = goneItem.Key"
                                                      OnFocusOut="() => ClearFocus(goneItem)"
-                                                     OnOpen="() => _details = goneItem">
+                                                     OnOpen="() => _details = goneItem"
+                                                     TitleMarks="@(IsPhone ? Marks(IsWantlisted(goneItem), IsBlocklisted(goneItem)) : null)"
+                                                     Note="@(IsPhone ? Gone(goneItem) : null)">
                                         <Icons>
-                                            <LeavingIndicator Reason="@PreviewCopy.GoneReason" Threshold="MirrorThreshold" Absences="AbsencesOf(goneItem.Identity.Id)"/>
-                                            <WantlistToggle Result="goneItem"
-                                                             IsToggled="IsWantlisted(goneItem)"
-                                                             IsToggling="_togglingWantlistItem == goneItem.Identity.Id"
-                                                             Item="_wantlist.Find(goneItem.Identity.Id)"
-                                                             OnToggle="ToggleWantlistAsync"/>
-                                            <BlocklistToggleIcon Result="goneItem"
-                                                                 IsToggled="IsBlocklisted(goneItem)"
-                                                                 IsToggling="_togglingBlocklistItem == goneItem.Identity.Id"
-                                                                 OnToggle="ToggleBlocklistAsync"/>
+                                            @if (!IsPhone)
+                                            {
+                                                @Gone(goneItem)
+                                                <WantlistToggle Result="goneItem"
+                                                                 IsToggled="IsWantlisted(goneItem)"
+                                                                 IsToggling="_togglingWantlistItem == goneItem.Identity.Id"
+                                                                 Item="_wantlist.Find(goneItem.Identity.Id)"
+                                                                 OnToggle="ToggleWantlistAsync"/>
+                                                <BlocklistToggleIcon Result="goneItem"
+                                                                     IsToggled="IsBlocklisted(goneItem)"
+                                                                     IsToggling="_togglingBlocklistItem == goneItem.Identity.Id"
+                                                                     OnToggle="ToggleBlocklistAsync"/>
+                                            }
                                         </Icons>
                                     </MediaDetailTile>
                                 </div>
@@ -251,7 +253,7 @@
                 <div class="mt-4 transition-opacity @DimClass">
                     <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 pb-2">Not found in provider</p>
                     <VirtualizeGuard>
-                        <Virtualize @key="(_filteredUnmatchedResults.Count, IsPhone)" Items="_filteredUnmatchedResults" Context="item" ItemSize="215" OverscanCount="6">
+                        <Virtualize @key="(_filteredUnmatchedResults.Count, IsPhone)" Items="_filteredUnmatchedResults" Context="item" ItemSize="@RowHeight" OverscanCount="6">
                             <ItemContent>
                         @{
                                 <div class="pb-2">
@@ -260,11 +262,12 @@
                                                      IsFocused="_focusedResult == item.Key"
                                                      OnFocusIn="() => _focusedResult = item.Key"
                                                      OnFocusOut="() => ClearFocus(item)"
-                                                     OnOpen="() => _details = item">
+                                                     OnOpen="() => _details = item"
+                                                     Note="@(IsPhone ? NotFound(item) : null)">
                                         <Icons>
-                                            @if (item is UnmatchedMedia unmatched)
+                                            @if (!IsPhone)
                                             {
-                                                <NotFoundPopover Unmatched="unmatched"/>
+                                                @NotFound(item)
                                             }
                                         </Icons>
                                     </MediaDetailTile>
@@ -447,6 +450,39 @@
             Qualified => null,
         };
     }
+
+    private RenderFragment? Fate(QueryVerdict<MatchedMedia> result, bool atRisk)
+    {
+        return atRisk
+            ? @<LeavingIndicator Reason="@PreviewCopy.AtRiskReason(result)" Threshold="MirrorThreshold" Absences="AbsencesOf(result.Item.Identity.Id)" ChildContent="LeavingDetail(result)"/>
+            : Verdict(result);
+    }
+
+    private RenderFragment Gone(MatchedMedia item) =>
+        @<LeavingIndicator Reason="@PreviewCopy.GoneReason" Threshold="MirrorThreshold" Absences="AbsencesOf(item.Identity.Id)"/>;
+
+    private static RenderFragment? NotFound(MediaMatchResult item) => item is UnmatchedMedia unmatched ? @<NotFoundPopover Unmatched="unmatched"/> : null;
+
+    private static RenderFragment? Marks(bool wanted, bool blocked)
+    {
+        if (!wanted && !blocked)
+        {
+            return null;
+        }
+
+        return @<text>
+            @if (wanted)
+            {
+                <span role="img" aria-label="In your wantlist"><LucideIcon Name="bookmark" Size="14" Fill="orange" Color="orange"/></span>
+            }
+            @if (blocked)
+            {
+                <span role="img" aria-label="On your blocklist" class="text-destructive"><LucideIcon Name="shield-off" Size="14"/></span>
+            }
+        </text>;
+    }
+
+    private int RowHeight => IsPhone ? 125 : 215;
 
     private RenderFragment CulledVerdict(MatchedMedia item, Culled culled)
     {

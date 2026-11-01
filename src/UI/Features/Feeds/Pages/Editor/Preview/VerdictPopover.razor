@@ -1,8 +1,18 @@
 <DetailTip Title="@Title" Delay="200" TriggerClass="p-0 cursor-default" PhoneLabel="@Title" PhoneClass="relative after:absolute after:-inset-2.5">
     <Trigger>
-        <span class="search-result-status-indicator block">
-            <LucideIcon Name="@Icon" Size="24"/>
-        </span>
+        @if (IsPhone)
+        {
+            <span class="flex items-center gap-1.5 text-[12.5px] text-foreground" data-verdict-line>
+                <LucideIcon Name="@Icon" Size="13" Class="text-muted-foreground"/>
+                <span>@Title</span>
+            </span>
+        }
+        else
+        {
+            <span class="search-result-status-indicator block">
+                <LucideIcon Name="@Icon" Size="24"/>
+            </span>
+        }
     </Trigger>
     <Detail>
         <div class="@(Edge is null ? "verdict-popover" : "verdict-popover has-edge")">
@@ -31,6 +41,8 @@
 </DetailTip>
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     [Parameter] [EditorRequired] public required string Icon { get; set; }
 
     [Parameter] [EditorRequired] public required string Title { get; set; }
