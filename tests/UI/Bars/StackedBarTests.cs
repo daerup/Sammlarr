@@ -226,6 +226,7 @@ public class StackedBarTests : BunitContext
 
 		cut.WaitForElement("[role=dialog] [data-testid=stacked-bar-tip]");
 		await Assert.That(cut.FindAll("[role=dialog] [data-testid=stacked-bar-tip-row]")).Count().IsEqualTo(2);
+		await Assert.That(cut.FindAll("[role=dialog] [data-testid=stacked-bar-track]")).IsEmpty();
 		await Assert.That(cut.FindAll("[data-sb-anchor]")).IsEmpty();
 	}
 
@@ -239,12 +240,17 @@ public class StackedBarTests : BunitContext
 	}
 
 	[Test]
-	public async Task Phone_WithALegend_LeavesTheValuesToIt()
+	public async Task Phone_WithALegend_TappingTheBarOpensTheBarAndEveryPartInASheet()
 	{
 		var cut = RenderBar(Run, legend: true, phone: true);
 
-		await Assert.That(cut.FindAll(".sb-open")).IsEmpty();
 		await Assert.That(cut.FindAll("[data-testid=stacked-bar-legend] .sb-key")).Count().IsEqualTo(2);
+		await cut.Find(".sb-open").ClickAsync(new());
+
+		cut.WaitForElement("[role=dialog] [data-testid=stacked-bar-tip]");
+		await Assert.That(cut.FindAll("[role=dialog] [data-testid=stacked-bar-track] .sb-part")).Count().IsEqualTo(2);
+		await Assert.That(cut.FindAll("[role=dialog] [data-testid=stacked-bar-tip-row]")).Count().IsEqualTo(2);
+		await Assert.That(cut.FindAll("[role=dialog] [data-testid=stacked-bar-tip-row][data-at=true]")).IsEmpty();
 	}
 
 	[Test]

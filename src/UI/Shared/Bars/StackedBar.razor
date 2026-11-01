@@ -15,10 +15,14 @@
                 <BbTooltipContent Class="@Tooltips.Panel" data-testid="stacked-bar-tip">@Tip(bar)</BbTooltipContent>
             </BbTooltip>
         }
-        else if (tip && TapOpens && !ShowLegend)
+        else if (tip && TapOpens)
         {
             <button type="button" class="sb-open" aria-label="@Label" aria-haspopup="dialog" aria-expanded="@(_sheet ? "true" : "false")" @onclick="() => _sheet = true">@Track(bar, false)</button>
             <InfoSheet @bind-Open="_sheet" Title="@Label">
+                @if (ShowLegend)
+                {
+                    <div class="mb-3">@Track(bar, false)</div>
+                }
                 <div data-testid="stacked-bar-tip">@Tip(bar)</div>
             </InfoSheet>
         }
