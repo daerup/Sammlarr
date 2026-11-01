@@ -37,7 +37,7 @@ public class FeedShuffleTests
 	}
 
 	private static async Task<int> CountAsync(IPage page, PreviewBadge badge) =>
-		int.Parse((await FeedEditor.Badge(page, badge).InnerTextAsync()).Trim(), CultureInfo.InvariantCulture);
+		int.Parse((await FeedEditor.BadgeCount(page, badge).InnerTextAsync()).Trim(), CultureInfo.InvariantCulture);
 
 	private static async Task<IReadOnlyList<string>> TitlesAsync(IPage page, int count)
 	{

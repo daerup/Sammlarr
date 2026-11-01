@@ -110,6 +110,8 @@ internal static class FeedEditor
 
 	internal static ILocator Badge(IPage page, PreviewBadge badge) => page.Locator(".stat-badges-row .preview-filter-badge").Nth(Position(badge));
 
+	internal static ILocator BadgeCount(IPage page, PreviewBadge badge) => Badge(page, badge).Locator("[data-count]");
+
 	internal static ILocator Toggle(IPage page, string label) => page.Field(label).Switch;
 
 	internal static ILocator Option(IPage page, string label, string value) => page.Field(label).Radio(value);

@@ -88,8 +88,8 @@
                     }
                 </div>
                 <BbTooltipProvider>
-                    <div class="flex items-start transition-opacity @DimClass max-md:w-full">
-                    <div class="stat-badges-row flex items-start text-xs font-medium max-md:flex-1 max-md:justify-between">
+                    <div class="flex items-start transition-opacity @DimClass max-md:-mx-4 max-md:overflow-x-auto max-md:px-4 max-md:[scrollbar-width:none]" data-scroll-x>
+                    <div class="stat-badges-row flex items-start text-xs font-medium max-md:gap-1.5">
                         <PreviewFilterBadge Flash="_flash" Icon="list" Label="All fetched" Count="_rawResults.Count" Active="_activeFilters.Count == 0 && !_atRiskOnly" OnClick="ResetFilters">
                             <Tooltip>Total items fetched from the source list. Click to clear filters.</Tooltip>
                         </PreviewFilterBadge>

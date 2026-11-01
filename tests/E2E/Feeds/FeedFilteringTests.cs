@@ -27,17 +27,17 @@ public class FeedFilteringTests
 		await FeedEditor.CaughtUpAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - Limit));
+		await Expect(FeedEditor.BadgeCount(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - Limit));
 
 		await FeedEditor.Option(page, "Blocklist slot policy", "Preserved").ClickAsync();
 		await FeedEditor.CaughtUpAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - Limit - 1));
+		await Expect(FeedEditor.BadgeCount(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - Limit - 1));
 
 		await FeedEditor.Rows(page).First.Button("Remove from blocklist").ClickAsync();
 
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - Limit));
+		await Expect(FeedEditor.BadgeCount(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - Limit));
 	}
 
 	[Test]
@@ -87,7 +87,7 @@ public class FeedFilteringTests
 		await Expect(condition.GetByRole(AriaRole.Combobox).First).ToHaveTextAsync(new Regex("Title"));
 		await Expect(page.Locator("input[placeholder='Enter value...']")).ToHaveValueAsync(kept);
 		var listed = (await FeedEditor.ServedTitlesAsync()).Count;
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Filtered)).ToHaveTextAsync(TestData.Count(listed - 1), Wait.Preview);
+		await Expect(FeedEditor.BadgeCount(page, PreviewBadge.Filtered)).ToHaveTextAsync(TestData.Count(listed - 1), Wait.Preview);
 	}
 
 	[Test]

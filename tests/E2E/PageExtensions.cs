@@ -27,6 +27,7 @@ internal static class PageExtensions
 			const clipped = node => {
 				for (let child = node, parent = node.parentElement; parent && parent !== document.documentElement; child = parent, parent = parent.parentElement) {
 					if (child instanceof Element && getComputedStyle(child).position === 'fixed') return false;
+					if (parent.matches('[data-scroll-x]')) return true;
 					const box = parent.getBoundingClientRect();
 					const fullWidth = box.left <= 0.5 && box.right >= width - 0.5;
 					if (box.right <= limit && !fullWidth && /(hidden|clip)/.test(getComputedStyle(parent).overflowX)) return true;

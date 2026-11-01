@@ -51,7 +51,7 @@ public class FeedPreviewTests
 		await FeedEditor.CaughtUpAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
-		var included = int.Parse(await FeedEditor.Badge(page, PreviewBadge.Included).InnerTextAsync(), CultureInfo.InvariantCulture);
+		var included = int.Parse(await FeedEditor.BadgeCount(page, PreviewBadge.Included).InnerTextAsync(), CultureInfo.InvariantCulture);
 
 		await FeedEditor.Badge(page, PreviewBadge.Skipped).ClickAsync();
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(listed - Limit);
