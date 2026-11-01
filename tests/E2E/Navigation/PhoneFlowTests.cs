@@ -561,6 +561,30 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 		await Expect(page.Locator("header .phone-select-bar")).ToHaveCountAsync(0);
 	}
 
+#if DEBUG
+	[Test]
+	public async Task Toast_OnAPhone_SitsUnderTheBarAndSwipesUpAway()
+	{
+		var page = await E2EApp.AdminAt(SettingsPage.Section("testing"));
+		var demo = page.Locator("section").Filter(new LocatorFilterOptions { HasText = "Fire a toast of the chosen kind" });
+		var toast = page.Locator(".toast-viewport [role=alert]");
+		await demo.Combobox.DispatchEventAsync("click");
+		await page.Option("Warning").DispatchEventAsync("click");
+		await demo.Button("Show").DispatchEventAsync("click");
+		await Expect(toast).ToBeVisibleAsync(Wait.Settle);
+
+		var bar = (await page.Locator("header").First.BoundingBoxAsync())!;
+		var box = (await toast.BoundingBoxAsync())!;
+		await Assert.That(box.Y).IsGreaterThanOrEqualTo(bar.Y + bar.Height).And.IsLessThan(bar.Y + bar.Height + 24);
+		await toast.HoverAsync();
+		await page.Mouse.DownAsync();
+		await page.Mouse.MoveAsync(box.X + box.Width / 2, box.Y - 60, new MouseMoveOptions { Steps = 6 });
+		await page.Mouse.UpAsync();
+
+		await Expect(toast).ToHaveCountAsync(0, Wait.Settle);
+	}
+#endif
+
 	private static async Task SitsOnTheBottomAsync(IPage page, string selector)
 	{
 		await page.WaitForFunctionAsync($"() => Math.abs(document.querySelector('{selector}').getBoundingClientRect().bottom - innerHeight) < 1");
