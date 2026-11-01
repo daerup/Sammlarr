@@ -25,8 +25,10 @@
     color: var(--muted-foreground);
 }
 
-.run-count-line ::deep [data-run-count] button:hover:not(:disabled) {
-    color: var(--foreground);
+@media (hover: hover) and (pointer: fine) {
+    .run-count-line ::deep [data-run-count] button:hover:not(:disabled) {
+        color: var(--foreground);
+    }
 }
 
 .run-count-line ::deep [data-run-count] button + button {

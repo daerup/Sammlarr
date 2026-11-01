@@ -1,0 +1,21 @@
+<DetailTip Title="@Title" Delay="Delay" Placement="Placement" TriggerClass="@TriggerClass" Focusable="Focusable" ContentClass="@ContentClass" ContentTestId="@ContentTestId"
+           PhoneLabel="@($"About {Title}")" PhoneClass="relative after:absolute after:-inset-3" @attributes="Attributes">
+    <Trigger>
+        <LucideIcon Name="info" Size="IconSize" Class="@IconClass"/>
+    </Trigger>
+    <Detail>@ChildContent</Detail>
+</DetailTip>
+
+@code {
+    [Parameter, EditorRequired] public required string Title { get; set; }
+    [Parameter] public int Delay { get; set; } = 300;
+    [Parameter] public PopoverPlacement Placement { get; set; } = PopoverPlacement.Top;
+    [Parameter] public int IconSize { get; set; } = 14;
+    [Parameter] public string? IconClass { get; set; }
+    [Parameter] public string? TriggerClass { get; set; } = "ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default";
+    [Parameter] public bool Focusable { get; set; } = true;
+    [Parameter] public string? ContentClass { get; set; }
+    [Parameter] public string? ContentTestId { get; set; }
+    [Parameter, EditorRequired] public required RenderFragment ChildContent { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? Attributes { get; set; }
+}

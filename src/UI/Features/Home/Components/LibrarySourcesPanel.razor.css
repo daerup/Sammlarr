@@ -1,37 +1,12 @@
-.band {
-    border: 1px solid var(--border);
-    border-radius: 11px;
-    background: var(--card);
-    overflow: hidden;
-    margin-bottom: 11px;
-}
-
-.band-head {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    padding: 10px 15px 9px;
-    background: color-mix(in srgb, var(--foreground) 5%, transparent);
-    border-bottom: 1px solid var(--border);
-}
-
-.band-title {
-    font-size: 12.5px;
-    font-weight: 600;
-}
-
-.band-note {
-    font-size: 11.5px;
-    color: var(--muted-foreground);
-}
-
 .band-empty {
     margin: 0;
     padding: 14px 15px;
+    border-top: 1px solid var(--border);
     font-size: 12.5px;
     color: var(--muted-foreground);
 }
 
 .band-body {
     padding: 14px 15px 15px;
+    border-top: 1px solid var(--border);
 }

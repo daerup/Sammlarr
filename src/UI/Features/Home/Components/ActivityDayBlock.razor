@@ -1,7 +1,7 @@
 @using System.Globalization
 
 <div class="dcard">
-    <button type="button" class="dtop @(_collapsed ? "is-collapsed" : null)" aria-expanded="@(_collapsed ? "false" : "true")" @onclick="@(() => _collapsed = !_collapsed)">
+    <button type="button" class="dtop @(_collapsed ? "is-collapsed" : null)" aria-expanded="@(_collapsed ? "false" : "true")" @onclick="ToggleAsync">
         <span class="dchev"><LucideIcon Name="@(_collapsed ? "chevron-right" : "chevron-down")" Size="13"/></span>
         <span class="dname">@DayName</span>
         <span class="dstat">
@@ -14,6 +14,10 @@
                 <span class="part"><span class="dn">&minus;@Day.Removed.Count.ToString("N0")</span> removed</span>
             }
             <span class="part">@("run".ToQuantity(Day.RunCount))</span>
+            @if (IsPhone && _collapsed && Day.Inconclusive.Count > 0)
+            {
+                <span class="part is-problem">@("problem".ToQuantity(Day.Inconclusive.Count))</span>
+            }
         </span>
     </button>
 
@@ -21,7 +25,7 @@
     {
         @if (Day.Feeds.Count > 0)
         {
-            <div class="chips">
+            <div class="chips" data-scroll-x>
                 @foreach (var feed in Day.Feeds)
                 {
                     @if (feed.Gone)
@@ -36,18 +40,31 @@
             </div>
         }
 
-        @if (Day.Added.Count > 0)
+        @if (IsPhone)
         {
-            <PosterTrack Ids="Day.Added" Media="Media" OnSelect="OnSelect" OnNeedMedia="OnNeedMedia"/>
+            @if (ShownAdded.Count > 0)
+            {
+                @Tiles(ShownAdded, false)
+            }
+            @if (ShownRemoved.Count > 0)
+            {
+                @RemovedHeading
+                @Tiles(ShownRemoved, true)
+            }
+            <PaginationControls CurrentPage="ShownPages" TotalPages="TilePages" OnReachEnd="ShowMoreTilesAsync"/>
         }
-
-        @if (Day.Removed.Count > 0)
+        else
         {
-            <div class="dsub">
-                <LucideIcon Name="trash-2" Size="11"/>
-                Removed
-            </div>
-            <PosterTrack Ids="Day.Removed" Media="Media" OnSelect="OnSelect" OnNeedMedia="OnNeedMedia" Faded="true"/>
+            @if (Day.Added.Count > 0)
+            {
+                <PosterTrack Ids="Day.Added" Media="Media" OnSelect="OnSelect" OnNeedMedia="OnNeedMedia"/>
+            }
+
+            @if (Day.Removed.Count > 0)
+            {
+                @RemovedHeading
+                <PosterTrack Ids="Day.Removed" Media="Media" OnSelect="OnSelect" OnNeedMedia="OnNeedMedia" Faded="true"/>
+            }
         }
 
         @foreach (var entry in Day.Inconclusive)
@@ -107,10 +124,88 @@
     [Parameter] public EventCallback<MatchedMedia> OnSelect { get; set; }
     [Parameter] public EventCallback<IReadOnlyList<MediaId>> OnNeedMedia { get; set; }
     [Parameter] public DateOnly Today { get; set; }
+    [Parameter] public bool StartsFolded { get; set; }
+
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
+    private const int RowBatch = 21;
 
     private bool _collapsed;
 
     private bool _expanded;
+
+    private bool _placedOnPhone;
+
+    private int _rowLimit = RowBatch;
+
+    private readonly HashSet<MediaId> _requested = [];
+
+    private IReadOnlyList<MediaId> ShownAdded => [.. Day.Added.Take(_rowLimit)];
+
+    private IReadOnlyList<MediaId> ShownRemoved => [.. Day.Removed.Take(Math.Max(0, _rowLimit - Day.Added.Count))];
+
+    private int ShownPages => _rowLimit / RowBatch;
+
+    private int TilePages => (Day.Added.Count + Day.Removed.Count + RowBatch - 1) / RowBatch;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsPhone && !_placedOnPhone)
+        {
+            _placedOnPhone = true;
+            _collapsed = StartsFolded;
+        }
+
+        await RequestRowMediaAsync();
+    }
+
+    private async Task ToggleAsync()
+    {
+        _collapsed = !_collapsed;
+        await RequestRowMediaAsync();
+    }
+
+    private async Task ShowMoreTilesAsync()
+    {
+        _rowLimit += RowBatch;
+        await RequestRowMediaAsync();
+    }
+
+    private async Task RequestRowMediaAsync()
+    {
+        if (!IsPhone || _collapsed)
+        {
+            return;
+        }
+
+        var wanted = ShownAdded.Concat(ShownRemoved).Where(id => !_requested.Contains(id)).ToList();
+        if (wanted.Count == 0)
+        {
+            return;
+        }
+
+        _requested.UnionWith(wanted);
+        await OnNeedMedia.InvokeAsync(wanted);
+    }
+
+    private RenderFragment RemovedHeading =>
+        @<div class="dsub">
+            <LucideIcon Name="trash-2" Size="11"/>
+            Removed
+        </div>;
+
+    private RenderFragment Tiles(IReadOnlyList<MediaId> ids, bool removed) =>
+        @<div class="day-grid">
+            <MediaGrid>
+                @foreach (var id in ids)
+                {
+                    @if (Media.TryGetValue(id, out var media))
+                    {
+                        <MediaGridTile @key="id.Value" Media="media" Dimmed="removed" OnClick="() => OnSelect.InvokeAsync(media)"/>
+                    }
+                }
+            </MediaGrid>
+        </div>;
 
     private string DayName =>
         Day.Date == Today ? "Today"

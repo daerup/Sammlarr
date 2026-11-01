@@ -1,38 +1,48 @@
-<BbTooltipProvider>
-    <BbTooltip DelayDuration="200">
-        <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
-            <div class="search-result-status-indicator">
+<DetailTip Title="@Title" Delay="200" TriggerClass="p-0 cursor-default" PhoneLabel="@Title" PhoneClass="relative after:absolute after:-inset-2.5">
+    <Trigger>
+        @if (IsPhone)
+        {
+            <span class="flex items-center gap-1.5 text-[12.5px] text-foreground" data-verdict-line>
+                <LucideIcon Name="@Icon" Size="13" Class="text-muted-foreground"/>
+                <span>@Title</span>
+            </span>
+        }
+        else
+        {
+            <span class="search-result-status-indicator block">
                 <LucideIcon Name="@Icon" Size="24"/>
+            </span>
+        }
+    </Trigger>
+    <Detail>
+        <div class="@(Edge is null ? "verdict-popover" : "verdict-popover has-edge")">
+            @if (Edge is { } share)
+            {
+                <span class="verdict-popover-edge"><i style="@($"width: {Math.Round(share * 100)}%")"></i></span>
+            }
+            <div class="verdict-popover-head">
+                <p class="verdict-popover-title">@Title</p>
+                @Header
             </div>
-        </BbTooltipTrigger>
-        <BbTooltipContent>
-            <div class="@(Edge is null ? "verdict-popover" : "verdict-popover has-edge")">
-                @if (Edge is { } share)
-                {
-                    <span class="verdict-popover-edge"><i style="@($"width: {Math.Round(share * 100)}%")"></i></span>
-                }
-                <div class="verdict-popover-head">
-                    <p class="verdict-popover-title">@Title</p>
-                    @Header
-                </div>
-                @if (Reason is not null)
-                {
-                    <p class="verdict-popover-reason">@Reason</p>
-                }
-                @if (ChildContent is not null)
-                {
-                    <div class="verdict-popover-detail">@ChildContent</div>
-                }
-                @if (Foot is not null)
-                {
-                    <p class="verdict-popover-foot">@Foot</p>
-                }
-            </div>
-        </BbTooltipContent>
-    </BbTooltip>
-</BbTooltipProvider>
+            @if (Reason is not null)
+            {
+                <p class="verdict-popover-reason">@Reason</p>
+            }
+            @if (ChildContent is not null)
+            {
+                <div class="verdict-popover-detail">@ChildContent</div>
+            }
+            @if (Foot is not null)
+            {
+                <p class="verdict-popover-foot">@Foot</p>
+            }
+        </div>
+    </Detail>
+</DetailTip>
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     [Parameter] [EditorRequired] public required string Icon { get; set; }
 
     [Parameter] [EditorRequired] public required string Title { get; set; }

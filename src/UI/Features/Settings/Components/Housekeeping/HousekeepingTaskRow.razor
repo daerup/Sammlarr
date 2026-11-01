@@ -1,73 +1,72 @@
-<tr class="border-b last:border-b-0" data-testid="housekeeping-task" data-task="@TestId">
-    <td class="py-2.5 pr-3 pl-[18px] align-top">
-        <div class="flex items-center gap-2.5 font-medium whitespace-nowrap">
-            @Tile
-            <div>
-                @if (Href is Some<string>(var href))
-                {
-                    <AppLink Href="@href" External="true" Class="font-semibold text-foreground">@Name</AppLink>
-                }
-                else
-                {
-                    <span class="font-semibold">@Name</span>
-                }
-                <div class="text-xs font-normal text-muted-foreground">@What</div>
+@if (IsPhone)
+{
+    <UnfoldRow Columns="grid-cols-[15px_minmax(0,1fr)_auto]" Divided="true" TriggerClass="py-2.5" data-testid="housekeeping-task" data-task="@TestId">
+        <Summary>
+            <span class="flex min-w-0 items-center gap-2.5 text-[13px] font-semibold">
+                @Tile
+                <span class="truncate">@Name</span>
+            </span>
+            <span class="text-xs">@When</span>
+        </Summary>
+        <Details>
+            <div class="flex flex-col items-start gap-2.5 pt-1 pr-4 pb-3 pl-[43px] text-xs">
+                <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5">
+                    <dt class="text-muted-foreground">Does</dt>
+                    <dd>@What</dd>
+                    <dt class="text-muted-foreground">Runs</dt>
+                    <dd>@Runs</dd>
+                    <dt class="text-muted-foreground">What it did</dt>
+                    <dd class="[&_span]:whitespace-normal" data-testid="housekeeping-did">@Did</dd>
+                    <dt class="text-muted-foreground">Next</dt>
+                    <dd>@Next</dd>
+                </dl>
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                    @RunButton
+                    @if (Href is Some<string>(var link))
+                    {
+                        <AppLink Href="@link" External="true">Open @Name</AppLink>
+                    }
+                </div>
             </div>
-        </div>
-    </td>
-    <td class="px-3 py-2.5 align-top text-xs whitespace-nowrap text-muted-foreground">@Runs</td>
-    <td class="px-3 py-2.5 align-top whitespace-nowrap">
-        <span class="@($"inline-flex items-center gap-[7px] {WhenClass}")" data-testid="housekeeping-when">
-            @if (Line.Tone is TaskTone.Running)
-            {
-                <LucideIcon Name="loader-circle" Size="12" Class="animate-spin"/>
-            }
-            else
-            {
-                <span class="@($"inline-block size-[7px] shrink-0 rounded-full {DotClass}")"></span>
-            }
-            @Line.When
-        </span>
-    </td>
-    <td class="max-w-[48ch] px-3 py-2.5 align-top text-muted-foreground" data-testid="housekeeping-did">
-        @if (Breakdown is Some<RenderFragment>(var breakdown))
-        {
-            <BbTooltip DelayDuration="150">
-                <BbTooltipTrigger AsChild="false">
-                    <span class="inline-flex items-center gap-1.5 whitespace-nowrap">@Result<LucideIcon Name="info" Size="13" Class="opacity-70"/></span>
-                </BbTooltipTrigger>
-                <BbTooltipContent Class="w-[340px] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg">
-                    @breakdown
-                </BbTooltipContent>
-            </BbTooltip>
-        }
-        else
-        {
-            <span class="whitespace-nowrap">@Result</span>
-        }
-        @if (Line.Error is Some<string>(var error))
-        {
-            <div class="mt-0.5 text-xs text-destructive" data-testid="housekeeping-error">@error</div>
-        }
-    </td>
-    <td class="px-3 py-2.5 align-top text-xs whitespace-nowrap text-muted-foreground">@Next</td>
-    <td class="py-2.5 pr-[18px] pl-3 text-right align-top">
-        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="@(Line.Tone is TaskTone.Running)" OnClick="OnRun" data-testid="housekeeping-run">
-            @if (Line.Tone is TaskTone.Running)
-            {
-                <LucideIcon Name="loader-circle" Size="13" Class="mr-1.5 animate-spin"/>
-                <span>Running…</span>
-            }
-            else
-            {
-                <LucideIcon Name="play" Size="13" Class="mr-1.5"/>
-                <span>Run now</span>
-            }
-        </BbButton>
-    </td>
-</tr>
+        </Details>
+    </UnfoldRow>
+}
+else
+{
+    <tr class="border-b last:border-b-0" data-testid="housekeeping-task" data-task="@TestId">
+        <td class="py-2.5 pr-3 pl-[18px] align-top">
+            <div class="flex items-center gap-2.5 font-medium whitespace-nowrap">
+                @Tile
+                <div>
+                    @if (Href is Some<string>(var href))
+                    {
+                        <AppLink Href="@href" External="true" Class="font-semibold text-foreground">@Name</AppLink>
+                    }
+                    else
+                    {
+                        <span class="font-semibold">@Name</span>
+                    }
+                    <div class="text-xs font-normal text-muted-foreground">@What</div>
+                </div>
+            </div>
+        </td>
+        <td class="px-3 py-2.5 align-top text-xs whitespace-nowrap text-muted-foreground">@Runs</td>
+        <td class="px-3 py-2.5 align-top whitespace-nowrap">
+            @When
+        </td>
+        <td class="max-w-[48ch] px-3 py-2.5 align-top text-muted-foreground" data-testid="housekeeping-did">
+            @Did
+        </td>
+        <td class="px-3 py-2.5 align-top text-xs whitespace-nowrap text-muted-foreground">@Next</td>
+        <td class="py-2.5 pr-[18px] pl-3 text-right align-top">
+            @RunButton
+        </td>
+    </tr>
+}
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     [Parameter] [EditorRequired] public required RenderFragment Tile { get; set; }
 
     [Parameter] [EditorRequired] public required string Name { get; set; }
@@ -87,6 +86,56 @@
     [Parameter] [EditorRequired] public required string TestId { get; set; }
 
     [Parameter] public EventCallback OnRun { get; set; }
+
+    private RenderFragment When =>
+        @<span class="@($"inline-flex items-center gap-[7px] whitespace-nowrap {WhenClass}")" data-testid="housekeeping-when">
+            @if (Line.Tone is TaskTone.Running)
+            {
+                <LucideIcon Name="loader-circle" Size="12" Class="animate-spin"/>
+            }
+            else
+            {
+                <span class="@($"inline-block size-[7px] shrink-0 rounded-full {DotClass}")"></span>
+            }
+            @Line.When
+        </span>;
+
+    private RenderFragment Did =>
+        @<text>
+            @if (Breakdown is Some<RenderFragment>(var breakdown))
+            {
+                <DetailTip Title="@Name" Delay="150" ContentClass="w-[340px] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg">
+                    <Trigger>
+                        <span class="inline-flex items-center gap-1.5 whitespace-nowrap">@Result<LucideIcon Name="info" Size="13" Class="opacity-70"/></span>
+                    </Trigger>
+                    <Detail>
+                        @breakdown
+                    </Detail>
+                </DetailTip>
+            }
+            else
+            {
+                <span class="whitespace-nowrap">@Result</span>
+            }
+            @if (Line.Error is Some<string>(var error))
+            {
+                <div class="mt-0.5 text-xs text-destructive" data-testid="housekeeping-error">@error</div>
+            }
+        </text>;
+
+    private RenderFragment RunButton =>
+        @<BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="@(Line.Tone is TaskTone.Running)" OnClick="OnRun" data-testid="housekeeping-run">
+            @if (Line.Tone is TaskTone.Running)
+            {
+                <LucideIcon Name="loader-circle" Size="13" Class="mr-1.5 animate-spin"/>
+                <span>Running…</span>
+            }
+            else
+            {
+                <LucideIcon Name="play" Size="13" Class="mr-1.5"/>
+                <span>Run now</span>
+            }
+        </BbButton>;
 
     private RenderFragment Result =>
         @<span>

@@ -7,7 +7,7 @@
 <KeyboardShortcut Keys="@ShortcutKeys" OnInvoked="OpenFromShortcutAsync" Enabled="ShortcutEnabled"/>
 @if (IsOpen)
 {
-    <div class="search-modal"
+    <div class="search-modal @(_details is null ? null : "under-details")"
          role="dialog"
          aria-modal="true"
          aria-label="@SearchModalTitle"
@@ -18,7 +18,7 @@
         <div tabindex="0" class="sr-only" aria-hidden="true" @onfocus="FocusTrapLoopAsync"></div>
 
         <div class="search-modal-content">
-            <div class="flex items-start justify-between gap-4">
+            <div class="flex items-start justify-between gap-4 max-md:hidden">
                 <div>
                     <h2 class="text-lg font-bold tracking-wide">@SearchModalTitle</h2>
                     <p class="text-sm text-muted-foreground">@SearchModalDescription</p>
@@ -28,23 +28,37 @@
                 </BbButton>
             </div>
 
-            <div class="search-modal-body space-y-4 mt-4">
-                <div class="flex items-center gap-2">
+            <div class="search-modal-body gap-4 mt-4 max-md:mt-0">
+                <div class="flex items-center gap-2 max-md:gap-1">
+                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" Class="h-11 w-10 shrink-0 md:hidden" OnClick="CloseAsync" AriaLabel="Back">
+                        <LucideIcon Name="chevron-left" Size="22"/>
+                    </BbButton>
                     <BbField Class="flex-1">
                         <BbFieldLabel For="search-input" Class="sr-only">Search query</BbFieldLabel>
                         <BbFieldContent>
-                            <input id="search-input"
-                                   class="w-full border-input bg-secondary file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 min-w-0 rounded-md border px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                   type="search"
-                                   @bind="_searchQuery"
-                                   @bind:event="oninput"
-                                   @onkeydown="HandleSearchKeyDown"
-                                   @onfocus="() => _focusedResult = null"
-                                   @ref="_searchInputRef"
-                                   placeholder="Search title"/>
+                            <div class="relative">
+                                <LucideIcon Name="search" Size="17" Class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground md:hidden"/>
+                                <input id="search-input"
+                                       class="w-full border-input bg-secondary file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 max-md:h-11 min-w-0 rounded-md border px-3 py-1 max-md:pl-10 max-md:pr-11 max-md:rounded-[10px] text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm [&::-webkit-search-cancel-button]:hidden"
+                                       type="search"
+                                       enterkeyhint="search"
+                                       @bind="_searchQuery"
+                                       @bind:event="oninput"
+                                       @bind:after="QueryChangedAsync"
+                                       @onkeydown="HandleSearchKeyDown"
+                                       @onfocus="() => _focusedResult = null"
+                                       @ref="_searchInputRef"
+                                       placeholder="@Placeholder"/>
+                                @if (IsPhone && !string.IsNullOrEmpty(_searchQuery))
+                                {
+                                    <button type="button" class="absolute right-1 top-1/2 grid size-9 -translate-y-1/2 place-items-center text-muted-foreground" aria-label="Clear search" @onclick="ClearAsync">
+                                        <LucideIcon Name="circle-x" Size="18"/>
+                                    </button>
+                                }
+                            </div>
                         </BbFieldContent>
                     </BbField>
-                    <BbButton Variant="ButtonVariant.Outline" OnClick="SearchAsync" Disabled="@_isSearching" Class="bg-secondary">
+                    <BbButton Variant="ButtonVariant.Outline" OnClick="SearchAsync" Disabled="@_isSearching" Class="bg-secondary max-md:hidden">
                         @if (_isSearching)
                         {
                             <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
@@ -56,6 +70,7 @@
                             <span>Search</span>
                         }
                     </BbButton>
+
                 </div>
 
                 @if (!string.IsNullOrWhiteSpace(_searchHint))
@@ -79,7 +94,7 @@
 
                 @if (_isSearching)
                 {
-                    <div class="search-modal-results scrollbar-thin space-y-2 pr-1" aria-hidden="true" tabindex="-1">
+                    <div class="search-modal-results scrollbar-thin space-y-2 pr-1 max-md:space-y-0" aria-hidden="true" tabindex="-1">
                         <AutoSkeletons Preset="AutoSkeletonPreset.MediaDetailTile" Count="4"/>
                     </div>
                 }
@@ -109,14 +124,15 @@
                             </BbTabsList>
                         </BbTabs>
                     }
-                    <div class="search-modal-results scrollbar-thin space-y-2 pr-1" tabindex="-1">
+                    <div class="search-modal-results scrollbar-thin space-y-2 pr-1 max-md:space-y-0" tabindex="-1">
                         @foreach (var result in ShownResults)
                         {
                             <MediaDetailTile @key="result.Key"
                                              Media="result"
                                              IsFocused="_focusedResult == result.Key"
                                              OnFocusIn="() => _focusedResult = result.Key"
-                                             OnFocusOut="() => ClearFocusedResult(result)">
+                                             OnFocusOut="() => ClearFocusedResult(result)"
+                                             OnOpen="() => _details = result">
                                 <Icons>
                                     @if (result is MatchedMedia matched)
                                     {
@@ -124,19 +140,21 @@
                                     }
                                     else if (result is UnmatchedMedia { Reason: UnmatchedReason.Conflict })
                                     {
-                                        <BbTooltip>
-                                            <BbTooltipTrigger AsChild="false" Class="text-muted-foreground" data-testid="search-conflict">
+                                        <DetailTip Title="Can't be added" TriggerClass="text-muted-foreground" PhoneLabel="Can't be added" PhoneClass="relative after:absolute after:-inset-2.5" data-testid="search-conflict">
+                                            <Trigger>
                                                 <LucideIcon Name="split" Size="16"/>
-                                            </BbTooltipTrigger>
-                                            <BbTooltipContent>Its ids disagree with titles already in your library, so it can't be added.</BbTooltipContent>
-                                        </BbTooltip>
+                                            </Trigger>
+                                            <Detail>
+                                                Its ids disagree with titles already in your library, so it can't be added.
+                                            </Detail>
+                                        </DetailTip>
                                     }
                                 </Icons>
                             </MediaDetailTile>
                         }
                     </div>
-                    <BbSeparator/>
-                    <p class="flex items-center gap-2 text-xs text-muted-foreground">
+                    <BbSeparator Class="max-md:hidden"/>
+                    <p class="flex items-center gap-2 text-xs text-muted-foreground max-md:hidden">
                         @foreach (var brand in Brands)
                         {
                             <BrandedLogo Brand="brand" Form="@FooterForm" Size="14" Decorative="true"/>
@@ -152,11 +170,22 @@
                         <p class="text-sm text-muted-foreground leading-relaxed">Try a different title or check your spelling.</p>
                     </div>
                 }
+                else if (IsPhone)
+                {
+                    <div class="search-modal-empty" data-testid="search-empty">
+                        <LucideIcon Name="search" Size="32"/>
+                        <p>@SearchModalDescription</p>
+                    </div>
+                }
             </div>
         </div>
 
         <div tabindex="0" class="sr-only" aria-hidden="true" @onfocus="FocusTrapLoopAsync"></div>
 
+        <MediaDetailSheet Open="_details is not null"
+                          OnOpenChanged="@(open => { if (!open) { _details = null; } })"
+                          Media="_details"
+                          Source="ManualSource.Search"/>
     </div>
 }
 
@@ -181,10 +210,19 @@
     private IReadOnlyList<SearchMiss> _missed = [];
     private MediaId? _activeToggledSourceId;
     private List<MediaMatchResult> _searchResults = [];
+    private MediaMatchResult? _details;
 
     private string _tab = ArrApp.Radarr.Name;
 
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
+    private static readonly TimeSpan TypingPause = TimeSpan.FromMilliseconds(350);
+
+    private int _typed;
+
     private bool SplitsByApp => SearchProvider == SearchProvider.Arr;
+
+    private string Placeholder => IsPhone ? $"Search {ResultsSource}" : "Search title";
 
     private IEnumerable<MediaMatchResult> ShownResults => SplitsByApp ? _searchResults.Where(result => result.Details.Type == TabApp.Type) : _searchResults;
 
@@ -271,6 +309,44 @@
         }
     }
 
+    private async Task QueryChangedAsync()
+    {
+        if (!IsPhone)
+        {
+            return;
+        }
+
+        var typed = ++_typed;
+        if (string.IsNullOrWhiteSpace(_searchQuery))
+        {
+            ResetResults();
+            return;
+        }
+
+        await Task.Delay(TypingPause);
+        if (typed == _typed)
+        {
+            await SearchAsync();
+        }
+    }
+
+    private async Task ClearAsync()
+    {
+        _searchQuery = string.Empty;
+        _typed++;
+        ResetResults();
+        await _searchInputRef.FocusAsync();
+    }
+
+    private void ResetResults()
+    {
+        _searchResults = [];
+        _missed = [];
+        _searchHint = null;
+        _searchError = null;
+        _hasSearched = false;
+    }
+
     private async Task SearchAsync()
     {
         var query = _searchQuery?.Trim();
@@ -291,6 +367,11 @@
         try
         {
             var searched = await SearchService.SearchAsync(query, [MediaType.Movie, MediaType.Show]);
+            if (IsPhone && _searchQuery?.Trim() != query)
+            {
+                return;
+            }
+
             _searchResults = [.. searched.Results];
             _missed = searched.Missed;
             _tab = Enum.GetValues<ArrApp>().OrderByDescending(CountOf).First().Name;

@@ -1,0 +1,37 @@
+<div class="search-field">
+    <LucideIcon Name="search" Size="16" Class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
+    <input @ref="_input"
+           type="search"
+           class="search-field-input"
+           placeholder="@Placeholder"
+           aria-label="@Placeholder"
+           enterkeyhint="search"
+           value="@Value"
+           @oninput="args => OnInput.InvokeAsync(args.Value as string ?? string.Empty)"/>
+    @if (Value.Length > 0)
+    {
+        <button type="button" class="absolute right-1 top-1/2 grid size-9 -translate-y-1/2 place-items-center text-muted-foreground" aria-label="Clear search" @onclick="ClearAsync">
+            <LucideIcon Name="circle-x" Size="18"/>
+        </button>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public required string Value { get; set; }
+
+    [Parameter, EditorRequired] public required string Placeholder { get; set; }
+
+    [Parameter] public EventCallback<string> OnInput { get; set; }
+
+    [Parameter] public EventCallback OnClear { get; set; }
+
+    private ElementReference _input;
+
+    public ValueTask FocusAsync() => _input.FocusAsync();
+
+    private async Task ClearAsync()
+    {
+        await OnClear.InvokeAsync();
+        await _input.FocusAsync();
+    }
+}

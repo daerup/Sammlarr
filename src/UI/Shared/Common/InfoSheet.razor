@@ -1,0 +1,33 @@
+@using BlazorBlueprint.Primitives
+
+<BbSheet Side="SheetSide.Bottom" Open="Open" OpenChanged="OpenChanged">
+    <BbSheetContent ShowClose="false" InitialFocus="FocusTrapInitialFocus.Container" data-sheet aria-label="@Title"
+                    Class="@($"info-sheet flex flex-col gap-0 rounded-t-[14px] p-0 {(Tall ? "h-[84dvh]" : "max-h-[86dvh]")}")">
+        <div class="info-sheet-handle" data-sheet-handle aria-hidden="true"></div>
+        <BbSheetTitle Class="px-5 pb-2 text-[17px] font-semibold">@Title</BbSheetTitle>
+        <div class="@BodyClass">
+            @ChildContent
+        </div>
+        <BbButton Variant="ButtonVariant.Ghost" Class="sr-only" OnClick="() => OpenChanged.InvokeAsync(false)">Close</BbButton>
+    </BbSheetContent>
+</BbSheet>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    [Parameter, EditorRequired] public required string Title { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [Parameter] public bool Tall { get; set; }
+
+    private string BodyClass
+    {
+        get
+        {
+            return Tall ? "flex min-h-0 flex-1 flex-col pb-[env(safe-area-inset-bottom)]" : "min-h-0 overflow-y-auto px-5 pb-[max(16px,env(safe-area-inset-bottom))] text-sm text-muted-foreground";
+        }
+    }
+}

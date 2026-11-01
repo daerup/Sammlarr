@@ -6,12 +6,14 @@ using Contracts.Settings;
 using Domain.Feed;
 using Domain.Identity;
 using Domain.Wantlist.Arr;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Providers.Sinks;
 using UI.Shared.Common;
+using UI.Shared.Layout;
 
 namespace UI.Tests.Settings.Providers.Sinks;
 
@@ -339,6 +341,20 @@ public class ArrSinkRowTests : BunitContext
 		cut.WaitForState(() => Badge(cut) == "Sonarr not answering");
 		var alert = cut.FindAll("[role=alert]").Single(found => found.TextContent.Contains(reason, StringComparison.Ordinal));
 		await Assert.That(alert.ParentElement!.QuerySelector("[aria-label='Show Sonarr API key']")).IsNotNull();
+	}
+
+	[Test]
+	public async Task Phone_WhenSonarrFails_SaysNotAnsweringAndNamesTheRolesInTheDetails()
+	{
+		RenderTree.TryAdd<CascadingValue<bool>>(cascade => cascade.Add(value => value.Name, PhoneLayout.IsPhoneCascade).Add(value => value.Value, true));
+		_tester.TestAsync(ArrApp.Sonarr, Any<ArrInstanceConfig>(), Any()).Returns(Error.From("Sonarr answered 401 Unauthorized at http://sonarr:8989."));
+
+		var cut = RenderRow(settingUp: false);
+
+		cut.WaitForState(() => Badge(cut) == "Not answering");
+		await Assert.That(cut.Find(".arr-row-head").QuerySelectorAll(".provider-role")).IsEmpty();
+		var roles = cut.FindAll(".provider-roles.is-named .provider-role").Select(role => role.TextContent.Trim());
+		await Assert.That(roles).IsEquivalentTo(["Wantlist", "Search"], CollectionOrdering.Matching);
 	}
 
 	[Test]

@@ -1,0 +1,25 @@
+@if (Wanted == 0)
+{
+    <span>The local wantlist Sammlarr keeps in sync with your feeds.</span>
+}
+else
+{
+    <AppLink Href="/wantlist" Arrow="false">@Wanted.ToString("N0")</AppLink>
+    <span>@("title".ToQuantity(Wanted, ShowQuantityAs.None)) on your wantlist, assembled by</span>
+    <AppLink Href="/feeds" Arrow="false">@Feeds.ToString("N0")</AppLink>
+    <span>@("feed".ToQuantity(Feeds, ShowQuantityAs.None)). </span>
+
+    @if (Blocklisted > 0)
+    {
+        <AppLink Href="/blocklist" Arrow="false">@Blocklisted.ToString("N0")</AppLink>
+        <span>blocklisted.</span>
+    }
+}
+
+@code {
+    [Parameter, EditorRequired] public required int Wanted { get; set; }
+
+    [Parameter, EditorRequired] public required int Feeds { get; set; }
+
+    [Parameter, EditorRequired] public required int Blocklisted { get; set; }
+}

@@ -5,6 +5,7 @@
 @using Contracts.Media
 @using Domain.Feed.Run
 @using global::Shared
+@using Microsoft.AspNetCore.Components.Sections
 @using UI.Shared.Changes
 @inject IFeedService FeedService
 @inject IMediaService Media
@@ -14,7 +15,25 @@
 
 <PageTitle>Run history</PageTitle>
 
-<div class="h-full px-6 py-4">
+@if (IsPhone)
+{
+    <SectionContent SectionName="@PhoneLayout.TitleSection">@(_feed?.Name ?? "Run history")</SectionContent>
+    <SectionContent SectionName="@PhoneLayout.BackSection">
+        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" Href="/feeds" AriaLabel="Back to Feeds">
+            <LucideIcon Name="chevron-left" Size="20"/>
+        </BbButton>
+    </SectionContent>
+    @if (_feed is not null)
+    {
+        <SectionContent SectionName="@PhoneLayout.ToolbarSection">
+            <CascadingValue Value="ActionPlacement.Toolbar" IsFixed="true">
+                <PageAction Icon="pencil" Label="Edit feed" OnClick="EditFeed"/>
+            </CascadingValue>
+        </SectionContent>
+    }
+}
+
+<div class="h-full px-6 py-4 max-md:overflow-y-auto max-md:p-0">
     @if (_feed is { } feed)
     {
         <div class="runs-page">
@@ -27,7 +46,7 @@
                     <span class="is-current">Runs</span>
                 </nav>
                 <div class="runs-title">
-                    <h2>Run history</h2>
+                    <h2 class="max-md:hidden">Run history</h2>
                     <FeedStrategyChip Strategy="feed.Strategy"/>
                     <FeedTriggerChip Schedule="feed.Schedule" NextRun="@ChipNextRun" Now="Clock.GetUtcNow()"/>
                     @if (!feed.Enabled)
@@ -35,8 +54,7 @@
                         <FeedChip Tone="FeedChipTone.Attention" Icon="pause">Paused</FeedChip>
                     }
                     <span class="runs-spacer"></span>
-                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small"
-                              OnClick="@(() => Navigation.NavigateTo($"/feeds/edit/{FeedIdParam}"))">
+                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Class="max-md:hidden" OnClick="EditFeed">
                         <LucideIcon Name="pencil" Size="13" Class="mr-1.5"/>
                         Edit feed
                     </BbButton>
@@ -161,80 +179,27 @@
                         </div>
                     </div>
 
-                    <div class="runs-divider"></div>
+                    @if (!IsPhone)
+                    {
+                        <div class="runs-divider"></div>
 
-                    <div class="runs-detail">
-                        @if (_selected is { } run)
-                        {
-                            <div class="runs-detail-head">
-                                <h3>@Heading(run)</h3>
-                                <div class="runs-detail-sub">
-                                    @FeedRunView.Summary(run)@if (run.Calls.Count > 0)
-                                    {
-                                        @(" · ")<RunCalls Run="run" Typical="_typical"/>
-                                    }
-                                </div>
-                                <div class="runs-detail-badges">
-                                    <FeedStrategyChip Strategy="run.Strategy"/>
-                                    @if (run.Failed)
-                                    {
-                                        <FeedChip Tone="FeedChipTone.Failed" Icon="cloud-off">Failed</FeedChip>
-                                    }
-                                    else if (run.Conclusiveness is Conclusiveness.Pending)
-                                    {
-                                        <FeedChip Tone="FeedChipTone.Running"><span class="feed-chip-dot"></span>Running</FeedChip>
-                                    }
-                                    else if (run.Conclusiveness is not Conclusiveness.Conclusive)
-                                    {
-                                        <FeedChip Tone="FeedChipTone.Attention" Icon="shield">Guarded</FeedChip>
-                                    }
-                                </div>
-                            </div>
-
-                            @if (FeedRunView.Problem(run) is { } problem)
+                        <div class="runs-detail">
+                            @if (_selected is { } run)
                             {
-                                <div class="runs-band @(run.Failed ? "is-bad" : "is-warn")">
-                                    <RunProblem Headline="@problem" Reason="@run.SourceFailure" Failed="run.Failed"/>
-                                </div>
+                                @RunDetail(run, heading: true)
                             }
-
-                            @if (_items.Count > 0)
-                            {
-                                <ChangeList Items="_items"
-                                            Chips="@FeedRunView.Chips(run.Counts)"
-                                            OnSelect="ShowDetailsAsync"
-                                            Highlight="Highlight"
-                                            Fill="true"
-                                            RemovedLabel="Removed"
-                                            AddedLabel="Added"/>
-                            }
-                            else if (FeedRunView.LostItsTitles(run))
-                            {
-                                <div class="runs-empty" data-testid="run-titles-gone">
-                                    <LucideIcon Name="archive" Size="24"/>
-                                    <div>@FeedRunView.TitlesGone</div>
-                                </div>
-                            }
-                            else if (run.Counts.Total > 0 && run.Conclusiveness is Conclusiveness.Conclusive)
-                            {
-                                <div class="runs-empty">
-                                    <LucideIcon Name="check-check" Size="24" Class="is-clean"/>
-                                    <div>The list matched your collection exactly.</div>
-                                </div>
-                            }
-                            else if (run.Conclusiveness is Conclusiveness.Pending)
-                            {
-                                <div class="runs-empty">This run is still going.</div>
-                            }
-                            else
-                            {
-                                <div class="runs-empty">Nothing was added or removed.</div>
-                            }
-                        }
-                    </div>
+                        </div>
+                    }
                 </div>
             }
         </div>
+
+        @if (IsPhone && _selected is { } shown)
+        {
+            <InfoSheet Open="_runOpen" OpenChanged="open => _runOpen = open" Tall="true" Title="@Heading(shown)">
+                <div class="runs-sheet">@RunDetail(shown, heading: false)</div>
+            </InfoSheet>
+        }
 
         <MediaDetailSheet Open="_sheet is not null"
                           OnOpenChanged="@(open => { if (!open) { _sheet = null; } })"
@@ -268,7 +233,9 @@
 
     [Parameter] [SupplyParameterFromQuery(Name = "item")] public string? ItemParam { get; set; }
 
-    private MediaId? Highlight => ItemParam is null ? null : MediaId.From(UrlGuid.Decode(ItemParam));
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
+    private MediaId? Highlight => ItemParam is null || _highlightCleared ? null : MediaId.From(UrlGuid.Decode(ItemParam));
 
     private Optional<RunId> LinkedRun => Optional.Of(RunIdParam).Map(id => RunId.From(UrlGuid.Decode(id)));
 
@@ -299,6 +266,9 @@
     private int _take = PageSize;
     private bool _more;
     private bool _loading = true;
+    private bool _runOpen;
+    private bool _highlightCleared;
+    private (string? Feed, string? Run, string? Item) _route;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -307,8 +277,38 @@
             return;
         }
 
+        if (!IsPhone)
+        {
+            _runOpen = false;
+        }
+
+        if ((FeedIdParam, RunIdParam, ItemParam) != _route)
+        {
+            _route = (FeedIdParam, RunIdParam, ItemParam);
+            _highlightCleared = false;
+            await LoadAsync(FeedId.From(UrlGuid.Decode(FeedIdParam)));
+        }
+
+        if (IsPhone && _selected is { } selected && LinkedRun.When(linked => linked == selected.Id).IsSome())
+        {
+            _runOpen = true;
+            ShowListAddress();
+        }
+    }
+
+    private void ShowListAddress()
+    {
+        var address = new Uri(Navigation.Uri);
+        var list = $"/feeds/{FeedIdParam}/runs";
+        if (address.AbsolutePath != list)
+        {
+            Navigation.NavigateTo(list + address.Query, replace: true);
+        }
+    }
+
+    private async Task LoadAsync(FeedId feedId)
+    {
         await Task.Yield();
-        var feedId = FeedId.From(UrlGuid.Decode(FeedIdParam));
         var found = (await FeedService.GetAsync()).Find(feedId);
         _loading = false;
         await found
@@ -321,6 +321,11 @@
 
     private async Task RevealLinkedRunAsync()
     {
+        if (_runOpen && LinkedRun.IsNone())
+        {
+            return;
+        }
+
         var wanted = LinkedRun.Match(linked => _runs.FirstOrDefault(run => run.Id == linked), () => _runs.FirstOrDefault());
         if (wanted is not null && wanted.Id != _selected?.Id)
         {
@@ -362,6 +367,13 @@
     private async Task SelectAsync(FeedRun run)
     {
         await ShowRunAsync(run);
+        if (IsPhone)
+        {
+            _highlightCleared = true;
+            _runOpen = true;
+            return;
+        }
+
         Navigation.NavigateTo($"/feeds/{FeedIdParam}/runs/{UrlGuid.Encode(run.Id.Value)}", forceLoad: false, replace: true);
     }
 
@@ -371,6 +383,8 @@
         var wanted = run.Items.Select(item => item.MediaId).ToList();
         _items = FeedRunView.Items(run, await Media.GetDetailsByIdAsync(wanted));
     }
+
+    private void EditFeed() => Navigation.NavigateTo($"/feeds/edit/{FeedIdParam}");
 
     private Task ShowDetailsAsync(MatchedMedia media)
     {
@@ -480,4 +494,75 @@
             );
         }
     }
+
+    private RenderFragment RunDetail(FeedRun run, bool heading) =>
+        @<text>
+            <div class="runs-detail-head">
+                @if (heading)
+                {
+                    <h3>@Heading(run)</h3>
+                }
+                <div class="runs-detail-sub">
+                    @FeedRunView.Summary(run)@if (run.Calls.Count > 0)
+                    {
+                        @(" · ")<RunCalls Run="run" Typical="_typical"/>
+                    }
+                </div>
+                <div class="runs-detail-badges">
+                    <FeedStrategyChip Strategy="run.Strategy"/>
+                    @if (run.Failed)
+                    {
+                        <FeedChip Tone="FeedChipTone.Failed" Icon="cloud-off">Failed</FeedChip>
+                    }
+                    else if (run.Conclusiveness is Conclusiveness.Pending)
+                    {
+                        <FeedChip Tone="FeedChipTone.Running"><span class="feed-chip-dot"></span>Running</FeedChip>
+                    }
+                    else if (run.Conclusiveness is not Conclusiveness.Conclusive)
+                    {
+                        <FeedChip Tone="FeedChipTone.Attention" Icon="shield">Guarded</FeedChip>
+                    }
+                </div>
+            </div>
+
+            @if (FeedRunView.Problem(run) is { } problem)
+            {
+                <div class="runs-band @(run.Failed ? "is-bad" : "is-warn")">
+                    <RunProblem Headline="@problem" Reason="@run.SourceFailure" Failed="run.Failed"/>
+                </div>
+            }
+
+            @if (_items.Count > 0)
+            {
+                <ChangeList Items="_items"
+                            Chips="@FeedRunView.Chips(run.Counts)"
+                            OnSelect="ShowDetailsAsync"
+                            Highlight="Highlight"
+                            Fill="true"
+                            RemovedLabel="Removed"
+                            AddedLabel="Added"/>
+            }
+            else if (FeedRunView.LostItsTitles(run))
+            {
+                <div class="runs-empty" data-testid="run-titles-gone">
+                    <LucideIcon Name="archive" Size="24"/>
+                    <div>@FeedRunView.TitlesGone</div>
+                </div>
+            }
+            else if (run.Counts.Total > 0 && run.Conclusiveness is Conclusiveness.Conclusive)
+            {
+                <div class="runs-empty">
+                    <LucideIcon Name="check-check" Size="24" Class="is-clean"/>
+                    <div>The list matched your collection exactly.</div>
+                </div>
+            }
+            else if (run.Conclusiveness is Conclusiveness.Pending)
+            {
+                <div class="runs-empty">This run is still going.</div>
+            }
+            else
+            {
+                <div class="runs-empty">Nothing was added or removed.</div>
+            }
+        </text>;
 }

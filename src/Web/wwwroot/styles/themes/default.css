@@ -170,6 +170,14 @@
     max-width: 94vw;
 }
 
+@media (width < 48rem) {
+    .change-dialog:has([data-dialog-actions]) {
+        width: auto;
+        display: flex;
+        flex-direction: column;
+    }
+}
+
 
 .change-dialog .change-prologue {
     padding-right: 44px;
@@ -214,10 +222,11 @@
 .media-title-trigger:focus-visible {
     outline: none;
 }
-
-.media-title-trigger:hover .media-title-text {
-    text-decoration: underline;
-    text-underline-offset: 4px;
+@media (hover: hover) and (pointer: fine) {
+    .media-title-trigger:hover .media-title-text {
+        text-decoration: underline;
+        text-underline-offset: 4px;
+    }
 }
 
 .media-title-trigger svg.media-title-icon {
@@ -286,12 +295,18 @@ body:has(.error-dialog) .search-modal {
     border: 1px solid var(--tint) !important;
     transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
 }
-.hover-button:hover,
 .hover-button:focus,
 .hover-button:focus-visible {
     background-color: var(--tint) !important;
     color: var(--tint-foreground, white) !important;
     border-color: var(--tint) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+    .hover-button:hover {
+        background-color: var(--tint) !important;
+        color: var(--tint-foreground, white) !important;
+        border-color: var(--tint) !important;
+    }
 }
 .hover-button:disabled,
 .hover-button[aria-disabled="true"] {
@@ -305,10 +320,14 @@ body:has(.error-dialog) .search-modal {
     --tint: var(--alert-success);
     --tint-foreground: white;
 }
-.hover-button--custom:hover,
 .hover-button--custom:focus,
 .hover-button--custom:focus-visible {
     color: var(--tint-foreground, oklch(from var(--tint) calc(0.565 - clamp(-0.415, (l - 0.68) * 1000, 0.415)) 0 h)) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+    .hover-button--custom:hover {
+        color: var(--tint-foreground, oklch(from var(--tint) calc(0.565 - clamp(-0.415, (l - 0.68) * 1000, 0.415)) 0 h)) !important;
+    }
 }
 .hover-button--borderless {
     border: none !important;
@@ -319,10 +338,14 @@ body:has(.error-dialog) .search-modal {
     border-color: currentColor !important;
     background-color: oklch(from var(--tint) l c h / 0.12) !important;
 }
-.hover-button:hover .hover-button-badge,
 .hover-button:focus .hover-button-badge,
 .hover-button:focus-visible .hover-button-badge {
     background-color: oklch(from var(--background) l c h / 0.15) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+    .hover-button:hover .hover-button-badge {
+        background-color: oklch(from var(--background) l c h / 0.15) !important;
+    }
 }
 
 .badge-soft-destructive {
@@ -373,14 +396,23 @@ body:has(.error-dialog) .search-modal {
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='m12 5 7 7-7 7'/%3E%3C/svg%3E") center / contain no-repeat;
     transition: transform 150ms ease;
 }
-.toast-soft-destructive button:not(.bb\:absolute):hover,
 .toast-soft-destructive button:not(.bb\:absolute):focus-visible {
     background-color: transparent !important;
     text-decoration-color: var(--destructive) !important;
 }
-.toast-soft-destructive button:not(.bb\:absolute):hover::after,
+@media (hover: hover) and (pointer: fine) {
+    .toast-soft-destructive button:not(.bb\:absolute):hover {
+        background-color: transparent !important;
+        text-decoration-color: var(--destructive) !important;
+    }
+}
 .toast-soft-destructive button:not(.bb\:absolute):focus-visible::after {
     transform: translateX(2px);
+}
+@media (hover: hover) and (pointer: fine) {
+    .toast-soft-destructive button:not(.bb\:absolute):hover::after {
+        transform: translateX(2px);
+    }
 }
 
 .wantlist-sync-preview {
@@ -426,6 +458,14 @@ body:has(.error-dialog) .search-modal {
     width: 75%;
     max-width: 28rem;
     border-left-width: 0;
+}
+
+.media-detail-sheet-content.phone-sheet[data-state] {
+    width: 100%;
+    max-width: none;
+    height: 84dvh;
+    border-radius: 14px 14px 0 0;
+    translate: 0 var(--sheet-drag, 0px);
 }
 
 .lucide-icon.meta-tv-icon {

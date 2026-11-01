@@ -1,0 +1,65 @@
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<CascadingValue Value="_isPhone" Name="@IsPhoneCascade">
+    @ChildContent
+</CascadingValue>
+
+@code {
+    internal const string IsPhoneCascade = "IsPhone";
+
+    internal const string TitleSection = "phone-title";
+
+    internal const string BackSection = "phone-back";
+
+    internal const string ToolbarSection = "page-toolbar";
+
+    internal const string BarSection = "phone-bar";
+
+    internal const string BulkSection = "phone-bulk";
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool _isPhone;
+    private bool _disposed;
+    private DotNetObjectReference<PhoneLayout>? _self;
+    private IJSObjectReference? _watch;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if (firstRender)
+            {
+                _self = DotNetObjectReference.Create(this);
+                await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/phone.js");
+                _watch = await module.InvokeAsync<IJSObjectReference>("watch", _self);
+            }
+        }
+        catch (ObjectDisposedException) when (_disposed) { }
+    }
+
+    [JSInvokable]
+    public void Changed(bool isPhone)
+    {
+        _isPhone = isPhone;
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _disposed = true;
+        try
+        {
+            if (_watch is not null)
+            {
+                await _watch.InvokeVoidAsync("dispose");
+                await _watch.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException) { }
+        catch (TaskCanceledException) { }
+
+        _self?.Dispose();
+    }
+}

@@ -1,20 +1,36 @@
 @implements IDisposable
 
-<KeyboardShortcut Keys="Ctrl+F" OnInvoked="FocusAsync"/>
+@if (IsPhone)
+{
+    @if (Value is { } searched)
+    {
+        <button type="button" class="list-search-chip" aria-label="Clear the search for @searched" @onclick="ClearAsync">
+            <LucideIcon Name="search" Size="13" Class="shrink-0"/>
+            <span class="list-search-chip-text">“@searched”</span>
+            <LucideIcon Name="x" Size="14" Class="shrink-0"/>
+        </button>
+    }
+}
+else
+{
+    <KeyboardShortcut Keys="Ctrl+F" OnInvoked="FocusAsync"/>
 
-<div class="list-search">
-    <LucideIcon Name="search" Size="15" Class="text-muted-foreground shrink-0"/>
-    <input @ref="_search"
-           type="search"
-           class="list-search-input"
-           placeholder="@Placeholder"
-           aria-label="@Placeholder"
-           value="@Value"
-           @oninput="OnTypedAsync"/>
-    <BbKbd Keys="Ctrl+F" Class="shrink-0"/>
-</div>
+    <div class="list-search">
+        <LucideIcon Name="search" Size="15" Class="text-muted-foreground shrink-0"/>
+        <input @ref="_search"
+               type="search"
+               class="list-search-input"
+               placeholder="@Placeholder"
+               aria-label="@Placeholder"
+               value="@Value"
+               @oninput="OnTypedAsync"/>
+        <BbKbd Keys="Ctrl+F" Class="shrink-0"/>
+    </div>
+}
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     [Parameter] public string? Value { get; set; }
 
     [Parameter] public EventCallback<string?> ValueChanged { get; set; }
@@ -27,6 +43,8 @@
     private CancellationTokenSource? _typing;
 
     private Task FocusAsync() => _search.FocusAsync().AsTask();
+
+    private Task ClearAsync() => ValueChanged.InvokeAsync(null);
 
     private async Task OnTypedAsync(ChangeEventArgs args)
     {

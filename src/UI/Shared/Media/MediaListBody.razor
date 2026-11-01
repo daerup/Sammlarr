@@ -15,9 +15,7 @@
 }
 else if (IsLoading || TotalCount is null)
 {
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <AutoSkeletons Preset="AutoSkeletonPreset.MediaGridTile" Count="12"/>
-    </div>
+    <MediaGrid Loading="true"/>
 }
 else if (TotalCount is 0)
 {
@@ -48,7 +46,8 @@ else if (TotalCount is { } total)
         <PaginationControls CurrentPage="CurrentPage"
                             TotalPages="PageCount"
                             IsDisabled="IsLoading"
-                            PageChanged="PageChanged"/>
+                            PageChanged="PageChanged"
+                            OnReachEnd="OnReachEnd"/>
     }
 }
 
@@ -66,6 +65,7 @@ else if (TotalCount is { } total)
     [Parameter] public int CurrentPage { get; set; } = 1;
     [Parameter] public int PageCount { get; set; } = 1;
     [Parameter] public EventCallback<int> PageChanged { get; set; }
+    [Parameter] public EventCallback OnReachEnd { get; set; }
     [Parameter, EditorRequired] public required RenderFragment EmptyState { get; set; }
     [Parameter, EditorRequired] public required RenderFragment Grid { get; set; }
 }

@@ -1,6 +1,7 @@
 namespace E2E.Tests.Auth;
 
-public class RouteProtectionTests
+[Devices(Device.Desktop, Device.Phone)]
+public class RouteProtectionTests(Device device) : E2ETests(device)
 {
 	[Test]
 	[Arguments(Routes.Home)]

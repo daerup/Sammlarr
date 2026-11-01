@@ -46,4 +46,25 @@ public class SammlarrLogoTests : BunitContext
 		await Assert.That(cut.Find("svg.sammlarr-logo").GetAttribute("viewBox")).DoesNotContain(",");
 		await Assert.That(cut.Find("g[transform]").GetAttribute("transform")).DoesNotContain(",");
 	}
+
+	[Test]
+	public async Task Star_FillsTheStarInTheTextColourWithoutTheWord()
+	{
+		var cut = Render<SammlarrLogo>(parameters => parameters.Add(logo => logo.Form, SammlarrLogoForm.Star).Add(logo => logo.Size, 13));
+
+		await Assert.That(cut.Find("path").GetAttribute("fill")).IsEqualTo("currentColor");
+		await Assert.That(cut.Find("path").HasAttribute("stroke")).IsFalse();
+		await Assert.That(cut.Find("svg.magpie-star").GetAttribute("width")).IsEqualTo("13");
+		await Assert.That(cut.FindAll(".sammlarr-word")).IsEmpty();
+	}
+
+	[Test]
+	public async Task StarOutline_DrawsTheStarsEdgeInTheTextColour()
+	{
+		var cut = Render<SammlarrLogo>(parameters => parameters.Add(logo => logo.Form, SammlarrLogoForm.StarOutline).Add(logo => logo.Size, 16));
+
+		var path = cut.Find("svg.magpie-star path");
+		await Assert.That(path.GetAttribute("fill")).IsEqualTo("none");
+		await Assert.That(path.GetAttribute("stroke")).IsEqualTo("currentColor");
+	}
 }

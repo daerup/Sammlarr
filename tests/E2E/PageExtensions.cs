@@ -11,6 +11,43 @@ internal static class PageExtensions
 	private const string CircuitReady =
 		$"() => !!window.Blazor && !document.querySelector('#components-reconnect-modal.components-reconnect-show') && {HandlersAttached}";
 
+	private const string Overflowing = """
+		async () => {
+			await document.fonts.ready;
+			const width = document.documentElement.clientWidth;
+			const limit = width + 1;
+			const path = element => {
+				const parts = [];
+				for (let node = element; node && node !== document.body && parts.length < 4; node = node.parentElement) {
+					const classes = typeof node.className === 'string' ? node.className.trim().split(/\s+/).filter(Boolean).slice(0, 2) : [];
+					parts.unshift(node.tagName.toLowerCase() + (node.id ? `#${node.id}` : '') + classes.map(name => `.${name}`).join(''));
+				}
+				return parts.join(' > ');
+			};
+			const clipped = node => {
+				for (let child = node, parent = node.parentElement; parent && parent !== document.documentElement; child = parent, parent = parent.parentElement) {
+					if (child instanceof Element && getComputedStyle(child).position === 'fixed') return false;
+					if (parent.matches('[data-scroll-x]')) return true;
+					const box = parent.getBoundingClientRect();
+					const fullWidth = box.left <= 0.5 && box.right >= width - 0.5;
+					if (box.right <= limit && !fullWidth && /(hidden|clip)/.test(getComputedStyle(parent).overflowX)) return true;
+				}
+				return false;
+			};
+			const shown = (node, element, box) => box.right > limit && box.width > 0 && getComputedStyle(element).visibility !== 'hidden' && !clipped(node);
+			const overflowing = new Set([...document.querySelectorAll('body *')].filter(element => shown(element, element, element.getBoundingClientRect())));
+			const texts = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+			const range = document.createRange();
+			for (let text = texts.nextNode(); text; text = texts.nextNode()) {
+				range.selectNodeContents(text);
+				if (text.textContent.trim() && shown(text, text.parentElement, range.getBoundingClientRect())) overflowing.add(text.parentElement);
+			}
+			return [...overflowing].filter(element => !overflowing.has(element.parentElement)).map(path);
+		}
+		""";
+
+	internal static Task<string[]> OverflowingAsync(this IPage page) => page.EvaluateAsync<string[]>(Overflowing);
+
 	internal static async Task VisitAsync(this IPage page, string route)
 	{
 		await page.GotoAsync(route);

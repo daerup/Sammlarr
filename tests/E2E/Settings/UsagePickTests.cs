@@ -59,7 +59,7 @@ public class UsagePickTests
 
 	private static ILocator Cause(IPage page, string name) => page.GetByTestId("usage-cause").Filter(new LocatorFilterOptions { HasText = name });
 
-	private static async Task UntilCountedAsync(IPage page, string cause)
+	internal static async Task UntilCountedAsync(IPage page, string cause)
 	{
 		var deadline = DateTimeOffset.UtcNow + Exported;
 		while (true)

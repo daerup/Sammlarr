@@ -3,6 +3,22 @@
     min-width: 0;
 }
 
+.sb-open {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+
+.sb-open::after {
+    content: "";
+    position: absolute;
+    inset: -9px 0;
+}
+
 .sb-track {
     position: relative;
     display: flex;
@@ -67,8 +83,10 @@
     cursor: pointer;
 }
 
-.sb-key:hover {
-    background: var(--secondary);
+@media (hover: hover) and (pointer: fine) {
+    .sb-key:hover {
+        background: var(--secondary);
+    }
 }
 
 .sb-key:focus-visible {

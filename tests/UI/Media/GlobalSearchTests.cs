@@ -89,6 +89,23 @@ public class GlobalSearchTests : BunitContext
 	}
 
 	[Test]
+	public async Task Result_WhenOpened_ShowsItsDetailsUntilTheSheetCloses()
+	{
+		var cut = await SearchForTheMovieAsync();
+
+		await cut.FindAll(".search-result-row").Single(row => row.TextContent.Contains(Movie)).QuerySelector(".result-open")!.ClickAsync(new());
+
+		var sheet = cut.FindComponent<MediaDetailSheet>();
+		await Assert.That(sheet.Instance.Open).IsTrue();
+		await Assert.That(sheet.Instance.Media).IsEqualTo(Matched);
+		await Assert.That(cut.Find(".search-modal").ClassList).Contains("under-details");
+		await cut.InvokeAsync(() => sheet.Instance.OnOpenChanged.InvokeAsync(false));
+		await Assert.That(sheet.Instance.Open).IsFalse();
+		await Assert.That(cut.Find(".search-modal").ClassList).DoesNotContain("under-details");
+		await Assert.That(cut.FindAll(".search-result-row")).Count().IsEqualTo(2);
+	}
+
+	[Test]
 	[Arguments(SearchProvider.Tmdb, "Results from The Movie Database")]
 	[Arguments(SearchProvider.Arr, "Results from Radarr and Sonarr")]
 	[Arguments(SearchProvider.Plex, "Results from Plex")]
@@ -279,6 +296,44 @@ public class GlobalSearchTests : BunitContext
 					RegistrationMode = RegistrationMode.Open,
 				}
 			);
+	}
+
+	[Test]
+	public async Task Phone_BeforeTyping_NamesTheSourceAndSaysWhatSearchIsFor()
+	{
+		var cut = this.RenderOnPhone<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true)).Component;
+
+		await Assert.That(cut.Find("#search-input").GetAttribute("placeholder")).IsEqualTo("Search Plex");
+		await Assert.That(cut.Find("[data-testid=search-empty]").TextContent.Trim()).IsEqualTo("Find a movie or show and add it to a list.");
+		await Assert.That(cut.FindAll("button").Select(button => button.GetAttribute("aria-label"))).Contains("Back");
+	}
+
+	[Test]
+	public async Task Phone_Typing_SearchesOnceTheTypingPauses()
+	{
+		var cut = this.RenderOnPhone<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true)).Component;
+
+		var first = cut.Find("#search-input").InputAsync(new ChangeEventArgs { Value = "Mov" });
+		await cut.Find("#search-input").InputAsync(new ChangeEventArgs { Value = Movie });
+		await first;
+
+		cut.WaitForState(() => cut.FindAll(".search-result-row").Count == 2, TimeSpan.FromSeconds(3));
+		_search.SearchAsync(Movie, Any(), Any()).WasCalled(Times.Once);
+		_search.SearchAsync("Mov", Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task Phone_Clear_EmptiesTheFieldAndTheResults()
+	{
+		var cut = this.RenderOnPhone<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true)).Component;
+		await cut.Find("#search-input").InputAsync(new ChangeEventArgs { Value = Movie });
+		cut.WaitForState(() => cut.FindAll(".search-result-row").Count == 2, TimeSpan.FromSeconds(3));
+
+		await cut.Find("[aria-label='Clear search']").ClickAsync(new());
+
+		await Assert.That(cut.FindAll(".search-result-row")).IsEmpty();
+		await Assert.That(cut.Find("#search-input").GetAttribute("value")).IsEmpty();
+		await Assert.That(cut.FindAll("[data-testid=search-empty]")).HasSingleItem();
 	}
 
 	private async Task<IRenderedComponent<GlobalSearch>> SearchForTheMovieAsync()

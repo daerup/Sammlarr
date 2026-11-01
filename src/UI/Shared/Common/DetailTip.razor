@@ -1,0 +1,44 @@
+@if (IsPhone)
+{
+    <button type="button" class="@($"{TriggerClass} {PhoneClass}")" aria-label="@PhoneLabel" aria-haspopup="dialog" aria-expanded="@(_open ? "true" : "false")" @attributes="Attributes"
+            @onclick="() => _open = true" @onclick:preventDefault="true" @onclick:stopPropagation="true">
+        @Trigger
+    </button>
+    <InfoSheet @bind-Open="_open" Title="@Title">@Detail</InfoSheet>
+}
+else
+{
+    <BbTooltip DelayDuration="Delay" Placement="Placement">
+        <BbTooltipTrigger AsChild="false" Class="@TriggerClass" Focusable="Focusable" @attributes="Attributes">
+            @Trigger
+        </BbTooltipTrigger>
+        <BbTooltipContent Class="@ContentClass" data-testid="@ContentTestId">@Detail</BbTooltipContent>
+    </BbTooltip>
+}
+
+@code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
+    [Parameter, EditorRequired] public required string Title { get; set; }
+    [Parameter] public int Delay { get; set; } = 300;
+    [Parameter] public PopoverPlacement Placement { get; set; } = PopoverPlacement.Top;
+    [Parameter] public string? TriggerClass { get; set; }
+    [Parameter] public bool Focusable { get; set; } = true;
+    [Parameter] public string? ContentClass { get; set; }
+    [Parameter] public string? ContentTestId { get; set; }
+    [Parameter] public string? PhoneLabel { get; set; }
+    [Parameter] public string? PhoneClass { get; set; }
+    [Parameter, EditorRequired] public required RenderFragment Trigger { get; set; }
+    [Parameter, EditorRequired] public required RenderFragment Detail { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? Attributes { get; set; }
+
+    private bool _open;
+
+    protected override void OnParametersSet()
+    {
+        if (!IsPhone)
+        {
+            _open = false;
+        }
+    }
+}

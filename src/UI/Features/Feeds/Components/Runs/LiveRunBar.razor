@@ -1,4 +1,4 @@
-<StackedBar Size="Size" Total="Tally.Total.ToNullable()" RestName="@Rest" Format="Count">
+<StackedBar Size="Size" Total="Tally.Total.ToNullable()" RestName="@Rest" Format="Count" TapOpens="TapOpens" Label="Run progress">
     <Title>@Heading</Title>
     <ChildContent>
         @foreach (var part in RunTally.Bar)
@@ -13,6 +13,8 @@
     [Parameter, EditorRequired] public required RunTally Tally { get; set; }
 
     [Parameter] public BarSize Size { get; set; } = BarSize.Small;
+
+    [Parameter] public bool TapOpens { get; set; } = true;
 
     private string Heading => Tally.Total.Match(total => $"{Count(Tally.Done)} of {(Tally.Estimated ? "~" : "")}{Count(total)}", () => "title".ToQuantity(Tally.Done, "N0"));
 

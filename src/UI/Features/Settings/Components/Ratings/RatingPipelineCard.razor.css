@@ -99,7 +99,10 @@
 
 .pipeline-tile.is-off ::deep .provider-tile,
 .pipeline-tile.is-off .pipeline-name,
-.pipeline-tile.is-off .pipeline-rank {
+.pipeline-tile.is-off .pipeline-rank,
+.rating-source.is-off ::deep .provider-tile,
+.rating-source.is-off .pipeline-name,
+.rating-source.is-off .pipeline-rank {
     opacity: 0.45;
 }
 
@@ -108,12 +111,14 @@
     background: transparent;
 }
 
-.pipeline-tile.is-unsupplied ::deep .provider-tile {
+.pipeline-tile.is-unsupplied ::deep .provider-tile,
+.rating-source.is-unsupplied ::deep .provider-tile {
     opacity: 0.45;
     filter: grayscale(1);
 }
 
-.pipeline-tile.is-unsupplied .pipeline-name {
+.pipeline-tile.is-unsupplied .pipeline-name,
+.rating-source.is-unsupplied .pipeline-name {
     opacity: 0.45;
     text-decoration: none;
     cursor: default;
@@ -206,4 +211,77 @@
     font-size: 11px;
     color: var(--muted-foreground);
     white-space: nowrap;
+}
+
+.rating-sources {
+    display: flex;
+    flex-direction: column;
+}
+
+.rating-source {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 52px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.rating-source:last-child {
+    border-bottom: 0;
+}
+
+.rating-source-name {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    min-width: 0;
+}
+
+.rating-source-name .pipeline-unsupplied {
+    margin-left: 0;
+}
+
+.rating-source-name .pipeline-name {
+    white-space: normal;
+}
+
+.rating-source-moves {
+    display: flex;
+    flex: none;
+    gap: 2px;
+}
+
+.rating-source-move {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: var(--foreground);
+    cursor: pointer;
+}
+
+.rating-source-move:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.rating-source-move:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 1px;
+}
+
+@media (width < 48rem) {
+    .pipeline-combine {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
 }

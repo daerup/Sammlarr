@@ -1,13 +1,15 @@
 <span class="push-badge-wrap" style="@AccentStyle">
     <BbBadge Variant="BadgeVariant.Secondary" Class="push-badge">
-        <BbTooltip>
-            <BbTooltipTrigger AsChild="false" Class="p-0">
-                <span class="push-badge-content inline-flex items-center justify-center" aria-label="@Label">
+        <DetailTip Title="Sync status" TriggerClass="p-0" PhoneClass="relative after:absolute after:-inset-4" aria-label="@Label">
+            <Trigger>
+                <span class="push-badge-content inline-flex items-center justify-center">
                     <LucideIcon Name="@Icon" Size="14" Color="currentColor"/>
                 </span>
-            </BbTooltipTrigger>
-            <BbTooltipContent>@Label</BbTooltipContent>
-        </BbTooltip>
+            </Trigger>
+            <Detail>
+                @Label
+            </Detail>
+        </DetailTip>
     </BbBadge>
 </span>
 

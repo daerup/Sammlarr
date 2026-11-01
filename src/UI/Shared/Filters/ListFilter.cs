@@ -1,6 +1,7 @@
 using Domain.Feed;
 using Domain.Media;
 using Domain.Wantlist;
+using UI.Shared.Media;
 
 namespace UI.Shared.Filters;
 
@@ -77,4 +78,22 @@ public sealed record ListFilter
 			ListSort.OldestRelease => items.OrderBy(item => media(item).Details.ReleaseDate),
 		};
 	}
+}
+
+internal static class ListFilterText
+{
+	internal const string AnyType = "Any type";
+
+	internal static string Label(ListSort sort) =>
+		sort switch
+		{
+			ListSort.RecentlyAdded => "Recently added",
+			ListSort.OldestAdded => "Oldest added",
+			ListSort.TitleAscending => "Title A to Z",
+			ListSort.TitleDescending => "Title Z to A",
+			ListSort.NewestRelease => "Newest release",
+			ListSort.OldestRelease => "Oldest release",
+		};
+
+	internal static string Label(MediaType? type) => type is { } chosen ? chosen.Plural : AnyType;
 }

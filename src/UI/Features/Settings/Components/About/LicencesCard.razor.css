@@ -54,7 +54,7 @@
     white-space: pre-wrap;
 }
 
-@media (max-width: 640px) {
+@media (width < 48rem) {
     .notice-package {
         grid-template-columns: minmax(0, 1fr);
         gap: 0;

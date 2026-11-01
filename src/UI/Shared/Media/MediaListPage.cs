@@ -2,6 +2,7 @@ using Contracts.Settings;
 using Domain.Settings;
 using Microsoft.AspNetCore.Components;
 using UI.Shared.Filters;
+using UI.Shared.Layout;
 using UI.Shared.Services;
 
 namespace UI.Shared.Media;
@@ -20,6 +21,7 @@ public abstract class MediaListPage : ComponentBase, IDisposable
 	private const int PageSize = 20;
 
 	private int _page = 1;
+	private int _shownPages = 1;
 	protected CancellationTokenSource Cancellation { get; } = new();
 	protected ProviderConfig? Settings { get; set; }
 	protected ListFilter Filter { get; set; } = ListFilter.None;
@@ -28,6 +30,10 @@ public abstract class MediaListPage : ComponentBase, IDisposable
 	protected string? ErrorMessage { get; set; }
 	protected bool IsEditMode { get; set; }
 	protected bool IsSheetOpen { get; set; }
+	protected bool IsFilterSheetOpen { get; set; }
+
+	[CascadingParameter(Name = PhoneLayout.IsPhoneCascade)]
+	private bool IsPhone { get; set; }
 
 	private bool signedIn;
 	private bool connected;
@@ -73,18 +79,30 @@ public abstract class MediaListPage : ComponentBase, IDisposable
 
 	protected void ToggleFilterBar() => ShowFilters = !ShowFilters;
 
+	protected void OpenFilterSheet() => IsFilterSheetOpen = true;
+
 	protected Task ApplyFilterAsync(ListFilter filter)
 	{
 		Filter = filter;
 		_page = 1;
+		_shownPages = 1;
 		return Task.CompletedTask;
 	}
 
 	protected static int PageCount(int itemCount) => Math.Max(1, (int)Math.Ceiling(itemCount / (double)PageSize));
 
-	protected int PageWithin(int itemCount) => Math.Clamp(_page, 1, PageCount(itemCount));
+	protected int PageWithin(int itemCount) => Math.Clamp(IsPhone ? _shownPages : _page, 1, PageCount(itemCount));
 
-	protected IReadOnlyList<T> Paged<T>(IReadOnlyList<T> items) => [.. items.Skip((PageWithin(items.Count) - 1) * PageSize).Take(PageSize)];
+	protected IReadOnlyList<T> Paged<T>(IReadOnlyList<T> items)
+	{
+		return IsPhone ? [.. items.Take(_shownPages * PageSize)] : [.. items.Skip((PageWithin(items.Count) - 1) * PageSize).Take(PageSize)];
+	}
+
+	protected Task ShowMoreAsync()
+	{
+		_shownPages++;
+		return Task.CompletedTask;
+	}
 
 	protected Task GoToPageAsync(int page)
 	{

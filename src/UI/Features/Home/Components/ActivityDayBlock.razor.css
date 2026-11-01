@@ -22,8 +22,10 @@
     cursor: pointer;
 }
 
-.dtop:hover {
-    background: color-mix(in srgb, var(--foreground) 8%, transparent);
+@media (hover: hover) and (pointer: fine) {
+    .dtop:hover {
+        background: color-mix(in srgb, var(--foreground) 8%, transparent);
+    }
 }
 
 .dtop.is-collapsed {
@@ -109,9 +111,11 @@
     text-decoration: none;
 }
 
-a.chip:hover {
-    border-color: var(--muted-foreground);
-    color: var(--foreground);
+@media (hover: hover) and (pointer: fine) {
+    a.chip:hover {
+        border-color: var(--muted-foreground);
+        color: var(--foreground);
+    }
 }
 
 .chip-name {
@@ -189,9 +193,11 @@ a.chip:hover {
     cursor: pointer;
 }
 
-.dtoggle:hover {
-    color: var(--foreground);
-    background: color-mix(in srgb, var(--foreground) 2%, transparent);
+@media (hover: hover) and (pointer: fine) {
+    .dtoggle:hover {
+        color: var(--foreground);
+        background: color-mix(in srgb, var(--foreground) 2%, transparent);
+    }
 }
 
 .druns {
@@ -210,8 +216,10 @@ a.chip:hover {
     text-decoration: none;
 }
 
-.drun:hover {
-    background: color-mix(in srgb, var(--foreground) 3%, transparent);
+@media (hover: hover) and (pointer: fine) {
+    .drun:hover {
+        background: color-mix(in srgb, var(--foreground) 3%, transparent);
+    }
 }
 
 .drun-at {
@@ -249,4 +257,30 @@ a.chip:hover {
 
 .drun-delta .nil {
     opacity: 0.6;
+}
+
+.dstat .part.is-problem {
+    color: var(--destructive);
+}
+
+@media (width < 48rem) {
+    .dcard {
+        margin-inline: -1rem;
+        border-width: 1px 0;
+        border-radius: 0;
+    }
+
+    .chips {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .chip {
+        flex: none;
+    }
+
+    .day-grid {
+        padding: 12px 14px;
+    }
 }

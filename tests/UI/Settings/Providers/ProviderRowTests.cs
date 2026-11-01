@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Providers;
+using UI.Shared.Layout;
 using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Settings.Providers;
@@ -55,6 +56,26 @@ public class ProviderRowTests : BunitContext
 		var roles = cut.FindAll(".provider-role .sr-only").Select(role => role.TextContent.Trim());
 		await Assert.That(roles).IsEquivalentTo(["Search", "Trending", "Feeds"], CollectionOrdering.Matching);
 		await Assert.That(cut.Markup).DoesNotContain("API key ·");
+	}
+
+	[Test]
+	public async Task Phone_OpenRow_NamesItsRolesInTheDetailsInstead()
+	{
+		RenderTree.TryAdd<CascadingValue<bool>>(cascade => cascade.Add(value => value.Name, PhoneLayout.IsPhoneCascade).Add(value => value.Value, true));
+
+		var cut = Render<ProviderRow>(parameters =>
+			parameters
+				.Add(row => row.Key, TmdbRow)
+				.Add(row => row.Brand, Brands.GetBrandingInfo(MediaProvider.Tmdb))
+				.Add(row => row.Open, true)
+				.Add(row => row.OpenChanged, _ => { })
+				.Add(row => row.Status, "<span>Connected</span>")
+				.AddChildContent("<p>The form</p>")
+		);
+
+		await Assert.That(cut.Find("button").QuerySelectorAll(".provider-role")).IsEmpty();
+		var roles = cut.FindAll(".provider-roles.is-named .provider-role").Select(role => role.TextContent.Trim());
+		await Assert.That(roles).IsEquivalentTo(["Search", "Trending", "Feeds"], CollectionOrdering.Matching);
 	}
 
 	public static IEnumerable<Func<(Service Key, string Id)>> Keys() =>

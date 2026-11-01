@@ -65,6 +65,11 @@ seeds a fresh admin or member into the stack's database, with the same keys and 
 person (`E2EApp.AdminAsync` and `MemberAsync` name them). A test never sees another test's feeds, wantlist or blocklist; only global state is shared on a
 stack, such as the provider settings, title ids and details, and the sign-up switch.
 
+A test class that drives a layout lists the devices it runs on: `[Devices(Device.Desktop, Device.Phone)] public class X(Device device) : E2ETests(device)`.
+TUnit makes one copy of each test per device, named `… on Desktop` and `… on Phone`, and every run tests every listed device. `BrowserPages.OpenAsync`
+gives the Phone copy a 390 × 844 touch context (mobile, DPR 2); a class without `[Devices]` runs on the desktop only. `PageFitTests` checks, per page and
+device, that nothing runs past the right edge.
+
 Every machine runs the suite like CI's four-core runner, so a CI failure reproduces locally: `CiRunner` pins the test process, and every stack and
 browser it starts, to four cores, with two main stacks (`E2EApp.StackCount`) and one self-hosted (`SelfHostedApp.StackCount`). CI runs it on the Release PR,
 in Release, and on every Renovate PR before it merges; its `test-results-e2e` artifact holds the TRX and each stack's log.
@@ -77,8 +82,9 @@ recorded list's titles into the admin's wantlist, and every later preview of tha
 count what a filter culls or read the badge's own number, never a fixed included count.
 
 Provider traffic is served by WireMock from committed fixtures under `tests/E2E/wiremock`: `mappings/<provider>/` holds the request matchers and
-`responses/<provider>/` the bodies, which are bind-mounted as WireMock's `__files` (the hand-written `arr-stubs`, `newznab` and `plex-stubs` mappings
-carry their bodies inline; `plex-stubs` acknowledges Plex watchlist adds and removals, which a switch back to Plex sends for every title on the stack). Fixtures are committed and `*.verified.json` is pinned to LF by `.gitattributes`.
+`responses/<provider>/` the bodies, which are bind-mounted as WireMock's `__files` (the hand-written `arr-stubs`, `newznab`, `plex-stubs` and `tmdb-stubs` mappings
+carry their bodies inline; `plex-stubs` acknowledges Plex watchlist adds and removals, which a switch back to Plex sends for every title on the stack, and with
+`tmdb-stubs` answers a second trending page, whose made-up titles Plex does not know, for the phone's endless list). Fixtures are committed and `*.verified.json` is pinned to LF by `.gitattributes`.
 
 **Replay** is the default: offline, deterministic, no secrets. **Live** (`E2E_LIVE=true`) makes the main pool proxy the real providers, capture what it
 sees, and compare it against what is committed. Each endpoint has a policy in `wiremock/fixture-policy.json`:

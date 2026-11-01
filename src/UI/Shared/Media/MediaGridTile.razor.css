@@ -47,12 +47,16 @@
     transition: transform 0.4s ease;
 }
 
-.cursor-pointer.group:hover {
-    transform: scale(1.05);
+@media (hover: hover) and (pointer: fine) {
+    .cursor-pointer.group:hover {
+        transform: scale(1.05);
+    }
 }
 
-.media-card-backdrop:hover .media-card-poster {
-    transform: scale(1);
+@media (hover: hover) and (pointer: fine) {
+    .media-card-backdrop:hover .media-card-poster {
+        transform: scale(1);
+    }
 }
 
 .dark .media-card-failed {
@@ -89,6 +93,10 @@
     color: rgb(255 255 255 / 0.7);
 }
 
+.tile-year {
+    display: none;
+}
+
 :root:not(.dark) .tile-no-art .media-card-failed {
     filter: none;
 }
@@ -110,4 +118,80 @@
 
 :root:not(.dark) .tile-no-art .tile-bookmark ::deep svg {
     stroke: var(--foreground);
+}
+
+@media (width < 48rem) {
+    .media-card-backdrop {
+        aspect-ratio: 2 / 3;
+        border-radius: 14px;
+        box-shadow: 0 0 0 1px color-mix(in oklch, var(--foreground) 10%, transparent);
+    }
+
+    .media-card-poster {
+        --zoom: 1;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        transform: none;
+    }
+
+    .media-card-scrim,
+    .tile-tagline,
+    .tile-date-full {
+        display: none;
+    }
+
+    .tile-info {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 2px 6px;
+        padding: 44px 8px 8px;
+        background: linear-gradient(to top, rgb(0 0 0 / 0.92), rgb(0 0 0 / 0.75) 45%, transparent);
+    }
+
+    .tile-row {
+        display: contents;
+    }
+
+    .tile-info h3 {
+        order: -1;
+        flex-basis: 100%;
+        display: -webkit-box;
+        overflow: hidden;
+        font-size: 12.5px;
+        line-height: 1.3;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+
+    .tile-text-soft {
+        font-size: 11.5px;
+        color: rgb(255 255 255 / 0.78);
+    }
+
+    .tile-year {
+        display: inline;
+    }
+
+    .tile-bookmark ::deep > span {
+        width: 28px !important;
+        height: 28px !important;
+        border-radius: 9999px;
+        background: rgb(0 0 0 / 0.45);
+        backdrop-filter: blur(6px);
+    }
+
+    .tile-bookmark ::deep > span > svg {
+        width: 15px;
+        height: 15px;
+    }
+
+    :root:not(.dark) .tile-no-art .tile-info {
+        background: none;
+    }
+
+    :root:not(.dark) .tile-no-art .tile-bookmark ::deep svg {
+        stroke: currentColor;
+    }
 }

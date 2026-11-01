@@ -31,6 +31,12 @@
     transition: transform 0.15s ease;
 }
 
-.provenance-trigger:has(.provenance-dot:is(:hover, :focus-visible)) .toggle-dot {
+.provenance-trigger:has(.provenance-dot:focus-visible) .toggle-dot {
     transform: scale(1.25);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .provenance-trigger:has(.provenance-dot:hover) .toggle-dot {
+        transform: scale(1.25);
+    }
 }

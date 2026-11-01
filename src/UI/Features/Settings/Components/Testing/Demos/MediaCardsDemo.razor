@@ -1,11 +1,11 @@
 <DemoCard Title="Media card" Where="Browse / Wantlist grid"
           Note="MediaGridTile in the real grid. A resolved movie and show, an unmatched item, and the loading skeleton. Click a tile to open the detail sheet.">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <MediaGrid>
         <MediaGridTile Media="DemoMedia.Movie" OnClick="() => OpenSheet(DemoMedia.Movie)" ShowBookmark="true" Wantlisted="ItemOf(DemoMedia.Movie)"/>
         <MediaGridTile Media="DemoMedia.Show" OnClick="() => OpenSheet(DemoMedia.Show)" ShowBookmark="true" Wantlisted="ItemOf(DemoMedia.Show)"/>
         <MediaGridTile Media="DemoMedia.Unknown" OnClick="() => OpenSheet(DemoMedia.Unknown)" ShowBookmark="false"/>
         <AutoSkeletons Preset="AutoSkeletonPreset.MediaGridTile" Count="1"/>
-    </div>
+    </MediaGrid>
 </DemoCard>
 
 <MediaDetailSheet Open="_sheetOpen"

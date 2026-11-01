@@ -20,8 +20,8 @@ public class FeedConfigurationTests
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		var listed = (await FeedEditor.ServedTitlesAsync()).Count;
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Total)).ToHaveTextAsync(TestData.Count(listed));
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(0));
+		await Expect(FeedEditor.BadgeCount(page, PreviewBadge.Total)).ToHaveTextAsync(TestData.Count(listed));
+		await Expect(FeedEditor.BadgeCount(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(0));
 
 		var limit = listed - 2;
 		await FeedEditor.OpenOptionalSectionAsync(page, OptionalSection);
@@ -30,8 +30,8 @@ public class FeedConfigurationTests
 		await FeedEditor.CaughtUpAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Total)).ToHaveTextAsync(TestData.Count(listed));
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - limit));
+		await Expect(FeedEditor.BadgeCount(page, PreviewBadge.Total)).ToHaveTextAsync(TestData.Count(listed));
+		await Expect(FeedEditor.BadgeCount(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - limit));
 
 		await FeedEditor.Badge(page, PreviewBadge.Included).ClickAsync();
 		await FeedEditor.Badge(page, PreviewBadge.Bypassed).ClickAsync();
@@ -79,7 +79,7 @@ public class FeedConfigurationTests
 
 		var titles = await FeedEditor.RowTitlesAsync(page);
 		var kept = titles[0];
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Filtered)).ToHaveTextAsync(TestData.Count(0));
+		await Expect(FeedEditor.BadgeCount(page, PreviewBadge.Filtered)).ToHaveTextAsync(TestData.Count(0));
 
 		await FeedEditor.OpenOptionalSectionAsync(page, OptionalSection);
 		await FeedEditor.Toggle(page, "Enable filters").ClickAsync();
@@ -87,8 +87,8 @@ public class FeedConfigurationTests
 		await FeedEditor.CaughtUpAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Total)).ToHaveTextAsync(TestData.Count(titles.Count));
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Filtered)).ToHaveTextAsync(TestData.Count(titles.Count - 1));
+		await Expect(FeedEditor.BadgeCount(page, PreviewBadge.Total)).ToHaveTextAsync(TestData.Count(titles.Count));
+		await Expect(FeedEditor.BadgeCount(page, PreviewBadge.Filtered)).ToHaveTextAsync(TestData.Count(titles.Count - 1));
 
 		await FeedEditor.Badge(page, PreviewBadge.Included).ClickAsync();
 		await FeedEditor.Badge(page, PreviewBadge.Bypassed).ClickAsync();
@@ -163,10 +163,10 @@ public class FeedConfigurationTests
 		await FeedEditor.Option(page, "Trigger", "Scheduled").ClickAsync();
 		await FeedEditor.LoadAsync(page);
 		await page.Button("Open time picker").ClickAsync();
-		await Expect(page.Button("Now")).ToBeVisibleAsync();
+		await Expect(page.Button("Pick the hour")).ToBeVisibleAsync();
 
 		await page.Labelled("Hour").ClickAsync();
-		await Expect(page.Button("Now")).ToBeHiddenAsync();
+		await Expect(page.Button("Pick the hour")).ToBeHiddenAsync();
 		await page.Keyboard.TypeAsync("25");
 		await page.Labelled("Minute").ClickAsync();
 		await page.Keyboard.TypeAsync("75");

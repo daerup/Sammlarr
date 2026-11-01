@@ -42,7 +42,7 @@ public class LibrarySourcesPanelTests : BunitContext
 
 		await cut.FindAll(".sb-key")[1].ClickAsync(new());
 
-		await Assert.That(cut.Find(".band-note").TextContent).IsEqualTo($"{1:N0} of {204:N0} titles");
+		await Assert.That(cut.Find(".panel-note").TextContent).IsEqualTo($"{1:N0} of {204:N0} titles");
 	}
 
 	private sealed class Harness : ComponentBase

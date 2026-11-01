@@ -21,6 +21,10 @@
         {
             <span class="change-subtitle">@Item.Subtitle</span>
         }
+        @if (IsPhone && Item.ContextTooltip is not null)
+        {
+            <span class="change-subtitle">@Item.ContextTooltip</span>
+        }
     </span>
     @if (Item.ContextIcon is { } icon)
     {
@@ -31,7 +35,7 @@
                         <LucideIcon Name="@icon" Size="14"/>
                     </span>
                 </BbTooltipTrigger>
-                <BbTooltipContent>@Item.ContextTooltip</BbTooltipContent>
+                <BbTooltipContent data-label-tip="@IsPhone">@Item.ContextTooltip</BbTooltipContent>
             </BbTooltip>
         </BbTooltipProvider>
     }
@@ -39,6 +43,8 @@
 
 @code {
     private static readonly ArtworkSize Thumb = new(40, 60);
+
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
 
     [Parameter] [EditorRequired] public required ChangeItem Item { get; set; }
     [Parameter] public EventCallback<MatchedMedia> OnSelect { get; set; }

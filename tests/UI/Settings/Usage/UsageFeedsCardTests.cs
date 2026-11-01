@@ -14,6 +14,7 @@ using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Usage;
 using UI.Shared.Common;
+using UI.Shared.Layout;
 
 namespace UI.Tests.Settings.Usage;
 
@@ -147,6 +148,14 @@ public class UsageFeedsCardTests : BunitContext
 	}
 
 	[Test]
+	public async Task Hover_AppliesOnlyWithAFinePointer()
+	{
+		var cut = Render<Harness>();
+
+		await Assert.That(HoverRules(cut)).StartsWith("@media (hover: hover) and (pointer: fine) {");
+	}
+
+	[Test]
 	public async Task Hover_WhileAFeedIsPicked_LightsUpAPointedRowsFeedButNothingPointedInTheChart()
 	{
 		var cut = Render<Harness>();
@@ -252,6 +261,48 @@ public class UsageFeedsCardTests : BunitContext
 
 		await Assert.That(cut.FindAll(".usage-feed-picked")).IsEmpty();
 		await Assert.That(cut.FindAll(".usage-feed-dim")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Phone_EachFeedIsOneLineOfItsCallsPerRunThatUnfoldsItsFiguresAndItsRuns()
+	{
+		var cut = RenderOnPhone();
+
+		await Assert.That(cut.FindAll(".usage-feed")).IsEmpty();
+		await Assert.That(Headline(cut, "Latest shows")).IsEqualTo("2,103 per run");
+		await Assert.That(Headline(cut, "Old list")).IsEqualTo("No runs");
+		await Assert.That(Headline(cut, "Horror movies")).StartsWith("deleted ");
+		var shows = Row(cut, "Latest shows");
+		await Assert.That(shows.QuerySelector("[data-testid=usage-feed-unmatched]")!.TextContent).Contains("Typical run: 3 titles unmatched.");
+		await Assert.That(shows.QuerySelector("[data-testid=usage-feed-runs]")!.GetAttribute("href")).IsEqualTo($"/feeds/{UrlGuid.Encode(Shows.Value)}/runs");
+		await Assert.That(Row(cut, "Horror movies").QuerySelector("[data-testid=usage-feed-runs]")).IsNull();
+		await shows.QuerySelector(".unfold-row-trigger")!.ClickAsync();
+
+		await Assert.That(Row(cut, "Latest shows").QuerySelector(".unfold-row-trigger")!.GetAttribute("aria-expanded")).IsEqualTo("true");
+	}
+
+	[Test]
+	public async Task Phone_UnfoldedFeeds_StayOpenWhenAPickedServiceFiltersAndReordersTheList()
+	{
+		var cut = RenderOnPhone();
+		await Row(cut, "Latest shows").QuerySelector(".unfold-row-trigger")!.ClickAsync();
+		await Row(cut, "Horror movies").QuerySelector(".unfold-row-trigger")!.ClickAsync();
+
+		cut.Render(parameters => parameters.Add(harness => harness.Picked, Some.Of(RemoteService.Tmdb)));
+
+		await Assert.That(Row(cut, "Horror movies").QuerySelector(".unfold-row-trigger")!.GetAttribute("aria-expanded")).IsEqualTo("true");
+		await Assert.That(Row(cut, "Latest shows").QuerySelector(".unfold-row-trigger")!.GetAttribute("aria-expanded")).IsEqualTo("true");
+	}
+
+	private IRenderedComponent<Harness> RenderOnPhone()
+	{
+		RenderTree.TryAdd<CascadingValue<bool>>(cascade => cascade.Add(value => value.Name, PhoneLayout.IsPhoneCascade).Add(value => value.Value, true));
+		return Render<Harness>();
+	}
+
+	private static string Headline(IRenderedComponent<Harness> cut, string name)
+	{
+		return Row(cut, name).QuerySelector("[data-testid=usage-feed-headline]")!.TextContent;
 	}
 
 	private static AngleSharp.Dom.IElement Row(IRenderedComponent<Harness> cut, string name)

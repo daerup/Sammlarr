@@ -6,10 +6,12 @@ using Contracts.Settings;
 using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Settings.Components.Users;
 using UI.Shared.Branding.Birds;
+using UI.Shared.Layout;
 using UI.Shared.Services;
 
 namespace UI.Tests.Settings;
@@ -87,6 +89,26 @@ public class UsersSectionTests : BunitContext
 			]);
 		var birds = cut.FindAll(".person-row").Select(row => $"{row.GetAttribute("style")} | {row.QuerySelectorAll("[data-bird]").Length}");
 		await Assert.That(birds).IsEquivalentTo(["--bird-hue: 40 | 1", "--bird-hue: 177.5 | 1", " | 0"]);
+	}
+
+	[Test]
+	public async Task Rows_OnAPhone_FoldTheRoleIntoTheLineAndLeaveActiveUnsaid()
+	{
+		Installed(AuthProvider.Local);
+		RenderTree.TryAdd<CascadingValue<bool>>(cascade => cascade.Add(value => value.Name, PhoneLayout.IsPhoneCascade).Add(value => value.Value, true));
+
+		var cut = Render<UsersSection>();
+
+		cut.WaitForElement(".person-row");
+		var rows = cut.FindAll(".person-row button.grid")
+			.Select(row => $"{row.QuerySelector("[data-owns]")!.TextContent.Trim()} | {row.QuerySelector("[data-status]")?.TextContent.Trim()}");
+		await Assert
+			.That(rows)
+			.IsEquivalentTo([
+				"Admin · 3 feeds · 15 wanted · 2 blocklisted | ",
+				$"Member · No feeds or titles yet | Locked until {LockedUntil.ToLocalTime():HH:mm}",
+				"Not joined yet | Invited",
+			]);
 	}
 
 	[Test]

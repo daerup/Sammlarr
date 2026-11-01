@@ -1,0 +1,100 @@
+@if (Visible)
+{
+    @if (Placement is ActionPlacement.Toolbar && HasSlot && Disabled && DisabledReason is not null)
+    {
+        <ReasonTip TriggerClass="flex min-w-0 flex-1" TriggerStyle="@SlotOrder" Reason="@DisabledReason" ActionText="Settings" ActionHref="@DisabledLink">@Slot</ReasonTip>
+    }
+    else if (Placement is ActionPlacement.Toolbar && HasSlot)
+    {
+        @Slot
+    }
+    else if (Placement is ActionPlacement.Header)
+    {
+        <div class="contents @(HasSlot ? "max-md:hidden" : null)">
+            @if (Desktop is not null)
+            {
+                @Desktop
+            }
+            else
+            {
+                <BbButton Variant="Variant" OnClick="OnClick" Disabled="Disabled" Class="@(Active ? "bg-accent" : null)">
+                    <LucideIcon Name="@Icon" Size="IconSize" Class="@IconClass"/>
+                    @(DesktopLabel ?? Label)
+                    @if (Badge > 0)
+                    {
+                        <span class="action-badge">@Badge</span>
+                    }
+                </BbButton>
+            }
+        </div>
+    }
+}
+
+@code {
+    [CascadingParameter] private ActionPlacement Placement { get; set; }
+
+    [Parameter, EditorRequired] public required string Icon { get; set; }
+    [Parameter] public int IconSize { get; set; } = 16;
+    [Parameter] public string IconClass { get; set; } = "mr-2";
+    [Parameter, EditorRequired] public required string Label { get; set; }
+    [Parameter] public string? DesktopLabel { get; set; }
+    [Parameter] public ButtonVariant Variant { get; set; } = ButtonVariant.Outline;
+    [Parameter] public bool Active { get; set; }
+    [Parameter] public int Badge { get; set; }
+    [Parameter] public bool Visible { get; set; } = true;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public ActionTone Tone { get; set; }
+    [Parameter] public int? Order { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+    [Parameter] public EventCallback PhoneOnClick { get; set; }
+    [Parameter] public RenderFragment? Desktop { get; set; }
+    [Parameter] public RenderFragment? BadgeContent { get; set; }
+    [Parameter] public string? BadgeLabel { get; set; }
+    [Parameter] public string? DisabledReason { get; set; }
+    [Parameter] public string? DisabledLink { get; set; }
+
+    private string? SlotOrder => Order is { } order ? $"order: {order}" : null;
+
+    private string? ToneClass
+    {
+        get
+        {
+            return Tone switch
+            {
+                ActionTone.Default => null,
+                ActionTone.Danger => "is-danger",
+                ActionTone.Commit => "is-commit",
+            };
+        }
+    }
+
+    private bool HasSlot => OnClick.HasDelegate || PhoneOnClick.HasDelegate;
+
+    private string? SlotLabel
+    {
+        get
+        {
+            return (Disabled ? DisabledReason : null, BadgeLabel, Badge) switch
+            {
+                ({ } reason, _, _) => $"{Label}, {reason}",
+                (null, { } status, _) => $"{Label}, {status}",
+                (null, null, > 0) => $"{Label}, {Badge}",
+                _ => null,
+            };
+        }
+    }
+
+    private RenderFragment Slot =>
+        @<button type="button" class="toolbar-slot @(Active && !PhoneOnClick.HasDelegate ? "is-on" : null) @ToneClass" style="@SlotOrder" disabled="@Disabled" aria-label="@SlotLabel" @onclick="PhoneOnClick.HasDelegate ? PhoneOnClick : OnClick">
+            <LucideIcon Name="@Icon" Size="20"/>
+            <span class="toolbar-slot-label">@Label</span>
+            @if (BadgeContent is not null)
+            {
+                <span class="toolbar-badge is-status">@BadgeContent</span>
+            }
+            else if (Badge > 0)
+            {
+                <span class="toolbar-badge">@Badge</span>
+            }
+        </button>;
+}

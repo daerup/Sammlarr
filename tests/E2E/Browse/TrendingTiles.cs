@@ -6,6 +6,8 @@ internal static class TrendingTiles
 {
 	internal const string Title = "Moana";
 
+	internal const string Second = "Mayday";
+
 	internal static ILocator Resolved(IPage page, string title) =>
 		page.Locator("[data-testid='media-tile']:not(.tile-unmatched)").Filter(new LocatorFilterOptions { Has = page.Heading(title) });
 }

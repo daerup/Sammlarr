@@ -27,6 +27,12 @@ public class FeedPagingTests
 	}
 
 	[Test]
+	public async Task Head_TakesEveryFeedUpToTheEndOfThatPage()
+	{
+		await Assert.That(FeedPaging.Head([.. Enumerable.Range(1, 50)], pages: 2)).IsEquivalentTo(Enumerable.Range(1, 40));
+	}
+
+	[Test]
 	public async Task Slice_TakesTheFeedsBelongingToThatPage()
 	{
 		var feeds = Enumerable.Range(1, 21).ToList();

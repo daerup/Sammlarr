@@ -18,7 +18,7 @@ internal sealed partial class CircuitFailureSink(string category, string marker,
 
 	internal static void AssertNone(IReadOnlyCollection<string> crashed)
 	{
-		var crashes = Crashes(crashed).Where(crash => !IsVirtualizeDisposedAfterItsPageClosed(crash)).SelectMany(crash => crash).ToList();
+		var crashes = Crashes(crashed).Where(crash => !IsFrameworkDisposedAfterItsPageClosed(crash)).SelectMany(crash => crash).ToList();
 		if (crashes.Count > 0)
 		{
 			Assert.Fail($"A circuit crashed:{Environment.NewLine}{string.Join(Environment.NewLine, crashes)}");
@@ -45,9 +45,17 @@ internal sealed partial class CircuitFailureSink(string category, string marker,
 		}
 	}
 
-	private static bool IsVirtualizeDisposedAfterItsPageClosed(List<string> crash) =>
-		crash.Any(line => line.Contains("System.Threading.Tasks.TaskCanceledException", StringComparison.Ordinal))
-		&& crash.Any(line => line.Contains("Virtualization.VirtualizeJsInterop.DisposeAsync", StringComparison.Ordinal));
+	private static readonly string[] FrameworkDisposals =
+	[
+		"Virtualization.VirtualizeJsInterop.DisposeAsync",
+		"Routing.NavigationLock.System.IAsyncDisposable.DisposeAsync",
+	];
+
+	private static bool IsFrameworkDisposedAfterItsPageClosed(List<string> crash)
+	{
+		return crash.Any(line => line.Contains("System.Threading.Tasks.TaskCanceledException", StringComparison.Ordinal))
+			&& crash.Any(line => FrameworkDisposals.Any(disposal => line.Contains(disposal, StringComparison.Ordinal)));
+	}
 
 	private void Observe(string message)
 	{

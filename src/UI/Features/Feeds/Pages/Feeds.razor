@@ -36,7 +36,7 @@
 
 <PageContainer Heading="Feeds">
     <DescriptionContent>
-        @if (_feeds.Count > 0)
+        @if (HasFeeds)
         {
             <FeedStatusLine Rows="_rows" Added="_lastWeek.Added" Removed="_lastWeek.Removed" Now="_now"/>
         }
@@ -45,33 +45,22 @@
             <span>Subscribe to media lists from supported providers to get started.</span>
         }
     </DescriptionContent>
-    <HeaderActions>
+    <HeaderSearch>
         <ProtectedSection GuardState="IsSignedIn" ShowFallback="false">
-            <div class="flex items-center gap-2">
-                @if (_feeds.Count > 0)
-                {
-                    <ListSearch Value="@_filter.Search" ValueChanged="ApplySearch" Placeholder="Search feeds"/>
-                }
-                <MediaListViewActions HasItems="_feeds.Count > 0"
-                                      IsEditMode="_isSelecting"
-                                      ShowFilters="_showFilters"
-                                      ActiveFilters="_filter.ActiveCount"
-                                      OnEnterEditMode="() => _isSelecting = true"
-                                      OnToggleFilters="() => _showFilters = !_showFilters"/>
-                @if (_feeds.Count > 0 && !_isSelecting)
-                {
-                    <BbButton Variant="ButtonVariant.Outline" OnClick="OpenRunFeeds">
-                        <LucideIcon Name="play" Size="16" Class="mr-2"/>
-                        Run feeds
-                    </BbButton>
-                }
-                <BbButton Variant="ButtonVariant.Secondary" OnClick="@(() => NavigationManager.NavigateTo("/feeds/create"))">
-                    <LucideIcon Name="plus" Size="15" Class="mr-2.5 shrink-0"/>
-                    Add feed
-                </BbButton>
-            </div>
+            @if (HasFeeds)
+            {
+                <ListSearch Value="@_filter.Search" ValueChanged="ApplySearch" Placeholder="Search feeds"/>
+            }
         </ProtectedSection>
-    </HeaderActions>
+    </HeaderSearch>
+    <Actions>
+        <ProtectedSection GuardState="IsSignedIn" ShowFallback="false">
+            <PageAction Icon="square-check" Label="Select" DesktopLabel="Bulk edit" OnClick="() => _isSelecting = true" Visible="HasFeeds && !_isSelecting"/>
+            <PageAction Icon="sliders-horizontal" Label="Filter" DesktopLabel="View" Active="_showFilters" Badge="_filter.ActiveCount" OnClick="() => _showFilters = !_showFilters" PhoneOnClick="() => _filterSheetOpen = true" Visible="HasFeeds"/>
+            <PageAction Icon="play" Label="Run" DesktopLabel="Run feeds" OnClick="OpenRunFeeds" Visible="HasFeeds && !_isSelecting"/>
+            <PageAction Icon="plus" IconSize="15" IconClass="mr-2.5 shrink-0" Label="Add feed" Variant="ButtonVariant.Secondary" OnClick="@(() => NavigationManager.NavigateTo("/feeds/create"))"/>
+        </ProtectedSection>
+    </Actions>
     <ChildContent>
         <ProtectedSection GuardState="IsSignedIn"
                           DeniedActionDescription="managing your feeds"
@@ -129,46 +118,62 @@
                                    OnClearSelection="_selection.Clear"
                                    OnExit="ExitSelecting">
                         <Actions>
-                            <HoverButton Preset="HoverButtonPreset.Custom"
-                                         Color="var(--foreground)"
-                                         Size="ButtonSize.Small"
-                                         Class="min-w-24 justify-center"
-                                         OnClick="OpenBulkRun"
-                                         Disabled="@(!Chosen.Any(row => row.Feed.Enabled && !row.IsBusy))">
-                                <LucideIcon Name="play" Size="14" Class="mr-1"/>
-                                <span>Run</span>
-                            </HoverButton>
-                            @if (Chosen.Count > 0 && Chosen.All(row => !row.Feed.Enabled))
+                            <PageAction Icon="play" Label="Run" OnClick="OpenBulkRun" Disabled="!CanRunChosen">
+                                <Desktop>
+                                    <HoverButton Preset="HoverButtonPreset.Custom"
+                                                 Color="var(--foreground)"
+                                                 Size="ButtonSize.Small"
+                                                 Class="min-w-24 justify-center"
+                                                 OnClick="OpenBulkRun"
+                                                 Disabled="!CanRunChosen">
+                                        <LucideIcon Name="play" Size="14" Class="mr-1"/>
+                                        <span>Run</span>
+                                    </HoverButton>
+                                </Desktop>
+                            </PageAction>
+                            @if (ChosenAllPaused)
                             {
-                                <HoverButton Preset="HoverButtonPreset.Custom"
-                                             Color="var(--alert-warning)"
-                                             Size="ButtonSize.Small"
-                                             Class="min-w-24 justify-center"
-                                             OnClick="ResumeAsync">
-                                    <LucideIcon Name="play" Size="14" Class="mr-1"/>
-                                    <span>Resume</span>
-                                </HoverButton>
+                                <PageAction Icon="play" Label="Resume" OnClick="ResumeAsync">
+                                    <Desktop>
+                                        <HoverButton Preset="HoverButtonPreset.Custom"
+                                                     Color="var(--alert-warning)"
+                                                     Size="ButtonSize.Small"
+                                                     Class="min-w-24 justify-center"
+                                                     OnClick="ResumeAsync">
+                                            <LucideIcon Name="play" Size="14" Class="mr-1"/>
+                                            <span>Resume</span>
+                                        </HoverButton>
+                                    </Desktop>
+                                </PageAction>
                             }
                             else
                             {
-                                <HoverButton Preset="HoverButtonPreset.Custom"
-                                             Color="var(--alert-warning)"
-                                             Size="ButtonSize.Small"
-                                             Class="min-w-24 justify-center"
-                                             OnClick="() => _confirm = FeedsConfirm.Pause"
-                                             Disabled="@(!Chosen.Any(row => row.Feed.Enabled))">
-                                    <LucideIcon Name="pause" Size="14" Class="mr-1"/>
-                                    <span>Pause</span>
-                                </HoverButton>
+                                <PageAction Icon="pause" Label="Pause" OnClick="AskPause" Disabled="!CanPauseChosen">
+                                    <Desktop>
+                                        <HoverButton Preset="HoverButtonPreset.Custom"
+                                                     Color="var(--alert-warning)"
+                                                     Size="ButtonSize.Small"
+                                                     Class="min-w-24 justify-center"
+                                                     OnClick="AskPause"
+                                                     Disabled="!CanPauseChosen">
+                                            <LucideIcon Name="pause" Size="14" Class="mr-1"/>
+                                            <span>Pause</span>
+                                        </HoverButton>
+                                    </Desktop>
+                                </PageAction>
                             }
-                            <HoverButton Preset="HoverButtonPreset.Destructive"
-                                         Size="ButtonSize.Small"
-                                         Class="min-w-24 justify-center"
-                                         OnClick="() => AskDelete(Chosen)"
-                                         Disabled="@(Chosen.Count == 0)">
-                                <LucideIcon Name="trash-2" Size="14" Class="mr-1"/>
-                                <span>Delete</span>
-                            </HoverButton>
+                            <PageAction Icon="trash-2" Label="Delete" Tone="ActionTone.Danger" OnClick="AskDeleteChosen" Disabled="!HasChosen">
+                                <Desktop>
+                                    <HoverButton Preset="HoverButtonPreset.Destructive"
+                                                 Size="ButtonSize.Small"
+                                                 Class="min-w-24 justify-center"
+                                                 OnClick="AskDeleteChosen"
+                                                 Disabled="!HasChosen">
+                                        <LucideIcon Name="trash-2" Size="14" Class="mr-1"/>
+                                        <span>Delete</span>
+                                    </HoverButton>
+                                </Desktop>
+                            </PageAction>
                         </Actions>
                     </BulkActionBar>
                 }
@@ -200,10 +205,11 @@
                         }
                     </div>
 
-                    <PaginationControls CurrentPage="_currentPage"
+                    <PaginationControls CurrentPage="@(IsPhone ? _shownPages : _currentPage)"
                                         TotalPages="FeedPaging.PageCount(_visible.Count)"
                                         IsDisabled="_isLoading"
-                                        PageChanged="page => _currentPage = page"/>
+                                        PageChanged="page => _currentPage = page"
+                                        OnReachEnd="() => _shownPages++"/>
                 }
             }
         </ProtectedSection>
@@ -234,13 +240,18 @@
         }
     </Badges>
     <Actions>
-        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => _confirmOpen = false)">Cancel</BbButton>
-        <BbButton Size="ButtonSize.Small" Disabled="@(_pendingFeed is null)" OnClick="ConfirmRunAsync">
+        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => _confirmOpen = false)" data-dialog-cancel>Cancel</BbButton>
+        <BbButton Size="ButtonSize.Small" Disabled="@(_pendingFeed is null)" OnClick="ConfirmRunAsync" data-dialog-commit>
             <LucideIcon Name="play" Size="13" Class="mr-1.5"/>
             Run
         </BbButton>
     </Actions>
 </ChangeDialog>
+
+@if (_filterSheetOpen)
+{
+    <FeedFilterSheet OpenChanged="open => _filterSheetOpen = open" Filter="_filter" OnApply="ApplyFilter" Providers="ProviderCounts" Count="filter => filter.Apply(_rows).Count"/>
+}
 
 <RunFeedsDialog Open="_isRunOpen"
                 OpenChanged="@(open => _isRunOpen = open)"
@@ -259,20 +270,20 @@
                 <BbAlertDialogTitle>@ConfirmTitle(confirm)</BbAlertDialogTitle>
                 <BbAlertDialogDescription>@ConfirmBody(confirm)</BbAlertDialogDescription>
             </BbAlertDialogHeader>
-            <BbAlertDialogFooter>
+            <BbAlertDialogFooter data-dialog-actions>
                 <BbAlertDialogCancel>
-                    <BbButton Variant="ButtonVariant.Outline" OnClick="() => _confirm = null">Cancel</BbButton>
+                    <BbButton data-dialog-cancel Variant="ButtonVariant.Outline" OnClick="() => _confirm = null">Cancel</BbButton>
                 </BbAlertDialogCancel>
                 @if (confirm is FeedsConfirm.Pause)
                 {
-                    <HoverButton Preset="HoverButtonPreset.Custom" Color="var(--alert-warning)" OnClick="PauseAsync">
+                    <HoverButton data-dialog-commit Preset="HoverButtonPreset.Custom" Color="var(--alert-warning)" OnClick="PauseAsync">
                         <LucideIcon Name="pause" Size="15" Class="mr-1"/>
                         <span>Pause</span>
                     </HoverButton>
                 }
                 else
                 {
-                    <HoverButton Preset="HoverButtonPreset.Destructive" OnClick="DeleteAsync">
+                    <HoverButton data-dialog-commit Preset="HoverButtonPreset.Destructive" OnClick="DeleteAsync">
                         <LucideIcon Name="trash-2" Size="15" Class="mr-1"/>
                         <span>Delete</span>
                     </HoverButton>
@@ -316,6 +327,7 @@
     private (int Added, int Removed) _lastWeek;
     private FeedFilter _filter = FeedFilter.None;
     private bool _showFilters;
+    private bool _filterSheetOpen;
     private bool _isSelecting;
     private bool _isRunOpen;
     private bool _runFromSelection;
@@ -324,6 +336,7 @@
 
     private bool _isLoading = true;
     private int _currentPage = 1;
+    private int _shownPages = 1;
     private int _runVersion;
     private bool _confirmOpen;
     private bool _isPreviewing;
@@ -340,9 +353,26 @@
 
     private bool IsSignedIn() => _isSignedIn;
 
-    private bool ShowsLiveView => _live.Match(_ => true, () => !_isLoading && _watching && _feeds.Count > 0);
+    private bool HasFeeds => _feeds.Count > 0;
 
-    private IReadOnlyList<FeedRow> PageRows => FeedPaging.Slice(_visible, FeedPaging.PageWithin(_currentPage, _visible.Count));
+    private bool ShowsLiveView => _live.Match(_ => true, () => !IsPhone && !_isLoading && _watching && HasFeeds);
+
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)]
+    private bool IsPhone { get; set; }
+
+    private bool CanRunChosen => Chosen.Any(row => row.Feed.Enabled && !row.IsBusy);
+
+    private bool CanPauseChosen => Chosen.Any(row => row.Feed.Enabled);
+
+    private bool ChosenAllPaused => HasChosen && Chosen.All(row => !row.Feed.Enabled);
+
+    private bool HasChosen => Chosen.Count > 0;
+
+    private void AskPause() => _confirm = FeedsConfirm.Pause;
+
+    private void AskDeleteChosen() => AskDelete(Chosen);
+
+    private IReadOnlyList<FeedRow> PageRows => IsPhone ? FeedPaging.Head(_visible, _shownPages) : FeedPaging.Slice(_visible, FeedPaging.PageWithin(_currentPage, _visible.Count));
 
     private IReadOnlyList<FeedRow> Chosen => [.. _visible.Where(row => _selection.Contains(row.Feed.Id))];
 
@@ -467,6 +497,7 @@
     {
         _filter = filter;
         _currentPage = 1;
+        _shownPages = 1;
         _visible = _filter.Apply(_rows);
     }
 

@@ -7,6 +7,10 @@
     justify-content: center;
 }
 
+.search-modal.under-details {
+    z-index: 40;
+}
+
 .search-modal-backdrop {
     position: absolute;
     inset: 0;
@@ -25,6 +29,19 @@
     background: var(--background);
     padding: 30px;
     border-radius: 15px;
+}
+
+.search-modal-empty {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 40px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--muted-foreground);
 }
 
 .search-modal-body {
@@ -65,4 +82,52 @@
     background-color: hsl(var(--muted) / 0.55);
 }
 
+@media (width < 48rem) {
+    .search-modal-content {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        max-height: none;
+        padding: calc(8px + env(safe-area-inset-top)) 16px 0;
+        border-radius: 0;
+    }
 
+    .search-modal-backdrop {
+        display: none;
+    }
+
+    .search-modal-results {
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
+    }
+
+    .search-modal-results ::deep .search-result-row .search-result-poster {
+        width: 44px;
+        height: 66px;
+    }
+
+    .search-modal-results ::deep .search-result-row .result-icons {
+        position: static;
+        flex: none;
+        gap: 0;
+    }
+
+    .search-modal-results ::deep .search-result-row .result-icons :is(.provenance-trigger, .search-result-toggle-btn) {
+        display: inline-flex;
+    }
+
+    .search-modal-results ::deep .search-result-row .search-result-toggle-btn {
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+    }
+
+    .search-modal-results ::deep .search-result-row .search-result-toggle-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .search-modal-results ::deep .search-result-row .result-chevron {
+        display: none;
+    }
+}

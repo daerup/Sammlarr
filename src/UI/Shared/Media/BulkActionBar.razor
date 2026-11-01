@@ -1,3 +1,33 @@
+@using Microsoft.AspNetCore.Components.Sections
+
+@if (IsPhone)
+{
+    <SectionContent SectionName="@PhoneLayout.BulkSection">
+        <CascadingValue Value="ActionPlacement.Toolbar" IsFixed="true">
+            @if (Actions is not null)
+            {
+                @Actions
+            }
+            else
+            {
+                @if (MarkLabel is not null)
+                {
+                    <PageAction Icon="@MarkIcon" Label="@MarkLabel" OnClick="MarkAsync" Disabled="CannotMark"/>
+                }
+                <PageAction Icon="trash-2" Label="@RemoveLabel" Tone="ActionTone.Danger" OnClick="RemoveAsync" Disabled="CannotRemove"/>
+            }
+        </CascadingValue>
+    </SectionContent>
+    <SectionContent SectionName="@PhoneLayout.BarSection">
+        <div class="phone-select-bar">
+            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" OnClick="OnExit" AriaLabel="Leave select mode">
+                <LucideIcon Name="x" Size="20"/>
+            </BbButton>
+            <span class="phone-title" role="status">@SelectedCount selected</span>
+            <BbButton Variant="ButtonVariant.Ghost" OnClick="SelectListAsync" AriaLabel="@($"Select all {ListCount}")">All @ListCount</BbButton>
+        </div>
+    </SectionContent>
+}
 <div class="bulk-sticky">
 <div class="flex items-center gap-3 rounded-lg border bg-card px-4 py-3 shadow-sm">
     <BbDropdownMenu>
@@ -55,32 +85,25 @@
     <div class="flex items-center gap-1.5">
     @if (MarkLabel is not null)
     {
-        <BbTooltip>
-            <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
+        <ReasonTip TriggerClass="inline-flex" Reason="@(SelectedCount > 0 && MarkableCount == 0 ? AlreadyMarkedHint : null)">
                 <HoverButton Preset="@(MarkTint is null ? HoverButtonPreset.Destructive : HoverButtonPreset.Custom)"
                              Color="@MarkTint"
                              Size="ButtonSize.Small"
                              OnClick="MarkAsync"
-                             Disabled="@(MarkableCount == 0 || IsRemoving)">
+                             Disabled="CannotMark">
                     <LucideIcon Name="@MarkIcon" Size="14" Class="mr-1"/>
                     <span>@MarkLabel</span>
                 </HoverButton>
-            </BbTooltipTrigger>
-            @if (SelectedCount > 0 && MarkableCount == 0)
-            {
-                <BbTooltipContent>@AlreadyMarkedHint</BbTooltipContent>
-            }
-        </BbTooltip>
+        </ReasonTip>
     }
 
     <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-5"/>
 
-    <BbTooltip>
-        <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
+    <ReasonTip TriggerClass="inline-flex" Reason="@(SelectedCount > 0 && RemovableCount == 0 ? AlreadyRemovedHint : null)">
             <HoverButton Preset="HoverButtonPreset.Destructive"
                          Size="ButtonSize.Small"
                          OnClick="RemoveAsync"
-                         Disabled="@(RemovableCount == 0 || IsRemoving)">
+                         Disabled="CannotRemove">
                 @if (IsRemoving)
                 {
                     <BbSpinner Size="SpinnerSize.Small" Class="mr-1"/>
@@ -92,12 +115,7 @@
                     <span>@RemoveLabel</span>
                 }
             </HoverButton>
-        </BbTooltipTrigger>
-        @if (SelectedCount > 0 && RemovableCount == 0)
-        {
-            <BbTooltipContent>@AlreadyRemovedHint</BbTooltipContent>
-        }
-    </BbTooltip>
+    </ReasonTip>
     </div>
     }
 
@@ -123,11 +141,11 @@
                     <span>@pending.Copy.Body</span>
                 </BbAlertDialogDescription>
             </BbAlertDialogHeader>
-            <BbAlertDialogFooter>
+            <BbAlertDialogFooter data-dialog-actions>
                 <BbAlertDialogCancel>
-                    <BbButton Variant="ButtonVariant.Outline" OnClick="CancelAsync">Cancel</BbButton>
+                    <BbButton data-dialog-cancel Variant="ButtonVariant.Outline" OnClick="CancelAsync">Cancel</BbButton>
                 </BbAlertDialogCancel>
-                <HoverButton Preset="@(pending.Tint is null ? HoverButtonPreset.Destructive : HoverButtonPreset.Custom)"
+                <HoverButton data-dialog-commit Preset="@(pending.Tint is null ? HoverButtonPreset.Destructive : HoverButtonPreset.Custom)"
                              Color="@pending.Tint"
                              OnClick="ConfirmAsync">
                     <LucideIcon Name="@pending.Icon" Size="15" Class="mr-1"/>
@@ -161,13 +179,22 @@
     [Parameter] public Func<int, BulkConfirm>? MarkConfirm { get; set; }
     [Parameter] public RenderFragment? Actions { get; set; }
 
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)]
+    private bool IsPhone { get; set; }
+
     private sealed record PendingAction(BulkConfirm Copy, int Count, string ConfirmLabel, string Icon, string? Tint, EventCallback Run);
 
     private PendingAction? _pending;
 
-    private bool HasMorePages => ListCount > PageCount;
+    private bool ReachesPastPage => ListCount > PageCount;
 
-    private bool NeedsConfirm => HasMorePages ? SelectedCount > PageCount : ListCount > 0 && SelectedCount >= ListCount;
+    private bool HasMorePages => !IsPhone && ReachesPastPage;
+
+    private bool NeedsConfirm => ReachesPastPage ? SelectedCount > PageCount : ListCount > 0 && SelectedCount >= ListCount;
+
+    private bool CannotMark => MarkableCount == 0 || IsRemoving;
+
+    private bool CannotRemove => RemovableCount == 0 || IsRemoving;
 
     private string TickIcon => HasMorePages && SelectedCount >= ListCount ? "check-check" : SelectedCount >= PageCount ? "check" : "minus";
 

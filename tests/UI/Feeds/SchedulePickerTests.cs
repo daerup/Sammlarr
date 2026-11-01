@@ -3,6 +3,7 @@ using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
 using Microsoft.AspNetCore.Components;
+using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Components;
 
 namespace UI.Tests.Feeds;
@@ -33,6 +34,16 @@ public class SchedulePickerTests : BunitContext
 		{
 			(CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture) = (culture, uiCulture);
 		}
+	}
+
+	[Test]
+	public async Task Expression_LabelsItsSixFieldsInFullWords()
+	{
+		var cut = Picker("0 0 6 1 * *");
+
+		await Assert
+			.That(cut.FindAll("[data-testid=cron-fields] > div > span.select-none:first-of-type").Select(label => label.TextContent))
+			.IsEquivalentTo(["Second", "Minute", "Hour", "Day of month", "Month", "Day of week"], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -78,16 +89,20 @@ public class SchedulePickerTests : BunitContext
 	}
 
 	[Test]
-	public async Task Clock_OpensTheSteppingPicker_WhoseChoiceReplacesTheTypedTime()
+	public async Task Clock_HourThenMinute_ReplacesTheTypedTime()
 	{
 		var cut = Picker("0 0 23 * * *");
 
 		await Assert.That(cut.FindAll("button[aria-label='Open time picker']")).Count().IsEqualTo(1);
 		cut.Find("button[aria-label='Open time picker']").Click();
-		cut.FindAll("[role=dialog] button").Single(button => button.TextContent.Trim() == "Clear").Click();
+		cut.WaitForElement("[role=dialog] [aria-label='Hour 07']");
+		await cut.FindAndClickAsync(() => cut.Find("[role=dialog] [aria-label='Hour 07']"));
+		await cut.FindAndClickAsync(() => cut.Find("[role=dialog] [aria-label='Minute 45']"));
+		await Assert.That(_schedule).IsEqualTo("untouched");
 
-		await Assert.That(_schedule).IsNull();
-		await Assert.That(cut.Find("input[aria-label=Hour]").GetAttribute("value")).IsEmpty();
+		await cut.FindAndClickAsync(() => cut.FindAll("[role=dialog] button").Single(button => button.TextContent.Trim() == "Set 07:45"));
+
+		await Assert.That(_schedule).IsEqualTo("0 45 7 * * *");
 	}
 
 	private IRenderedComponent<IComponent> Picker(string? schedule)

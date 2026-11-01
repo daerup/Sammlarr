@@ -23,103 +23,111 @@
 @inject Notifier Notifier
 @inject RatingContext RatingContext
 
-<BbCard data-preview-state="@PreviewState" Class="flex-1 min-w-0 flex flex-col overflow-hidden rounded-lg bg-card border border-border shadow-sm">
-    <div class="shrink-0 sticky top-0 z-20 px-6 pt-6 pb-4 border-b flex items-center gap-2 bg-base-100 rounded-t-lg">
-        <BbInput Placeholder="Search media..."
-                 Class="w-full"
-                 Value="@_searchQuery"
-                 ValueChanged="OnSearchQueryChanged"
-                 UpdateTiming="UpdateTiming.Debounced"
-                 DebounceInterval="250"
-                 Disabled="IsLoading"/>
-        <LucideIcon Name="search" Class="text-muted-foreground shrink-0"/>
-        @if (HasResults)
+<BbCard data-preview-state="@PreviewState" Class="flex-1 min-w-0 flex flex-col overflow-hidden rounded-lg bg-card border border-border shadow-sm max-md:-mx-4 max-md:overflow-visible max-md:rounded-none max-md:border-x-0 max-md:shadow-none">
+    @if (!IsPhone)
+    {
+        <div class="shrink-0 sticky top-0 z-20 px-6 pt-6 pb-4 border-b flex items-center gap-2 bg-card rounded-t-lg">
+            <BbInput Placeholder="Search media..."
+                     Class="w-full"
+                     Value="@_searchQuery"
+                     ValueChanged="OnSearchQueryChanged"
+                     UpdateTiming="UpdateTiming.Debounced"
+                     DebounceInterval="250"
+                     Disabled="IsLoading"/>
+            <LucideIcon Name="search" Class="text-muted-foreground shrink-0"/>
+            @if (HasResults)
+            {
+                <BbTooltip>
+                    <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
+                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Refresh assets" OnClick="() => _refreshDialogOpen = true">
+                            <LucideIcon Name="refresh-cw" Size="16"/>
+                        </BbButton>
+                    </BbTooltipTrigger>
+                    <BbTooltipContent data-label-tip>Refresh assets</BbTooltipContent>
+                </BbTooltip>
+            }
+        </div>
+    }
+    <BbAlertDialog @bind-Open="_refreshDialogOpen">
+        <BbAlertDialogContent>
+            <BbAlertDialogHeader>
+                <BbAlertDialogTitle>Refresh assets?</BbAlertDialogTitle>
+                <BbAlertDialogDescription>
+                    This drops the cached metadata for every item shown and re-fetches it from your providers. It may take a while for large lists.
+                </BbAlertDialogDescription>
+            </BbAlertDialogHeader>
+            <BbAlertDialogFooter data-dialog-actions>
+                <BbAlertDialogCancel>
+                    <BbButton data-dialog-cancel Variant="ButtonVariant.Outline">Cancel</BbButton>
+                </BbAlertDialogCancel>
+                <BbButton data-dialog-commit Variant="ButtonVariant.Default" OnClick="OnRefreshConfirmedAsync">Refresh</BbButton>
+            </BbAlertDialogFooter>
+        </BbAlertDialogContent>
+    </BbAlertDialog>
+    <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 pb-4 pt-4 flex flex-col max-md:overflow-visible max-md:px-4" style="scrollbar-gutter: stable;">
+        @if (HasItems && IsPhone)
         {
-            <BbAlertDialog @bind-Open="_refreshDialogOpen">
-                <BbAlertDialogTrigger>
-                    <BbTooltip>
-                        <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
-                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Refresh assets">
-                                <LucideIcon Name="refresh-cw" Size="16"/>
-                            </BbButton>
-                        </BbTooltipTrigger>
-                        <BbTooltipContent>Refresh assets</BbTooltipContent>
-                    </BbTooltip>
-                </BbAlertDialogTrigger>
-                <BbAlertDialogContent>
-                    <BbAlertDialogHeader>
-                        <BbAlertDialogTitle>Refresh assets?</BbAlertDialogTitle>
-                        <BbAlertDialogDescription>
-                            This drops the cached metadata for every item shown and re-fetches it from your providers. It may take a while for large lists.
-                        </BbAlertDialogDescription>
-                    </BbAlertDialogHeader>
-                    <BbAlertDialogFooter>
-                        <BbAlertDialogCancel>
-                            <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
-                        </BbAlertDialogCancel>
-                        <BbButton Variant="ButtonVariant.Default" OnClick="OnRefreshConfirmedAsync">Refresh</BbButton>
-                    </BbAlertDialogFooter>
-                </BbAlertDialogContent>
-            </BbAlertDialog>
+            <div class="preview-heading" data-preview-heading>
+                @if (_searching)
+                {
+                    <SearchField @ref="_phoneSearch" Value="@_searchQuery" Placeholder="Search titles" OnInput="OnPhoneTypedAsync" OnClear="ClearSearch"/>
+                    <button type="button" class="preview-search-cancel" @onclick="CloseSearch">Cancel</button>
+                }
+                else
+                {
+                    <div class="min-w-0 flex-1">@Heading</div>
+                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Search titles" Disabled="IsLoading" OnClick="OpenSearch">
+                        <LucideIcon Name="search" Size="18"/>
+                    </BbButton>
+                    @if (HasResults)
+                    {
+                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Refresh assets" OnClick="() => _refreshDialogOpen = true">
+                            <LucideIcon Name="refresh-cw" Size="18"/>
+                        </BbButton>
+                    }
+                }
+            </div>
         }
-    </div>
-    <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 pb-4 pt-4 flex flex-col" style="scrollbar-gutter: stable;">
         @if (HasItems)
         {
-            <div class="mb-4 shrink-0 flex items-start justify-between gap-3">
-                <div>
-                    <h2 class="text-base font-semibold tracking-wide flex items-center gap-2">
-                        <span>Media Results</span>
-                        @if (IsLoading || Updating)
-                        {
-                            <span class="inline-flex" data-preview-busy>
-                                <BbSpinner Size="SpinnerSize.Small"/>
-                            </span>
-                        }
-                    </h2>
-                    <p class="text-sm text-muted-foreground mt-0.5">
-                        <FeedSourceLink Identifier="@(_appliedConfig?.Identifier ?? Config.Identifier)"
-                                        Provider="@(_appliedConfig?.Provider ?? Config.Provider!.Value)"
-                                        Muted="true"/>
-                    </p>
-                    @if (_reloading is { } reloading)
-                    {
-                        <p class="mt-1 text-xs text-muted-foreground" data-preview-reloading>@reloading.Progress</p>
-                    }
-                </div>
+            <div class="mb-4 shrink-0 flex items-start justify-between gap-3 max-md:flex-col max-md:items-stretch max-md:gap-2.5">
+                @if (!IsPhone)
+                {
+                    <div>@Heading</div>
+                }
                 <BbTooltipProvider>
-                    <div class="flex items-start transition-opacity @DimClass">
-                    <div class="stat-badges-row flex items-start text-xs font-medium">
-                        <PreviewFilterBadge Flash="_flash" Icon="list" Count="_rawResults.Count" Active="_activeFilters.Count == 0 && !_atRiskOnly" OnClick="ResetFilters">
+                    <div class="flex items-start transition-opacity @DimClass max-md:-mx-4 max-md:overflow-x-auto max-md:px-4 max-md:[scrollbar-width:none]" data-scroll-x>
+                    <div class="stat-badges-row flex items-start text-xs font-medium max-md:gap-1.5">
+                        <PreviewFilterBadge Flash="_flash" Icon="list" Label="All fetched" Count="_rawResults.Count" Active="_activeFilters.Count == 0 && !_atRiskOnly" OnClick="ResetFilters">
                             <Tooltip>Total items fetched from the source list. Click to clear filters.</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Flash="_flash" Icon="check" Count="IncludedCount" Active="IsFilterActive(PreviewBucket.Added)" OnClick="() => ToggleFilter(PreviewBucket.Added)">
+                        <PreviewFilterBadge Flash="_flash" Icon="check" Label="Will import" Count="IncludedCount" Active="IsFilterActive(PreviewBucket.Added)" OnClick="() => ToggleFilter(PreviewBucket.Added)">
                             <Tooltip>Items that will be imported</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Flash="_flash" Icon="bookmark-check" Count="KeptCount" Active="IsFilterActive(PreviewBucket.Kept)" OnClick="() => ToggleFilter(PreviewBucket.Kept)">
+                        <PreviewFilterBadge Flash="_flash" Icon="bookmark-check" Label="Already added" Count="KeptCount" Active="IsFilterActive(PreviewBucket.Kept)" OnClick="() => ToggleFilter(PreviewBucket.Kept)">
                             <Tooltip>Items this feed already added and still wants. Nothing to import.</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Flash="_flash" Icon="redo-dot" Count="BypassedCount" Active="IsFilterActive(PreviewBucket.Bypassed)" OnClick="() => ToggleFilter(PreviewBucket.Bypassed)">
+                        <PreviewFilterBadge Flash="_flash" Icon="redo-dot" Label="Bypasses import" Detailed="true" Count="BypassedCount" Active="IsFilterActive(PreviewBucket.Bypassed)" OnClick="() => ToggleFilter(PreviewBucket.Bypassed)">
                             <Tooltip>
                                 <p class="font-medium mb-0.5">Bypasses import</p>
                                 <p>@WantlistCount in your wantlist · @BlocklistCount in your blocklist</p>
                                 <p class="opacity-70 mt-0.5">These will not be imported.</p>
                             </Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Flash="_flash" Icon="filter-x" Count="FilteredCount" Active="IsFilterActive(PreviewBucket.Filtered)" OnClick="() => ToggleFilter(PreviewBucket.Filtered)">
+                        <PreviewFilterBadge Flash="_flash" Icon="filter-x" Label="Filtered out" Count="FilteredCount" Active="IsFilterActive(PreviewBucket.Filtered)" OnClick="() => ToggleFilter(PreviewBucket.Filtered)">
                             <Tooltip>Items excluded by your filter rules</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Flash="_flash" Icon="scissors" Count="SkippedCount" Active="IsFilterActive(PreviewBucket.Skipped)" OnClick="() => ToggleFilter(PreviewBucket.Skipped)">
+                        <PreviewFilterBadge Flash="_flash" Icon="scissors" Label="Over the limit" Count="SkippedCount" Active="IsFilterActive(PreviewBucket.Skipped)" OnClick="() => ToggleFilter(PreviewBucket.Skipped)">
                             <Tooltip>Items excluded by the import limit</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Flash="_flash" Icon="circle-alert" Count="UnmatchedCount" Active="IsFilterActive(PreviewBucket.Unmatched)" OnClick="() => ToggleFilter(PreviewBucket.Unmatched)">
+                        <PreviewFilterBadge Flash="_flash" Icon="circle-alert" Label="Unmatched" Count="UnmatchedCount" Active="IsFilterActive(PreviewBucket.Unmatched)" OnClick="() => ToggleFilter(PreviewBucket.Unmatched)">
                             <Tooltip>Items that could not be matched in your media provider</Tooltip>
                         </PreviewFilterBadge>
                     </div>
                     @if (IsMirror && LeavingCount > 0)
                     {
-                        <div class="leaving-badge-slot flex items-start text-xs font-medium ml-2 pl-2 border-l border-border">
-                            <PreviewFilterBadge Flash="_flash" Icon="log-out" Count="LeavingCount" Active="_atRiskOnly" OnClick="ToggleAtRiskOnly">
+                        <div class="leaving-badge-slot flex items-start text-xs font-medium ml-2 pl-2 border-l border-border max-md:ml-1.5 max-md:pl-1.5">
+                            <PreviewFilterBadge Flash="_flash" Icon="log-out" Label="On its way out" Detailed="true" Count="LeavingCount" Active="_atRiskOnly" OnClick="ToggleAtRiskOnly">
                                 <Tooltip>
                                     <p class="font-medium mb-0.5">On its way out</p>
                                     <p>@AtRiskCount no longer match your rules@(GoneCount > 0 ? $" · {GoneCount} no longer on the remote list" : null)</p>
@@ -150,7 +158,7 @@
             {
                 <div class="preview-main-results transition-opacity @DimClass">
                 <VirtualizeGuard>
-                    <Virtualize @key="_filteredResults.Count" Items="_filteredResults" Context="result" ItemSize="215" OverscanCount="6">
+                    <Virtualize @key="(_filteredResults.Count, IsPhone)" Items="_filteredResults" Context="result" ItemSize="@RowHeight" OverscanCount="6">
                         <ItemContent>
                         @{
                         var item = result.Item;
@@ -178,23 +186,21 @@
                                                  Class="@(hoverStyle)"
                                                  IsFocused="_focusedResult == item.Key"
                                                  OnFocusIn="() => _focusedResult = item.Key"
-                                                 OnFocusOut="() => ClearFocus(item)">
+                                                 OnFocusOut="() => ClearFocus(item)"
+                                                 OnOpen="() => _details = item"
+                                                 TitleMarks="@(IsPhone ? Marks(isInWantlist, isBlocklisted) : null)"
+                                                 Note="@(IsPhone ? Fate(result, isAtRisk) : null)">
                                     <Icons>
-                                        @if (isAtRisk)
+                                        @if (!IsPhone)
                                         {
-                                            <LeavingIndicator Reason="@PreviewCopy.AtRiskReason(result)" Threshold="MirrorThreshold" Absences="AbsencesOf(item.Identity.Id)"
-                                                              ChildContent="LeavingDetail(result)"/>
+                                            @Fate(result, isAtRisk)
+                                            <WantlistToggle Result="item"
+                                                             IsToggled="isInWantlist"
+                                                             IsToggling="isTogglingWantlist"
+                                                             Item="_wantlist.Find(item.Identity.Id)"
+                                                             OnToggle="ToggleWantlistAsync"/>
+                                            <BlocklistToggleIcon Result="item" IsToggled="isBlocklisted" IsToggling="isTogglingBlocklist" OnToggle="ToggleBlocklistAsync"/>
                                         }
-                                        else
-                                        {
-                                            @Verdict(result)
-                                        }
-                                        <WantlistToggle Result="item"
-                                                         IsToggled="isInWantlist"
-                                                         IsToggling="isTogglingWantlist"
-                                                         Item="_wantlist.Find(item.Identity.Id)"
-                                                         OnToggle="ToggleWantlistAsync"/>
-                                        <BlocklistToggleIcon Result="item" IsToggled="isBlocklisted" IsToggling="isTogglingBlocklist" OnToggle="ToggleBlocklistAsync"/>
                                     </Icons>
                                 </MediaDetailTile>
                             </div>
@@ -209,7 +215,7 @@
                 <div class="mt-4 preview-gone-results transition-opacity @DimClass">
                     <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 pb-2">@PreviewCopy.GoneHeading</p>
                     <VirtualizeGuard>
-                        <Virtualize @key="_filteredGoneResults.Count" Items="_filteredGoneResults" Context="gone" ItemSize="215" OverscanCount="6">
+                        <Virtualize @key="(_filteredGoneResults.Count, IsPhone)" Items="_filteredGoneResults" Context="gone" ItemSize="@RowHeight" OverscanCount="6">
                             <ItemContent>
                         @{
                                 var goneItem = gone.Media;
@@ -219,18 +225,24 @@
                                                      Class="result-leaving"
                                                      IsFocused="_focusedResult == goneItem.Key"
                                                      OnFocusIn="() => _focusedResult = goneItem.Key"
-                                                     OnFocusOut="() => ClearFocus(goneItem)">
+                                                     OnFocusOut="() => ClearFocus(goneItem)"
+                                                     OnOpen="() => _details = goneItem"
+                                                     TitleMarks="@(IsPhone ? Marks(IsWantlisted(goneItem), IsBlocklisted(goneItem)) : null)"
+                                                     Note="@(IsPhone ? Gone(goneItem) : null)">
                                         <Icons>
-                                            <LeavingIndicator Reason="@PreviewCopy.GoneReason" Threshold="MirrorThreshold" Absences="AbsencesOf(goneItem.Identity.Id)"/>
-                                            <WantlistToggle Result="goneItem"
-                                                             IsToggled="IsWantlisted(goneItem)"
-                                                             IsToggling="_togglingWantlistItem == goneItem.Identity.Id"
-                                                             Item="_wantlist.Find(goneItem.Identity.Id)"
-                                                             OnToggle="ToggleWantlistAsync"/>
-                                            <BlocklistToggleIcon Result="goneItem"
-                                                                 IsToggled="IsBlocklisted(goneItem)"
-                                                                 IsToggling="_togglingBlocklistItem == goneItem.Identity.Id"
-                                                                 OnToggle="ToggleBlocklistAsync"/>
+                                            @if (!IsPhone)
+                                            {
+                                                @Gone(goneItem)
+                                                <WantlistToggle Result="goneItem"
+                                                                 IsToggled="IsWantlisted(goneItem)"
+                                                                 IsToggling="_togglingWantlistItem == goneItem.Identity.Id"
+                                                                 Item="_wantlist.Find(goneItem.Identity.Id)"
+                                                                 OnToggle="ToggleWantlistAsync"/>
+                                                <BlocklistToggleIcon Result="goneItem"
+                                                                     IsToggled="IsBlocklisted(goneItem)"
+                                                                     IsToggling="_togglingBlocklistItem == goneItem.Identity.Id"
+                                                                     OnToggle="ToggleBlocklistAsync"/>
+                                            }
                                         </Icons>
                                     </MediaDetailTile>
                                 </div>
@@ -249,7 +261,7 @@
                 <div class="mt-4 transition-opacity @DimClass">
                     <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 pb-2">Not found in provider</p>
                     <VirtualizeGuard>
-                        <Virtualize @key="_filteredUnmatchedResults.Count" Items="_filteredUnmatchedResults" Context="item" ItemSize="215" OverscanCount="6">
+                        <Virtualize @key="(_filteredUnmatchedResults.Count, IsPhone)" Items="_filteredUnmatchedResults" Context="item" ItemSize="@RowHeight" OverscanCount="6">
                             <ItemContent>
                         @{
                                 <div class="pb-2">
@@ -257,11 +269,13 @@
                                                      Media="item"
                                                      IsFocused="_focusedResult == item.Key"
                                                      OnFocusIn="() => _focusedResult = item.Key"
-                                                     OnFocusOut="() => ClearFocus(item)">
+                                                     OnFocusOut="() => ClearFocus(item)"
+                                                     OnOpen="() => _details = item"
+                                                     Note="@(IsPhone ? NotFound(item) : null)">
                                         <Icons>
-                                            @if (item is UnmatchedMedia unmatched)
+                                            @if (!IsPhone)
                                             {
-                                                <NotFoundPopover Unmatched="unmatched"/>
+                                                @NotFound(item)
                                             }
                                         </Icons>
                                     </MediaDetailTile>
@@ -346,7 +360,81 @@
     </div>
 </BbCard>
 
+<MediaDetailSheet Open="_details is not null" OnOpenChanged="DetailsOpenChangedAsync" Media="_details" Source="ManualSource.FeedPreview"/>
+
 @code {
+
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
+    private static readonly TimeSpan SearchPause = TimeSpan.FromMilliseconds(250);
+
+    private bool _searching;
+
+    private bool _focusSearch;
+
+    private int _typed;
+
+    private SearchField _phoneSearch = null!;
+
+    private RenderFragment Heading =>
+        @<text>
+            <h2 class="text-base font-semibold tracking-wide flex items-center gap-2">
+                <span>Media Results</span>
+                @if (IsLoading || Updating)
+                {
+                    <span class="inline-flex" data-preview-busy>
+                        <BbSpinner Size="SpinnerSize.Small"/>
+                    </span>
+                }
+            </h2>
+            <p class="text-sm text-muted-foreground mt-0.5">
+                <FeedSourceLink Identifier="@(_appliedConfig?.Identifier ?? Config.Identifier)"
+                                Provider="@(_appliedConfig?.Provider ?? Config.Provider!.Value)"
+                                Muted="true"/>
+            </p>
+            @if (_reloading is { } reloading)
+            {
+                <p class="mt-1 text-xs text-muted-foreground" data-preview-reloading>@reloading.Progress</p>
+            }
+        </text>;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_focusSearch)
+        {
+            _focusSearch = false;
+            await _phoneSearch.FocusAsync();
+        }
+    }
+
+    private void OpenSearch()
+    {
+        _searching = true;
+        _focusSearch = true;
+    }
+
+    private async Task OnPhoneTypedAsync(string text)
+    {
+        var typed = ++_typed;
+        await Task.Delay(SearchPause);
+        if (typed == _typed)
+        {
+            OnSearchQueryChanged(text);
+        }
+    }
+
+    private void ClearSearch()
+    {
+        _typed++;
+        OnSearchQueryChanged(string.Empty);
+    }
+
+    private void CloseSearch()
+    {
+        _typed++;
+        _searching = false;
+        OnSearchQueryChanged(string.Empty);
+    }
 
     [Parameter] public required FeedConfig Config { get; set; }
     [Parameter] public FeedId? SavedFeedId { get; set; }
@@ -400,6 +488,7 @@
     private MediaId? _togglingBlocklistItem;
     private WantlistSnapshot _wantlist = new([]);
     private readonly HashSet<MediaId> _blocklistIds = [];
+    private MediaMatchResult? _details;
     private bool _refreshDialogOpen;
     private bool _providerUnavailable;
     private readonly Stopwatch _fetchTimer = new();
@@ -439,6 +528,39 @@
             Qualified => null,
         };
     }
+
+    private RenderFragment? Fate(QueryVerdict<MatchedMedia> result, bool atRisk)
+    {
+        return atRisk
+            ? @<LeavingIndicator Reason="@PreviewCopy.AtRiskReason(result)" Threshold="MirrorThreshold" Absences="AbsencesOf(result.Item.Identity.Id)" ChildContent="LeavingDetail(result)"/>
+            : Verdict(result);
+    }
+
+    private RenderFragment Gone(MatchedMedia item) =>
+        @<LeavingIndicator Reason="@PreviewCopy.GoneReason" Threshold="MirrorThreshold" Absences="AbsencesOf(item.Identity.Id)"/>;
+
+    private static RenderFragment? NotFound(MediaMatchResult item) => item is UnmatchedMedia unmatched ? @<NotFoundPopover Unmatched="unmatched"/> : null;
+
+    private static RenderFragment? Marks(bool wanted, bool blocked)
+    {
+        if (!wanted && !blocked)
+        {
+            return null;
+        }
+
+        return @<text>
+            @if (wanted)
+            {
+                <span role="img" aria-label="In your wantlist"><LucideIcon Name="bookmark" Size="14" Fill="orange" Color="orange"/></span>
+            }
+            @if (blocked)
+            {
+                <span role="img" aria-label="On your blocklist" class="text-destructive"><LucideIcon Name="shield-off" Size="14"/></span>
+            }
+        </text>;
+    }
+
+    private int RowHeight => IsPhone ? 125 : 215;
 
     private RenderFragment CulledVerdict(MatchedMedia item, Culled culled)
     {
@@ -962,6 +1084,20 @@
         _cts?.Dispose();
     }
 
+    private async Task DetailsOpenChangedAsync(bool open)
+    {
+        if (open)
+        {
+            return;
+        }
+
+        _details = null;
+        _blocklistIds.Clear();
+        await LoadWantlistAndBlocklistAsync(CancellationToken.None);
+        await ReprocessLoadedAsync();
+        await EmitStatusIfChangedAsync();
+    }
+
     private async Task LoadWantlistAndBlocklistAsync(CancellationToken cancellationToken)
     {
         try
@@ -1060,7 +1196,7 @@
         }
         catch (UnknownMediaException)
         {
-            Notify(notifier => notifier.Warning($"'{item.Details.Title}' isn't ready yet: still loading.", "Can't update blocklist"));
+            Notify(notifier => notifier.Warning(BlocklistNotices.NotReady(item.Details.Title), BlocklistNotices.CantUpdate));
         }
         catch (Exception ex)
         {

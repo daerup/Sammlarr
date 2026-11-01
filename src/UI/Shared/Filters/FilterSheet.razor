@@ -1,0 +1,80 @@
+@typeparam TFilter where TFilter : class
+
+<BbDialog Open="true" OpenChanged="OpenChanged">
+    <BbDialogContent Class="max-w-xl p-0 gap-0" InitialFocus="FocusTrapInitialFocus.Container">
+        <BbDialogTitle Class="px-5 pt-[18px] pb-1 text-base">Filter and sort</BbDialogTitle>
+        <div class="filter-sheet-search" role="search">
+            <SearchField Value="@(Search.Text(_draft) ?? string.Empty)" Placeholder="@Search.Placeholder" OnInput="Type" OnClear="() => Type(string.Empty)"/>
+        </div>
+        <div class="filter-sheet-body">
+            <h3 class="filter-sheet-group">Sort</h3>
+            <div role="radiogroup" aria-label="Sort">
+                @foreach (var sort in Sorts)
+                {
+                    var chosen = sort.IsOn(_draft);
+                    <button type="button" role="radio" aria-checked="@(chosen ? "true" : "false")" class="filter-sheet-radio" @onclick="() => Pick(sort)">
+                        <span class="filter-sheet-radio-label">@sort.Label</span>
+                        @if (chosen)
+                        {
+                            <LucideIcon Name="check" Size="18"/>
+                        }
+                    </button>
+                }
+            </div>
+            @foreach (var group in Groups.Where(group => group.Choices.Count > 0))
+            {
+                <h3 class="filter-sheet-group">@group.Title</h3>
+                <div class="filter-sheet-chips" role="@(group.Single ? "radiogroup" : "group")" aria-label="@group.Title">
+                    @foreach (var choice in group.Choices)
+                    {
+                        var on = choice.IsOn(_draft) ? "true" : "false";
+                        <button type="button"
+                                class="filter-sheet-chip @(choice.IsOn(_draft) ? "is-on" : null)"
+                                role="@(group.Single ? "radio" : null)"
+                                aria-checked="@(group.Single ? on : null)"
+                                aria-pressed="@(group.Single ? null : on)"
+                                @onclick="() => Pick(choice)">
+                            @choice.Label
+                            @if (choice.Count is { } count)
+                            {
+                                <span class="filter-sheet-chip-count">@count.ToString("N0")</span>
+                            }
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+        <div class="filter-sheet-foot" data-dialog-actions>
+            <BbButton Variant="ButtonVariant.Outline" OnClick="ClearAll">Clear all</BbButton>
+            <BbButton OnClick="ShowAsync" data-dialog-commit>Show @Noun.ToQuantity(Count(_draft), "N0")</BbButton>
+        </div>
+    </BbDialogContent>
+</BbDialog>
+
+@code {
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+    [Parameter, EditorRequired] public required TFilter Filter { get; set; }
+    [Parameter] public EventCallback<TFilter> OnApply { get; set; }
+    [Parameter, EditorRequired] public required IReadOnlyList<FilterChoice<TFilter>> Sorts { get; set; }
+    [Parameter, EditorRequired] public required IReadOnlyList<FilterGroup<TFilter>> Groups { get; set; }
+    [Parameter, EditorRequired] public required FilterSearch<TFilter> Search { get; set; }
+    [Parameter, EditorRequired] public required Func<TFilter, TFilter> Clear { get; set; }
+    [Parameter, EditorRequired] public required Func<TFilter, int> Count { get; set; }
+    [Parameter, EditorRequired] public required string Noun { get; set; }
+
+    private TFilter _draft = null!;
+
+    protected override void OnInitialized() => _draft = Filter;
+
+    private void Pick(FilterChoice<TFilter> choice) => _draft = choice.Pick(_draft);
+
+    private void Type(string text) => _draft = Search.With(_draft, string.IsNullOrWhiteSpace(text) ? null : text);
+
+    private void ClearAll() => _draft = Clear(_draft);
+
+    private async Task ShowAsync()
+    {
+        await OnApply.InvokeAsync(_draft);
+        await OpenChanged.InvokeAsync(false);
+    }
+}

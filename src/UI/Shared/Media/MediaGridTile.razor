@@ -13,13 +13,19 @@
         }
         else
         {
-            <img class="media-card-poster" src="@_src" srcset="@_srcSet" sizes="@Sizes" alt="" @onerror="OnImageError"/>
+            <picture>
+                @if (_posterSrcSet is not null)
+                {
+                    <source media="(width < 48rem)" srcset="@_posterSrcSet" sizes="calc(33vw - 17px)"/>
+                }
+                <img class="media-card-poster" src="@_src" srcset="@_srcSet" sizes="@Sizes" alt="" @onerror="OnImageError"/>
+            </picture>
         }
         <div class="media-card-scrim"></div>
 
         @if (Media is UnmatchedMedia)
         {
-            <div class="absolute top-4 right-4 z-10">
+            <div class="absolute top-4 right-4 z-10 max-md:top-1.5 max-md:right-1.5">
                 <BbTooltipProvider>
                     <BbTooltip DelayDuration="200">
                         <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
@@ -27,19 +33,19 @@
                                 <LucideIcon Name="circle-alert" Size="24"/>
                             </div>
                         </BbTooltipTrigger>
-                        <BbTooltipContent>Could not be matched in your media service. This item can't be added to your wantlist.</BbTooltipContent>
+                        <BbTooltipContent>@WantlistNotices.Unmatched</BbTooltipContent>
                     </BbTooltip>
                 </BbTooltipProvider>
             </div>
         }
         else if (ShowBookmark && Media is MatchedMedia matched)
         {
-            <div class="tile-bookmark absolute top-4 right-4 z-10" style="color: orange">
+            <div class="tile-bookmark absolute top-4 right-4 z-10 max-md:top-1.5 max-md:right-1.5" style="color: orange">
                 <WantlistToggle Result="matched" ReadOnly="true" Size="25" IsToggled="Wantlisted.IsSome()" Item="Wantlisted"/>
             </div>
         }
 
-        <div class="absolute bottom-0 left-0 right-0 p-4 space-y-2 z-10">
+        <div class="tile-info absolute bottom-0 left-0 right-0 p-4 space-y-2 z-10 max-md:space-y-0">
             <SammlarrRatingBadge Ratings="@Details.Ratings" Ids="@([.. Media.Externals])" Title="@Details.Title" Look="RatingBadgeLook.OnImage" Size="17" StoredOnly="RatingsStoredOnly" Media="Media.MatchedId"/>
 
             @if (Details.Tagline is not null)
@@ -47,10 +53,10 @@
                 <h3 class="tile-text text-base font-bold text-lg">@Details.Title</h3>
             }
 
-            <div class="flex items-end justify-between gap-2">
+            <div class="tile-row flex items-end justify-between gap-2">
                 @if (Details.Tagline is not null)
                 {
-                    <p class="tile-text text-xs line-clamp-2">@Details.Tagline</p>
+                    <p class="tile-tagline tile-text text-xs line-clamp-2">@Details.Tagline</p>
                 }
                 else
                 {
@@ -58,7 +64,8 @@
                 }
                 @if (Details.ReleaseDate is { } released)
                 {
-                    <span class="tile-text-soft font-medium text-sm shrink-0">@released.ToString("MMM d, yyyy", CultureInfo.InvariantCulture)</span>
+                    <span class="tile-date-full tile-text-soft font-medium text-sm shrink-0">@released.ToString("MMM d, yyyy", CultureInfo.InvariantCulture)</span>
+                    <span class="tile-year tile-text-soft font-medium text-sm">@released.ToString("yyyy", CultureInfo.InvariantCulture)</span>
                 }
             </div>
         </div>
@@ -76,13 +83,17 @@
     [Parameter] public bool Dimmed { get; set; }
     [Parameter] public bool RatingsStoredOnly { get; set; }
 
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     private MediaDetails Details => Media.Details;
 
-    private const string Sizes = "(min-width: 768px) calc(30vw - 40px), calc(120vw - 76px)";
+    private const string Sizes = "(min-width: 768px) calc(30vw - 40px), calc(94vw - 49px)";
     private static readonly ArtworkSize[] Candidates = [new(780, 413), new(1280, 678)];
+    private static readonly ArtworkSize[] PosterCandidates = [new(185, 278), new(342, 513), new(500, 750)];
 
     private string? _src;
     private string? _srcSet;
+    private string? _posterSrcSet;
     private (string? Backdrop, string? Poster)? _artwork;
     private bool _isShowingPoster;
     private bool _failed;
@@ -94,6 +105,7 @@
         {
             _artwork = artwork;
             _isShowingPoster = Details.BackdropUrl is null;
+            _posterSrcSet = Artwork.ByWidth(Details.PosterUrl, PosterCandidates) ?? Details.PosterUrl;
             Show(Details.BackdropUrl ?? Details.PosterUrl);
         }
     }
@@ -107,6 +119,13 @@
 
     private async Task OnImageError()
     {
+        var posterSourceFailed = IsPhone && _posterSrcSet is not null;
+        _posterSrcSet = null;
+        if (posterSourceFailed)
+        {
+            return;
+        }
+
         if (_srcSet is not null)
         {
             _srcSet = null;

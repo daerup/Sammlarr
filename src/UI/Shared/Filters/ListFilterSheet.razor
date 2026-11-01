@@ -1,0 +1,38 @@
+<FilterSheet TFilter="ListFilter"
+             OpenChanged="OpenChanged"
+             Filter="Filter"
+             OnApply="OnApply"
+             Sorts="Sorts"
+             Groups="Groups"
+             Search="Search"
+             Clear="filter => filter.ClearFilters()"
+             Count="Count"
+             Noun="title"/>
+
+@code {
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+    [Parameter, EditorRequired] public required ListFilter Filter { get; set; }
+    [Parameter] public EventCallback<ListFilter> OnApply { get; set; }
+    [Parameter] public IReadOnlyList<SourceOption> Sources { get; set; } = [];
+    [Parameter] public IReadOnlyList<StatusOption> Statuses { get; set; } = [];
+    [Parameter, EditorRequired] public required Func<ListFilter, int> Count { get; set; }
+
+    private static readonly FilterChoice<ListFilter>[] Sorts =
+        [.. Enum.GetValues<ListSort>().Select(sort => new FilterChoice<ListFilter>(ListFilterText.Label(sort), filter => filter.Sort == sort, filter => filter with { Sort = sort }))];
+
+    private static readonly FilterSearch<ListFilter> Search = new("Search titles", filter => filter.Search, (filter, search) => filter with { Search = search });
+
+    private static readonly FilterGroup<ListFilter> Types = new("Type", [Type(null), Type(MediaType.Movie), Type(MediaType.Show)], Single: true);
+
+    private IReadOnlyList<FilterGroup<ListFilter>> Groups =>
+    [
+        new("Source", [.. Sources.Select(source => FilterChoices<ListFilter>.Toggle(source.Label, source.Choice, filter => filter.Sources, (filter, sources) => filter with { Sources = sources }))]),
+        Types,
+        new("Status", [.. Statuses.Select(status => FilterChoices<ListFilter>.Toggle(status.Label, status.Key, filter => filter.Statuses, (filter, statuses) => filter with { Statuses = statuses }))]),
+    ];
+
+    private static FilterChoice<ListFilter> Type(MediaType? type)
+    {
+        return new(ListFilterText.Label(type), filter => filter.Type == type, filter => filter with { Type = type });
+    }
+}

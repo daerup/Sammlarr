@@ -15,14 +15,18 @@
     opacity: 0.95;
 }
 
-.rating-star.shine:hover .rating-star-body,
-.shine-host:hover .rating-star.shine .rating-star-body {
-    animation: rating-star-shine 1s ease-in-out;
+@media (hover: hover) and (pointer: fine) {
+    .rating-star.shine:hover .rating-star-body,
+    .shine-host:hover .rating-star.shine .rating-star-body {
+        animation: rating-star-shine 1s ease-in-out;
+    }
 }
 
-.rating-star.shine:hover .rating-star-rays,
-.shine-host:hover .rating-star.shine .rating-star-rays {
-    animation: rating-star-rays 1s ease-in-out;
+@media (hover: hover) and (pointer: fine) {
+    .rating-star.shine:hover .rating-star-rays,
+    .shine-host:hover .rating-star.shine .rating-star-rays {
+        animation: rating-star-rays 1s ease-in-out;
+    }
 }
 
 @keyframes rating-star-shine {

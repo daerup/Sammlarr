@@ -1,4 +1,5 @@
-<BbButton Variant="ButtonVariant.Outline"
+<BbButton @attributes="Attributes"
+          Variant="ButtonVariant.Outline"
           Type="@Type"
           Class="@CssClass"
           style="@(string.IsNullOrEmpty(Color) ? null : $"--tint: {Color};")"
@@ -30,6 +31,7 @@
     [Parameter] public ButtonType Type { get; set; } = ButtonType.Button;
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? Attributes { get; set; }
 
     private bool HasTrailingContent => !string.IsNullOrEmpty(Text) || ChildContent is not null;
 

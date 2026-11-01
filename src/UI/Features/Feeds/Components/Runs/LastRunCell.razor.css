@@ -12,9 +12,11 @@
     white-space: nowrap;
 }
 
-.last-run:hover {
-    color: var(--foreground);
-    background: color-mix(in srgb, var(--foreground) 5%, transparent);
+@media (hover: hover) and (pointer: fine) {
+    .last-run:hover {
+        color: var(--foreground);
+        background: color-mix(in srgb, var(--foreground) 5%, transparent);
+    }
 }
 
 .last-run.is-never {

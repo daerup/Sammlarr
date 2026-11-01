@@ -73,83 +73,140 @@
     [Parameter]
     public EventCallback<int> PageChanged { get; set; }
 
+    [Parameter]
+    public EventCallback OnReachEnd { get; set; }
+
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)]
+    private bool IsPhone { get; set; }
+
     private ElementReference _end;
+    private Task<IJSObjectReference>? _import;
     private IJSObjectReference? _module;
     private IJSObjectReference? _watcher;
+    private int _generation;
     private DotNetObjectReference<PaginationControls>? _self;
     private bool _docked;
-    private bool _watching;
+    private (bool Shown, bool Phone) _watching;
+    private (int Current, int Total) _seen;
     private bool _disposed;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var shown = TotalPages > 1;
-        if (shown == _watching)
+        var wanted = (TotalPages > 1, IsPhone);
+        if (wanted != _watching)
         {
+            _watching = wanted;
+            _seen = (CurrentPage, TotalPages);
+            await WatchAsync();
             return;
         }
 
-        _watching = shown;
-
-        if (!shown)
+        if (IsPhone && _watcher is { } watcher && (CurrentPage, TotalPages) != _seen)
         {
-            await StopWatchingAsync();
+            _seen = (CurrentPage, TotalPages);
+            await OutlivingTheCircuitAsync(async () => await watcher.InvokeVoidAsync("recheck"));
+        }
+    }
+
+    private async Task WatchAsync()
+    {
+        var generation = ++_generation;
+        await StopWatchingAsync();
+        if (!_watching.Shown)
+        {
             _docked = false;
             return;
         }
 
-        try
+        var phone = _watching.Phone;
+        IJSObjectReference? started = null;
+        await OutlivingTheCircuitAsync(async () =>
         {
             _self ??= DotNetObjectReference.Create(this);
-            _module ??= await Js.InvokeAsync<IJSObjectReference>("import", "./js/pager.js");
-            _watcher = await _module.InvokeAsync<IJSObjectReference>("watchEnd", _end, _self);
+            _import ??= Js.InvokeAsync<IJSObjectReference>("import", "./js/pager.js").AsTask();
+            _module = await _import;
+            started = await _module.InvokeAsync<IJSObjectReference>("watchEnd", _end, _self, phone);
+        });
+
+        if (_import is { IsFaulted: true } or { IsCanceled: true })
+        {
+            _import = null;
         }
-        catch (ObjectDisposedException) when (_disposed) { }
+
+        if (generation == _generation && !_disposed)
+        {
+            _watcher = started;
+            return;
+        }
+
+        await StopAsync(started);
+        if (_disposed)
+        {
+            await ReleaseAsync();
+        }
     }
 
     private async Task StopWatchingAsync()
     {
-        if (_watcher is null)
+        var watcher = _watcher;
+        _watcher = null;
+        await StopAsync(watcher);
+    }
+
+    private async Task StopAsync(IJSObjectReference? watcher)
+    {
+        if (watcher is null)
         {
             return;
         }
 
+        await OutlivingTheCircuitAsync(async () =>
+        {
+            await watcher.InvokeVoidAsync("dispose");
+            await watcher.DisposeAsync();
+        });
+    }
+
+    private async Task OutlivingTheCircuitAsync(Func<Task> call)
+    {
         try
         {
-            await _watcher.InvokeVoidAsync("dispose");
-            await _watcher.DisposeAsync();
+            await call();
         }
-        catch (JSDisconnectedException) { }
-
-        _watcher = null;
+        catch (Exception exception) when (exception is JSDisconnectedException or TaskCanceledException || (exception is ObjectDisposedException && _disposed)) { }
     }
 
     [JSInvokable]
-    public Task OnDockedChanged(bool docked)
+    public async Task OnEndInView(bool inView)
     {
-        if (docked == _docked)
+        if (inView && IsPhone && CurrentPage < TotalPages)
         {
-            return Task.CompletedTask;
+            await OnReachEnd.InvokeAsync();
         }
 
-        _docked = docked;
+        if (inView == _docked)
+        {
+            return;
+        }
+
+        _docked = inView;
         StateHasChanged();
-        return Task.CompletedTask;
     }
 
     public async ValueTask DisposeAsync()
     {
         _disposed = true;
-        await StopWatchingAsync();
+        await ReleaseAsync();
+    }
 
-        try
+    private async Task ReleaseAsync()
+    {
+        await StopWatchingAsync();
+        if (_module is { } module)
         {
-            if (_module is not null)
-            {
-                await _module.DisposeAsync();
-            }
+            _module = null;
+            await OutlivingTheCircuitAsync(async () => await module.DisposeAsync());
         }
-        catch (JSDisconnectedException) { }
 
         _self?.Dispose();
     }

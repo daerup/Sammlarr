@@ -326,6 +326,72 @@ public class ServicesMapTests : BunitContext
 		await Assert.That(Service(cut, "TMDb").QuerySelector(".sr-only")!.TextContent).IsEqualTo("Open ");
 	}
 
+	[Test]
+	public async Task Phone_ListsEachRoleWithTheServicesBehindItAndNoCanvas()
+	{
+		var cut = RenderListOnPhone(canPick: false, RemoteService.Plex, RemoteService.AniList);
+
+		var rows = cut.FindAll(".svc-row")
+			.Select(row => $"{row.GetAttribute("data-role")}: {string.Join(", ", row.QuerySelectorAll(".svc-service").Select(Listed))}");
+		await Assert
+			.That(rows)
+			.IsEquivalentTo(
+				[
+					"Sign-in: Plex",
+					"Wantlist: Plex",
+					"Search: Plex",
+					"Trending: TMDb (off)",
+					"Feeds: TMDb (off), MDBList (off), AniList, MyAnimeList (off), Trakt (off)",
+				],
+				CollectionOrdering.Matching
+			);
+		await Assert
+			.That(cut.FindAll(".svc-row[data-role=Search] .sr-only").Select(text => text.TextContent))
+			.IsEquivalentTo(["Open ", ": Your account"], CollectionOrdering.Matching);
+		await Assert.That(cut.FindAll(".map")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Phone_ServiceOrSource_WhenTapped_AsksToOpenItsRow()
+	{
+		List<RemoteService> opened = [];
+		var cut = this.RenderOnPhone<ServicesMap>(parameters =>
+			parameters
+				.Add(map => map.Config, ProviderBranding.OnPlexSearchingPlex)
+				.Add(map => map.Ready, new HashSet<RemoteService>())
+				.Add(map => map.ServiceOpened, EventCallback.Factory.Create<RemoteService>(this, opened.Add))
+		).Component;
+
+		await cut.Find(".svc-row[data-role=Trending] button.svc-service").ClickAsync();
+		await cut.FindAll(".svc-row[data-role=Feeds] button.svc-service")[1].ClickAsync();
+
+		await Assert.That(opened).IsEquivalentTo([RemoteService.Tmdb, RemoteService.Mdblist], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Phone_ForAnAdmin_KeepsThePickersBesideTheirServiceAndDropsTheLineLegend()
+	{
+		var cut = RenderListOnPhone(canPick: true);
+
+		await Assert
+			.That(cut.FindAll(".svc-pick .map-chip").Select(chip => $"{chip.Closest(".svc-row")!.GetAttribute("data-role")}: {chip.GetAttribute("aria-label")}"))
+			.IsEquivalentTo(["Wantlist: Change what Wantlist uses", "Search: Change what Search uses"]);
+		await Assert.That(cut.FindAll(".map-legend svg")).IsEmpty();
+	}
+
+	private IRenderedComponent<ServicesMap> RenderListOnPhone(bool canPick, params RemoteService[] ready)
+	{
+		return this.RenderOnPhone<ServicesMap>(parameters =>
+			parameters.Add(map => map.Config, ProviderBranding.OnPlexSearchingPlex).Add(map => map.Ready, ready.ToHashSet()).Add(map => map.CanPick, canPick)
+		).Component;
+	}
+
+	private static string Listed(IElement service)
+	{
+		var name = service.QuerySelector(".svc-service-name")!.TextContent.Trim();
+		return service.ClassList.Contains("is-off") ? $"{name} (off)" : name;
+	}
+
 	private static IElement Service(IRenderedComponent<ServicesMap> cut, string name)
 	{
 		return cut.FindAll(".map-service").Single(service => service.QuerySelector(".map-service-name")!.TextContent.Trim() == name);

@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
+using UI.Shared.Layout;
 using UI.Shared.Media;
 using UI.Shared.Services;
 
@@ -20,11 +21,15 @@ namespace UI.Tests.Media;
 
 public class MediaDetailSheetTests : BunitContext
 {
+	private const string Poster = "https://cdn.example.test/poster.jpg";
+
 	private static readonly MediaId Id = MediaId.From(new Guid(21, 0, 0, new byte[8]));
 
 	private Mock<IWantlistService> _wantlist = null!;
 
 	private Mock<IMediaService> _media = null!;
+
+	private Mock<IBlocklistService> _blocklist = null!;
 
 	[Test]
 	public async Task Toggle_WhenARemovalIsAlreadyQueued_StillReadsAsAddRatherThanCancel()
@@ -80,13 +85,77 @@ public class MediaDetailSheetTests : BunitContext
 		await Assert.That(links[1]).Contains("?item=");
 	}
 
+	[Test]
+	public async Task Hero_WithAPoster_LaysABlurredBandOfItBehind()
+	{
+		Register();
+
+		var cut = RenderSheet(Detail(poster: Poster));
+
+		await Assert.That(cut.Find(".hero-band img").GetAttribute("src")).IsEqualTo(Poster);
+		await Assert.That(cut.Find(".hero-band").GetAttribute("aria-hidden")).IsEqualTo("true");
+	}
+
+	[Test]
+	public async Task Hero_WithoutAPoster_HasNoBand()
+	{
+		Register();
+
+		var cut = RenderSheet();
+
+		await Assert.That(cut.FindAll(".hero-band")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Sheet_OnAPhone_RisesFromTheBottomWithAHandle()
+	{
+		Register();
+		RenderTree.TryAdd<CascadingValue<bool>>(cascade => cascade.Add(value => value.Name, PhoneLayout.IsPhoneCascade).Add(value => value.Value, true));
+
+		var cut = RenderSheet();
+
+		var sheet = cut.Find(".media-detail-sheet-content");
+		await Assert.That(sheet.HasAttribute("data-sheet")).IsTrue();
+		await Assert.That(sheet.GetAttribute("data-side")).IsEqualTo("bottom");
+		await Assert.That(sheet.QuerySelectorAll("[data-sheet-handle]")).HasSingleItem();
+	}
+
+	[Test]
+	public async Task Unmatched_SaysWhyItCannotBeWantlisted()
+	{
+		Register();
+
+		var cut = RenderSheet(new UnmatchedMedia([], new MovieDetails { Title = "Unsung Hero" }));
+
+		await Assert.That(cut.Find(".media-sheet-unmatched").TextContent.Trim()).IsEqualTo(WantlistNotices.Unmatched);
+		await Assert.That(Toggle(cut)).IsNull();
+	}
+
+	[Test]
+	public async Task Blocklist_ForATitleStillLoading_WarnsThatItIsNotReady()
+	{
+		Register();
+		_blocklist.AddAsync(Any(), Any()).Throws(new UnknownMediaException(Id));
+
+		var cut = RenderSheet();
+		cut.WaitForState(() => cut.FindAll(".media-detail-sheet-content button[aria-label='Add to blocklist']").Count == 1);
+		await cut.Find(".media-detail-sheet-content button[aria-label='Add to blocklist']").ClickAsync(new());
+
+		var toast = Services.GetRequiredService<ToastService>().Toasts.Single();
+		await Assert.That(toast.Variant).IsEqualTo(ToastVariant.Warning);
+		await Assert.That(toast.Description).IsEqualTo("'Futurama' isn't ready yet: still loading.");
+	}
+
 	private static WantlistSnapshot Wantlisted(WantlistItemProvenance provenance) => new([new WantlistItem(Id, DateTimeOffset.UnixEpoch, provenance)]);
 
 	private static IElement? Toggle(IRenderedComponent<Harness> cut) =>
 		cut.FindAll(".media-detail-sheet-content button")
 			.FirstOrDefault(button => button.GetAttribute("aria-label") is { } label && label.Contains("wantlist", StringComparison.OrdinalIgnoreCase));
 
-	private IRenderedComponent<Harness> RenderSheet() => Render<Harness>();
+	private IRenderedComponent<Harness> RenderSheet(MediaMatchResult? media = null)
+	{
+		return Render<Harness>(parameters => parameters.Add(harness => harness.Media, media ?? Detail()));
+	}
 
 	private static WantlistSnapshot Nothing => new([]);
 
@@ -100,9 +169,9 @@ public class MediaDetailSheetTests : BunitContext
 		_wantlist.GetAsync(Any()).Returns(Nothing);
 		Services.AddSingleton(_wantlist.Object);
 
-		var blocklist = IBlocklistService.Mock();
-		blocklist.GetAsync(Any()).Returns(new BlocklistSnapshot([]));
-		Services.AddSingleton(blocklist.Object);
+		_blocklist = IBlocklistService.Mock();
+		_blocklist.GetAsync(Any()).Returns(new BlocklistSnapshot([]));
+		Services.AddSingleton(_blocklist.Object);
 
 		_media = IMediaService.Mock();
 		_media.GetDetailsAsync(Any<IEnumerable<MediaId>>(), Any(), Any()).Returns(AsyncEnumerable.Empty<Result<MatchedMedia>>());
@@ -120,18 +189,21 @@ public class MediaDetailSheetTests : BunitContext
 
 	private sealed class Harness : ComponentBase
 	{
+		[Parameter]
+		public required MediaMatchResult Media { get; set; }
+
 		protected override void BuildRenderTree(RenderTreeBuilder builder)
 		{
 			builder.OpenComponent<BbPortalHost>(0);
 			builder.CloseComponent();
 			builder.OpenComponent<MediaDetailSheet>(1);
 			builder.AddAttribute(2, nameof(MediaDetailSheet.Open), true);
-			builder.AddAttribute(3, nameof(MediaDetailSheet.Media), Detail());
+			builder.AddAttribute(3, nameof(MediaDetailSheet.Media), Media);
 			builder.CloseComponent();
 		}
 	}
 
-	private static MediaMatchResult Detail()
+	private static MediaMatchResult Detail(string? poster = null)
 	{
 		return new MatchedMedia(
 			new MediaIdentity(Id, [TmdbId.From(Id.Value.ToString(), MediaType.Movie)]),
@@ -143,6 +215,7 @@ public class MediaDetailSheetTests : BunitContext
 				Genres = [],
 				Runtime = TimeSpan.FromMinutes(22),
 				Ratings = MediaRatings.None,
+				PosterUrl = poster,
 			}
 		);
 	}

@@ -30,6 +30,8 @@
             </div>
         </div>
 
+        @Totals
+
         @if (Band is not null)
         {
             <div class="change-band @BandClass">@Band</div>
@@ -41,6 +43,7 @@
                         Chips="Chips"
                         OnSelect="OnSelect"
                         Fold="Fold"
+                        Fill="@(IsPhone && Actions is not null)"
                         RemovedLabel="@RemovedLabel"
                         AddedLabel="@AddedLabel"
                         UnchangedLabel="@UnchangedLabel"/>
@@ -57,21 +60,23 @@
             <div class="change-empty">@EmptyMessage</div>
         }
 
-        <div class="change-foot @(Actions is null ? "is-note-only" : null)">
+        <div class="change-foot @(Actions is null ? "is-note-only" : null)" data-dialog-actions="@(Actions is not null)">
             @if (Note is not null && NoteHref is not null)
             {
-                <AppLink Href="@NoteHref" Class="text-xs">@Note</AppLink>
+                <AppLink Href="@NoteHref" Class="text-xs" data-dialog-lead>@Note</AppLink>
             }
             else
             {
-                <span class="change-note">@Note</span>
+                <span class="change-note" data-dialog-lead>@Note</span>
             }
-            <span class="change-actions">@Actions</span>
+            <span class="change-actions" data-dialog-buttons>@Actions</span>
         </div>
     </BbDialogContent>
 </BbDialog>
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     [Parameter] public bool Open { get; set; }
     [Parameter] public EventCallback<bool> OnOpenChanged { get; set; }
 
@@ -81,6 +86,7 @@
 
     [Parameter] public RenderFragment? Prologue { get; set; }
     [Parameter] public RenderFragment? Band { get; set; }
+    [Parameter] public RenderFragment? Totals { get; set; }
     [Parameter] public ChangeBandTone BandTone { get; set; } = ChangeBandTone.Warn;
 
     [Parameter] public bool Loading { get; set; }

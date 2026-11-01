@@ -1,9 +1,21 @@
 @using Domain.Notifications
 @inject TimeProvider Clock
 
-@if (Outcomes.Count == 0)
+@if (!Interactive)
 {
-    <span class="inline-block h-2 w-2 shrink-0 rounded-full bg-muted-foreground/30" title="No deliveries yet"></span>
+    <span class="inline-flex shrink-0 items-center">
+        <span class="inline-block h-2 w-2 rounded-full @DotClass" aria-hidden="true"></span>
+        <span class="sr-only">@State</span>
+    </span>
+}
+else if (Outcomes.Count == 0)
+{
+    <DetailTip Title="Deliveries" TriggerClass="inline-flex" Focusable="false" PhoneLabel="No deliveries yet" PhoneClass="relative after:absolute after:-inset-4">
+        <Trigger>
+            <span class="inline-block h-2 w-2 shrink-0 rounded-full @DotClass"></span>
+        </Trigger>
+        <Detail>No deliveries yet</Detail>
+    </DetailTip>
 }
 else
 {
@@ -43,10 +55,26 @@ else
     [EditorRequired]
     public required IReadOnlyList<NotificationDeliveryOutcome> Outcomes { get; set; }
 
+    [Parameter]
+    public bool Interactive { get; set; } = true;
+
     private string DotClass =>
-        Outcomes.Any(entry => entry.Outcome is Failed) ? "bg-destructive"
-        : Outcomes.Any(entry => entry.Outcome is Retrying) ? "bg-amber-500"
-        : "bg-green-500";
+        Outcomes switch
+        {
+            [] => "bg-muted-foreground/30",
+            _ when Outcomes.Any(entry => entry.Outcome is Failed) => "bg-destructive",
+            _ when Outcomes.Any(entry => entry.Outcome is Retrying) => "bg-amber-500",
+            _ => "bg-green-500",
+        };
+
+    private string State =>
+        Outcomes switch
+        {
+            [] => "No deliveries yet",
+            _ when Outcomes.Any(entry => entry.Outcome is Failed) => "A delivery failed",
+            _ when Outcomes.Any(entry => entry.Outcome is Retrying) => "A delivery is retrying",
+            _ => "Delivering",
+        };
 
     private static string RowDot(DeliveryOutcome outcome) =>
         outcome switch

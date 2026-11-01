@@ -24,7 +24,7 @@
 
 @{
     var allItems = AllItems;
-    var gridItems = Visible(allItems);
+    var gridItems = Visible(Filter, allItems);
     var sources = SourcesFrom(allItems);
     var pageItems = Paged(gridItems);
 }
@@ -39,19 +39,26 @@
                 OnAccessChanged="HandleAccessChanged"
                 Search="@Filter.Search"
                 SearchChanged="ApplySearchAsync">
-    <HeaderExtras>
-        <MediaListViewActions HasItems="@(_items is { Count: > 0 } || _removedItems.Count > 0)"
-                              IsEditMode="IsEditMode"
-                              ShowFilters="ShowFilters"
-                              ActiveFilters="Filter.ActiveCount"
-                              OnEnterEditMode="EnterEditMode"
-                              OnToggleFilters="ToggleFilterBar"/>
-        <ProtectedComponent GuardState="IsConnected"
-                            Sink="@Settings!.Sink"
-                            DeniedActionDescription="sync your wantlist">
-            <WantlistSyncButton @ref="_syncControl" OnSynced="LoadAsync" OnStatusRefresh="LoadOutboxAsync" OnSyncStarted="StartSync" IsSyncing="_syncing" BrandColor="@SinkBrandColor" ProviderName="@SinkName" Sink="Settings?.Sink" OutboxEntries="_outboxEntries.Values"/>
-        </ProtectedComponent>
-    </HeaderExtras>
+    <Actions>
+        <PageAction Icon="square-check" Label="Select" DesktopLabel="Bulk edit" OnClick="EnterEditMode" Visible="HasItems && !IsEditMode"/>
+        <PageAction Icon="sliders-horizontal" Label="Filter" DesktopLabel="View" Active="ShowFilters" Badge="Filter.ActiveCount" OnClick="ToggleFilterBar" PhoneOnClick="OpenFilterSheet" Visible="HasItems"/>
+        <PageAction Icon="refresh-cw"
+                    Label="Sync"
+                    BadgeContent="SyncControl?.Badge"
+                    BadgeLabel="@SyncControl?.BadgeLabel"
+                    PhoneOnClick="OpenSyncAsync"
+                    Disabled="@(SyncControl is null || SyncControl.IsBusy)"
+                    DisabledReason="@SyncDeniedReason"
+                    DisabledLink="@ProtectedComponent.SinkLink(Settings!.Sink)">
+            <Desktop>
+                <ProtectedComponent GuardState="IsConnected"
+                                    Sink="@Settings!.Sink"
+                                    DeniedActionDescription="@SyncAction">
+                    <WantlistSyncButton @ref="_syncControl" StateChanged="StateHasChanged" OnSynced="LoadAsync" OnStatusRefresh="LoadOutboxAsync" OnSyncStarted="StartSync" IsSyncing="_syncing" BrandColor="@SinkBrandColor" ProviderName="@SinkName" Sink="Settings?.Sink" OutboxEntries="_outboxEntries.Values"/>
+                </ProtectedComponent>
+            </Desktop>
+        </PageAction>
+    </Actions>
     <ChildContent>
         <MediaListBody IsLoading="IsLoadingList"
                        ErrorMessage="@ErrorMessage"
@@ -65,7 +72,8 @@
                        Statuses="StatusOptions"
                        CurrentPage="@PageWithin(gridItems.Count)"
                        PageCount="@PageCount(gridItems.Count)"
-                       PageChanged="GoToPageAsync">
+                       PageChanged="GoToPageAsync"
+                       OnReachEnd="ShowMoreAsync">
             <EmptyState>
                 <MediaListEmptyState Icon="inbox" Heading="Your wantlist is empty.">
                     <ChildContent>@(Settings is { } settings ? ListTexts.EmptyWantlist(settings.Sink) : null)</ChildContent>
@@ -112,18 +120,18 @@
                     <Overlay Context="item">
                         @if (_removedIds.Contains(item.Media.Identity.Id))
                         {
-                            <div class="absolute top-2 right-2 z-10">
+                            <div class="absolute top-2 right-2 z-10 max-md:top-1.5 max-md:right-1.5">
                                 <PushStatusDot State="PushDotState.Removed" LastError="@LastErrorOf(item.Media.Identity.Id)" ProviderName="@SinkName"/>
                             </div>
                         }
                         else
                         {
-                            <div class="absolute top-2 left-2 z-10 flex flex-col gap-1">
+                            <div class="absolute top-2 left-2 z-10 flex flex-col gap-1 max-md:top-1.5 max-md:left-1.5">
                                 <ProvenanceBadge Provenance="item.Provenance" AddedAt="item.AddedAt" ItemId="item.Media.Identity.Id" Type="item.Media.Identity.Type"/>
                             </div>
                             @if (PushDotFor(item.Media.Identity.Id) is { } dot)
                             {
-                                <div class="absolute top-2 right-2 z-10">
+                                <div class="absolute top-2 right-2 z-10 max-md:top-1.5 max-md:right-1.5">
                                     <PushStatusDot State="dot.State" Attempts="dot.Attempts" LastError="dot.LastError" ProviderName="@SinkName"/>
                                 </div>
                             }
@@ -138,6 +146,11 @@
 <MediaDetailSheet Open="IsSheetOpen"
                   OnOpenChanged="SheetOpenChangedAsync"
                   Media="SelectedMedia"/>
+
+@if (IsFilterSheetOpen)
+{
+    <ListFilterSheet OpenChanged="open => IsFilterSheetOpen = open" Filter="Filter" OnApply="ApplySheetAsync" Sources="sources" Statuses="StatusOptions" Count="CountFor"/>
+}
 
 @code {
     private static readonly TimeSpan RenderCoalesceWindow = TimeSpan.FromMilliseconds(120);
@@ -155,6 +168,12 @@
     private WantlistedMedia? _selectedItem;
     private WantlistSyncButton? _syncControl;
 
+    private const string SyncAction = "sync your wantlist";
+
+    private WantlistSyncButton? SyncControl => IsConnected() ? _syncControl : null;
+
+    private string? SyncDeniedReason => IsConnected() ? null : ProtectedComponent.SinkReason(Settings!.Sink, SyncAction);
+
     [Parameter]
     [SupplyParameterFromQuery(Name = "feed")]
     public string? FeedParam { get; set; }
@@ -168,16 +187,24 @@
 
     private string SinkName => Settings is null ? "your media service" : BrandingService.Name(Settings.Sink.Service);
 
+    private bool HasItems => _items is { Count: > 0 } || _removedItems.Count > 0;
+
     private IReadOnlyList<StatusOption> StatusOptions => WantlistStatusView.Options(_removedItems.Count);
 
-    private IReadOnlyList<WantlistedMedia> AllItems =>
-        _items is null ? [] : WantlistStatusView.Within(Filter, _items, _removedItems);
+    private IReadOnlyList<WantlistedMedia> AllItems => AllItemsFor(Filter);
 
-    private IReadOnlyList<WantlistedMedia> Visible(IReadOnlyList<WantlistedMedia> all) =>
+    private IReadOnlyList<WantlistedMedia> AllItemsFor(ListFilter filter) => _items is null ? [] : WantlistStatusView.Within(filter, _items, _removedItems);
+
+    private int CountFor(ListFilter filter) => Visible(filter, AllItemsFor(filter)).Count;
+
+    private Task ApplySheetAsync(ListFilter filter) =>
+        ApplyFilterAsync(filter with { Statuses = WantlistStatusView.Adjusted(filter.Statuses, _items?.Count ?? 0, _removedItems.Count) });
+
+    private static IReadOnlyList<WantlistedMedia> Visible(ListFilter filter, IReadOnlyList<WantlistedMedia> all) =>
         [
-            .. Filter.SortBy(
+            .. filter.SortBy(
                 all.Where(item =>
-                    Filter.MatchesSource(item.Provenance) && Filter.MatchesType(item.Media.Details.Type) && Filter.MatchesSearch(item.Media.Details.Title)
+                    filter.MatchesSource(item.Provenance) && filter.MatchesType(item.Media.Details.Type) && filter.MatchesSearch(item.Media.Details.Title)
                 ),
                 item => item.Media,
                 item => item.AddedAt

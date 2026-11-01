@@ -26,7 +26,21 @@ internal static class BrowserPages
 
 	internal static async Task<IBrowserContext> OpenAsync(IBrowser browser, string baseUrl)
 	{
-		var context = await browser.NewContextAsync(new BrowserNewContextOptions { BaseURL = baseUrl });
+		var device = (TestContext.Current!.Metadata.TestDetails.ClassInstance as E2ETests)?.Device ?? Device.Desktop;
+		var context = await browser.NewContextAsync(
+			device switch
+			{
+				Device.Desktop => new BrowserNewContextOptions { BaseURL = baseUrl },
+				Device.Phone => new BrowserNewContextOptions
+				{
+					BaseURL = baseUrl,
+					ViewportSize = new ViewportSize { Width = 390, Height = 844 },
+					DeviceScaleFactor = 2,
+					IsMobile = true,
+					HasTouch = true,
+				},
+			}
+		);
 		await context.RouteAsync(url => !url.StartsWith(baseUrl, StringComparison.Ordinal), ServeArtworkLocallyAsync);
 		await context.AddInitScriptAsync(Locators.MarkListeningInputs);
 		return context;

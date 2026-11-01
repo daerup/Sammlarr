@@ -1,0 +1,155 @@
+@using System.Globalization
+@implements IAsyncDisposable
+@inject IJSRuntime Js
+
+<div class="clock-dial @(Kind == ClockDialKind.Minute ? "is-minute" : null)" data-kind="@Kind" @ref="_dial">
+    <svg class="clock-dial-face" viewBox="0 0 240 240" aria-hidden="true" focusable="false">
+        <circle class="clock-dial-plate" cx="120" cy="120" r="114"/>
+        @for (var tick = 0; tick < 60; tick++)
+        {
+            var hour = tick % 5 == 0;
+            <rect class="@(hour ? "clock-dial-bar" : "clock-dial-hairline")"
+                  x="@Number(Centre - (hour ? 1.3 : 0.7))" y="9" width="@(hour ? "2.6" : "1.4")" height="@(hour ? 10 : 6)"
+                  transform="rotate(@(tick * 6) 120 120)"/>
+        }
+        <g class="clock-dial-hour-hand" style="@Turn(_hourAngle)">
+            <polygon points="113.6,138 126.4,138 124.4,66 115.6,66"/>
+        </g>
+        <g class="clock-dial-cursor" style="@Turn(_angle)">
+            <rect class="clock-dial-tail" x="117.5" y="120" width="5" height="22"/>
+            <rect class="clock-dial-stem" x="117.5" y="119" width="5" height="1" style="@Stretch(Reach)"/>
+            <circle class="clock-dial-knob" cx="120" cy="120" r="16" style="@Lift(Reach)"/>
+            <circle class="clock-dial-pin" cx="120" cy="120" r="3.5"/>
+        </g>
+    </svg>
+    <div class="clock-dial-layer" data-layer="hour" inert="@(Kind != ClockDialKind.Hour)">
+        @foreach (var mark in HourMarks)
+        {
+            @Button(mark, Kind == ClockDialKind.Hour && mark.Value == Time.Hours)
+        }
+    </div>
+    <div class="clock-dial-layer" data-layer="minute" inert="@(Kind != ClockDialKind.Minute)">
+        @foreach (var mark in MinuteMarks)
+        {
+            @Button(mark, Kind == ClockDialKind.Minute && mark.Value == Time.Minutes)
+        }
+    </div>
+    @if (Kind == ClockDialKind.Minute && Time.Minutes % 5 != 0)
+    {
+        <span class="clock-dial-exact" style="@Place(new Spot(Time.Minutes * 6, Outer))">@Two(Time.Minutes)</span>
+    }
+</div>
+
+@code {
+    [Parameter] public ClockDialKind Kind { get; set; }
+
+    [Parameter] public TimeSpan Time { get; set; }
+
+    [Parameter] public EventCallback<int> ValueChanged { get; set; }
+
+    private const double Centre = 120;
+
+    private const double Outer = 88;
+
+    private const double Inner = 60;
+
+    private ElementReference _dial;
+
+    private IJSObjectReference? _module;
+
+    private Task<IJSObjectReference?>? _watching;
+
+    private DotNetObjectReference<ClockDial>? _self;
+
+    private double _angle = double.NaN;
+
+    private double _hourAngle = double.NaN;
+
+    private sealed record Mark(int Value, string Text, Spot Spot, string Label);
+
+    private readonly record struct Spot(double Degrees, double Radius);
+
+    private static IEnumerable<Mark> HourMarks =>
+        Enumerable.Range(0, 12).SelectMany(step => new[] { Hour(step == 0 ? 12 : step, step, Outer), Hour(step == 0 ? 0 : step + 12, step, Inner) });
+
+    private static IEnumerable<Mark> MinuteMarks =>
+        Enumerable.Range(0, 12).Select(step => new Mark(step * 5, Two(step * 5), new Spot(step * 30, Outer), $"Minute {Two(step * 5)}"));
+
+    private double Reach => Kind == ClockDialKind.Minute || Time.Hours is >= 1 and <= 12 ? Outer : Inner;
+
+    protected override void OnParametersSet()
+    {
+        _angle = Toward(_angle, Kind == ClockDialKind.Hour ? Time.Hours % 12 * 30 : Time.Minutes * 6);
+        _hourAngle = Toward(_hourAngle, Time.Hours % 12 * 30 + Time.Minutes / 2d);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _self = DotNetObjectReference.Create(this);
+            _watching = WatchAsync(_self);
+            await _watching;
+        }
+    }
+
+    [JSInvokable]
+    public Task DragTo(int minute) => ValueChanged.InvokeAsync(minute);
+
+    private async Task<IJSObjectReference?> WatchAsync(DotNetObjectReference<ClockDial> self)
+    {
+        _module = await Js.InvokeAsync<IJSObjectReference>("import", "./js/clock-dial.js");
+        return await _module.InvokeAsync<IJSObjectReference?>("watch", _dial, self);
+    }
+
+    private RenderFragment Button(Mark mark, bool on) =>
+        @<button type="button" class="@MarkClass(mark, on)" style="@Place(mark.Spot)" aria-label="@mark.Label" aria-pressed="@(on ? "true" : "false")"
+                 @onclick="() => ValueChanged.InvokeAsync(mark.Value)">@mark.Text</button>;
+
+    private static double Toward(double current, double target) => double.IsNaN(current) ? target : current + ((target - current) % 360 + 540) % 360 - 180;
+
+    private static Mark Hour(int hour, int step, double radius) =>
+        new(hour, radius == Outer ? hour.ToString(CultureInfo.InvariantCulture) : Two(hour), new Spot(step * 30, radius), $"Hour {Two(hour)}");
+
+    private static string MarkClass(Mark mark, bool on)
+    {
+        var inner = mark.Spot.Radius == Inner ? " is-inner" : string.Empty;
+        return $"clock-dial-mark{inner}{(on ? " is-on" : string.Empty)}";
+    }
+
+    private static string Turn(double degrees) => string.Create(CultureInfo.InvariantCulture, $"transform: rotate({degrees:0.##}deg)");
+
+    private static string Stretch(double reach) => string.Create(CultureInfo.InvariantCulture, $"transform: scaleY({reach:0.##})");
+
+    private static string Lift(double reach) => string.Create(CultureInfo.InvariantCulture, $"transform: translateY(-{reach:0.##}px)");
+
+    private static string Place(Spot spot) => string.Create(CultureInfo.InvariantCulture, $"left: {X(spot):0.##}px; top: {Y(spot):0.##}px");
+
+    private static double X(Spot spot) => Centre + spot.Radius * Math.Sin(spot.Degrees * Math.PI / 180);
+
+    private static double Y(Spot spot) => Centre - spot.Radius * Math.Cos(spot.Degrees * Math.PI / 180);
+
+    private static string Number(double value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+
+    private static string Two(int value) => value.ToString("00", CultureInfo.InvariantCulture);
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_watching is not null && await _watching is { } watcher)
+            {
+                await watcher.InvokeVoidAsync("dispose");
+                await watcher.DisposeAsync();
+            }
+            if (_module is not null)
+            {
+                await _module.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException) { }
+        catch (TaskCanceledException) { }
+
+        _self?.Dispose();
+    }
+}

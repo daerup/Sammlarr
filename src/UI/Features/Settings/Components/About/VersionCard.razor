@@ -1,8 +1,8 @@
-<div class="overflow-hidden rounded-lg border bg-card">
-    <CardHead Icon="tag" Title="Version"/>
-    <div class="flex items-center gap-3 px-[15px] py-3">
-        <SammlarrLogo Size="24" WordSize="14"/>
-        <div class="flex min-w-0 flex-col gap-0.5">
+<SectionCard Icon="tag" Title="Version">
+    <div class="flex items-center gap-3 px-[15px] py-3 max-md:flex-col max-md:py-6 max-md:text-center">
+        <span class="max-md:hidden" data-testid="version-logo"><SammlarrLogo Size="24" WordSize="14"/></span>
+        <span class="md:hidden" data-testid="version-logo-phone"><SammlarrLogo Size="48" WordSize="28"/></span>
+        <div class="flex min-w-0 flex-col gap-0.5 max-md:items-center">
             <div class="flex items-center gap-2">
                 <span class="version-number font-mono text-[13px]">@Version.Number</span>
                 @if (Version.IsDevBuild)
@@ -18,7 +18,7 @@
         </div>
         @if (!string.IsNullOrWhiteSpace(Repository))
         {
-            <div class="ml-auto flex shrink-0 items-center gap-4 whitespace-nowrap text-xs">
+            <div class="ml-auto flex shrink-0 items-center gap-4 whitespace-nowrap text-xs max-md:ml-0 max-md:flex-wrap max-md:justify-center max-md:gap-y-1.5">
                 @if (Update is Some<AppUpdate>(var newer))
                 {
                     <AppLink Href="@newer.Page.ToString()" External="true">What is new in @newer.Version</AppLink>
@@ -31,7 +31,7 @@
             </div>
         }
     </div>
-</div>
+</SectionCard>
 
 @code {
     [Parameter] [EditorRequired] public required AppVersion Version { get; set; }

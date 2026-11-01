@@ -9,7 +9,7 @@ public partial class RatingBreakdownTests
 	[Test]
 	public async Task Breakdown_ForATitleWikidataKnows_LinksEveryRatedRowToItsPage()
 	{
-		await using var wikidata = await E2EApp.StubAsync(Sparql("tt33764258", "m/the_odyssey_2026"));
+		await using var wikidata = await E2EApp.StubAsync(Wikidata.Sparql("tt33764258", "m/the_odyssey_2026"));
 		var page = await E2EApp.AdminAt(Routes.Browse);
 
 		var breakdown = await OpenBreakdownAsync(page, "The Odyssey");
@@ -22,7 +22,7 @@ public partial class RatingBreakdownTests
 	[Test]
 	public async Task Breakdown_ForATitleWikidataHasNoPageFor_LinksRottenTomatoesToItsSearch()
 	{
-		await using var wikidata = await E2EApp.StubAsync(Sparql("tt34564059"));
+		await using var wikidata = await E2EApp.StubAsync(Wikidata.Sparql("tt34564059"));
 		var page = await E2EApp.AdminAt(Routes.Browse);
 		var asked = await E2EApp.RequestCountAsync("%22tt34564059%22");
 
@@ -30,6 +30,19 @@ public partial class RatingBreakdownTests
 
 		await E2EApp.WaitForRequestsBeyondAsync("%22tt34564059%22", asked);
 		await Expect(Link(breakdown, "Rotten Tomatoes® critics")).ToHaveAttributeAsync("href", "https://www.rottentomatoes.com/search?search=The%20Runner");
+	}
+
+	[Test]
+	public async Task Breakdown_OnADesktop_StaysAPopoverWithoutAHistoryEntry()
+	{
+		await using var wikidata = await E2EApp.StubAsync(Wikidata.Sparql("tt33764258", "m/the_odyssey_2026"));
+		var page = await E2EApp.AdminAt(Routes.Browse);
+		var entries = await page.EvaluateAsync<int>("() => history.length");
+
+		await OpenBreakdownAsync(page, "The Odyssey");
+
+		await Expect(page.Locator(".as-sheet")).ToHaveCountAsync(0);
+		await Assert.That(await page.EvaluateAsync<int>("() => history.length")).IsEqualTo(entries);
 	}
 
 	private static async Task<ILocator> OpenBreakdownAsync(IPage page, string title)
@@ -50,15 +63,6 @@ public partial class RatingBreakdownTests
 	private static ILocator Link(ILocator breakdown, string source)
 	{
 		return breakdown.Locator(".rating-row", new LocatorLocatorOptions { HasText = source }).First.Locator(".rating-row-link");
-	}
-
-	private static StubSpec Sparql(string imdb, params string[] paths)
-	{
-		var bindings = string.Join(
-			',',
-			paths.Select(path => $$$"""{"imdb":{"type":"literal","value":"{{{imdb}}}"},"rt":{"type":"literal","value":"{{{path}}}"}}""")
-		);
-		return new StubSpec("/sparql", 200, $$$"""{"results":{"bindings":[{{{bindings}}}]}}""") { Method = "POST", BodyContains = [$"%22{imdb}%22"] };
 	}
 
 	[GeneratedRegex(@"^https://www\.themoviedb\.org/movie/\d+$")]

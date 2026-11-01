@@ -1,0 +1,40 @@
+<div class="@Root section-card @Class" @attributes="Attributes">
+    @if (Look is SectionCardLook.Panel)
+    {
+        <div class="panel-head">
+            <span class="panel-title">@Title</span>
+            <span class="panel-note">@Note</span>
+        </div>
+    }
+    else if (Title is not null)
+    {
+        <CardHead Icon="@Icon" Title="@Title" Mark="Mark">@Head</CardHead>
+    }
+    @ChildContent
+</div>
+
+@code {
+    [Parameter] public SectionCardLook Look { get; set; }
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public RenderFragment? Mark { get; set; }
+    [Parameter] public RenderFragment? Head { get; set; }
+    [Parameter] public string? Note { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? Attributes { get; set; }
+
+    private string Root
+    {
+        get
+        {
+            return Look switch
+            {
+                SectionCardLook.Card => "overflow-hidden rounded-lg border bg-card",
+                SectionCardLook.Fit => "w-fit max-w-full overflow-hidden rounded-lg border bg-card",
+                SectionCardLook.Large => "overflow-hidden rounded-xl border bg-card",
+                SectionCardLook.Panel => "panel",
+            };
+        }
+    }
+}

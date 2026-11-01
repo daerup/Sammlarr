@@ -29,8 +29,10 @@
     cursor: pointer;
 }
 
-.bulk-caret:hover {
-    color: var(--foreground);
+@media (hover: hover) and (pointer: fine) {
+    .bulk-caret:hover {
+        color: var(--foreground);
+    }
 }
 
 .bulk-sticky {
@@ -40,4 +42,18 @@
     margin: 0 -24px 16px;
     padding: 10px 24px;
     background: var(--background);
+}
+
+.phone-select-bar {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 52px;
+    padding: 0 8px;
+}
+
+@media (width < 48rem) {
+    .bulk-sticky {
+        display: none;
+    }
 }

@@ -20,7 +20,7 @@ else if (Overview.LastRun is Some<FeedRun>(var run))
                 <BbTooltipTrigger Focusable="false">
                     @Pill(run)
                 </BbTooltipTrigger>
-                <BbTooltipContent Class="w-[300px] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg" data-testid="last-run-tip">
+                <BbTooltipContent Class="w-[300px] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg" data-testid="last-run-tip" data-label-tip>
                     <div class="flex justify-between gap-2.5">
                         <b class="font-semibold text-foreground">Run of @Heading(run)</b>
                         <span class="tabular-nums">@run.Duration.Humanize(2, Notation.Symbols) · @("title".ToQuantity(run.Counts.Total, "N0"))</span>
@@ -29,7 +29,7 @@ else if (Overview.LastRun is Some<FeedRun>(var run))
                     {
                     <div class="mt-2 text-[10px] font-semibold uppercase tracking-[.07em]">Finding the titles</div>
                     <div class="mt-1">
-                        <StackedBar Format="Count">@Parts(segments)</StackedBar>
+                        <StackedBar Format="Count" TapOpens="false">@Parts(segments)</StackedBar>
                     </div>
                     <div class="mt-1.5 grid grid-cols-[1fr_auto] gap-x-4 gap-y-0.5" data-testid="last-run-tip-found">
                         @foreach (var segment in RunBar.Legend(segments))
@@ -63,7 +63,7 @@ else if (Overview.LastRun is Some<FeedRun>(var run))
                 </BbTooltipContent>
             </BbTooltip>
             <button type="button" class="foot-bar" aria-label="See what this run changed" data-testid="last-run-bar" @onclick="() => OpenAsync(run)">
-                <StackedBar Format="Count">
+                <StackedBar Format="Count" TapOpens="false">
                     <Title>Run of @Heading(run)</Title>
                     <ChildContent>@Parts(segments)</ChildContent>
                 </StackedBar>
@@ -76,7 +76,7 @@ else if (Overview.LastRun is Some<FeedRun>(var run))
             <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
                 @Pill(run)
             </BbTooltipTrigger>
-            <BbTooltipContent>See what this run changed</BbTooltipContent>
+            <BbTooltipContent data-label-tip>See what this run changed</BbTooltipContent>
         </BbTooltip>
     }
 }

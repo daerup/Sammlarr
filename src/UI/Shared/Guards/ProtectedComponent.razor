@@ -7,14 +7,11 @@
 }
 else
 {
-    <BbTooltip>
-        <BbTooltipTrigger AsChild="false" Class="inline-block cursor-not-allowed" Focusable="false">
-            <div class="pointer-events-none opacity-50">
-                @ChildContent
-            </div>
-        </BbTooltipTrigger>
-        <BbTooltipContent>@GetDisabledMessage()</BbTooltipContent>
-    </BbTooltip>
+    <ReasonTip TriggerClass="inline-block cursor-not-allowed" Reason="@GetDisabledMessage()" ActionText="Settings" ActionHref="@GetSetupLink()">
+        <div class="pointer-events-none opacity-50">
+            @ChildContent
+        </div>
+    </ReasonTip>
 }
 
 @code {
@@ -25,15 +22,38 @@ else
     [Parameter] public ApiKeyProvider? ApiProvider { get; set; }
     [Parameter] public string DeniedActionDescription { get; set; } = "use this";
 
+    private string? GetSetupLink()
+    {
+        return Sink switch
+        {
+            { } sink => SinkLink(sink),
+            null => ApiProvider is { } provider ? SettingsLinks.Provider(provider.Remote) : null,
+        };
+    }
+
+    internal static string SinkReason(SinkKind sink, string action)
+    {
+        return sink switch
+        {
+            SinkKind.Plex => $"Connect your Plex account to {action}.",
+            SinkKind.Arr => $"Radarr + Sonarr needs setting up before you can {action}.",
+        };
+    }
+
+    internal static string? SinkLink(SinkKind sink)
+    {
+        return sink switch
+        {
+            SinkKind.Plex => SettingsLinks.Provider(RemoteService.Plex),
+            SinkKind.Arr => null,
+        };
+    }
+
     private string GetDisabledMessage()
     {
         if (Sink is { } sink)
         {
-            return sink switch
-            {
-                SinkKind.Plex => $"Connect your Plex account to {DeniedActionDescription}.",
-                SinkKind.Arr => $"Radarr + Sonarr needs setting up before you can {DeniedActionDescription}.",
-            };
+            return SinkReason(sink, DeniedActionDescription);
         }
 
         if (ApiProvider.HasValue)

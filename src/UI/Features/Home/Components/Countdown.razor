@@ -5,7 +5,7 @@
     <BbTooltipTrigger AsChild="false" Class="cursor-default">
         <span class="countdown">@ScheduleText.Away(At, Clock.GetUtcNow())</span>
     </BbTooltipTrigger>
-    <BbTooltipContent>@ScheduleText.AwayExactly(At, Clock.GetUtcNow())</BbTooltipContent>
+    <BbTooltipContent data-label-tip>@ScheduleText.AwayExactly(At, Clock.GetUtcNow())</BbTooltipContent>
 </BbTooltip>
 
 @code {

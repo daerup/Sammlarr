@@ -5,14 +5,26 @@
 <Deferred>
     @{
         var bar = Snap();
+        var tip = bar.Rows > 1 || Title is not null;
     }
     <span class="stacked-bar">
-        @if (bar.Rows > 1 || Title is not null)
+        @if (tip && !IsPhone)
         {
             <BbTooltip Open="_open" OpenChanged="open => _open = open" Placement="PopoverPlacement.Bottom">
                 @Track(bar, true)
                 <BbTooltipContent Class="@Tooltips.Panel" data-testid="stacked-bar-tip">@Tip(bar)</BbTooltipContent>
             </BbTooltip>
+        }
+        else if (tip && TapOpens)
+        {
+            <button type="button" class="sb-open" aria-label="@Label" aria-haspopup="dialog" aria-expanded="@(_sheet ? "true" : "false")" @onclick="() => _sheet = true">@Track(bar, false)</button>
+            <InfoSheet @bind-Open="_sheet" Title="@Label">
+                @if (ShowLegend)
+                {
+                    <div class="mb-3">@Track(bar, false)</div>
+                }
+                <div data-testid="stacked-bar-tip">@Tip(bar)</div>
+            </InfoSheet>
         }
         else
         {
@@ -52,6 +64,12 @@
 
     [Parameter] public EventCallback<IReadOnlySet<string>> HiddenChanged { get; set; }
 
+    [Parameter] public bool TapOpens { get; set; } = true;
+
+    [Parameter] public string Label { get; set; } = "Breakdown";
+
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     private readonly List<StackedBarPart> _parts = [];
 
     private readonly HashSet<string> _hidden = [];
@@ -63,6 +81,8 @@
     private bool _atRest;
 
     private bool _open;
+
+    private bool _sheet;
 
     internal void Add(StackedBarPart part) => _parts.Add(part);
 
@@ -89,14 +109,32 @@
         return new Snapshot(segments, shown, sum, total, Optional.Of(RestName).When(_ => total > sum));
     }
 
+    protected override void OnParametersSet()
+    {
+        if (!IsPhone)
+        {
+            _sheet = false;
+        }
+    }
+
     private void Point(StackedBarPart part)
     {
+        if (IsPhone)
+        {
+            return;
+        }
+
         _at = part;
         _atRest = false;
     }
 
     private void PointRest()
     {
+        if (IsPhone)
+        {
+            return;
+        }
+
         _at = null;
         _atRest = true;
     }
@@ -115,7 +153,7 @@
 
     private async Task OpenSoonAsync()
     {
-        if (!_open)
+        if (!_open && (_at is not null || _atRest))
         {
             await Task.Delay(OpenDelay);
             _open = _at is not null || _atRest;

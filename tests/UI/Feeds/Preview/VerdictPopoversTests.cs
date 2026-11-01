@@ -39,6 +39,14 @@ public class VerdictPopoversTests : BunitContext
 	}
 
 	[Test]
+	public async Task Bypassed_OnAPhone_WritesItsTitleBesideTheIcon()
+	{
+		var cut = this.RenderOnPhone<BypassedPopover>(parameters => parameters.Add(popover => popover.Enrollment, Wantlisted)).Component;
+
+		await Assert.That(cut.Find("button[aria-haspopup=dialog] [data-verdict-line]").TextContent.Trim()).IsEqualTo("Already on your wantlist");
+	}
+
+	[Test]
 	public async Task Bypassed_ForAPreservedTitle_SaysItDoesNotCount()
 	{
 		var tip = await OpenAsync<BypassedPopover>(parameters =>

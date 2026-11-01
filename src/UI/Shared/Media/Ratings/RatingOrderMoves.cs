@@ -12,13 +12,17 @@ internal static class RatingOrderMoves
 		KeyboardEventArgs args
 	)
 	{
-		var index = rows.ToList().IndexOf(source);
-		var target = (args.AltKey, args.Key) switch
+		return (args.AltKey, args.Key) switch
 		{
-			(true, "ArrowUp") => index - 1,
-			(true, "ArrowDown") => index + 1,
-			_ => -1,
+			(true, "ArrowUp") => By(ordered, rows, source, -1),
+			(true, "ArrowDown") => By(ordered, rows, source, 1),
+			_ => new None(),
 		};
+	}
+
+	public static Optional<(OrderedRating Order, int Index)> By(OrderedRating ordered, IReadOnlyList<RatingSource> rows, RatingSource source, int step)
+	{
+		var target = rows.ToList().IndexOf(source) + step;
 		return Optional.When(target >= 0 && target < rows.Count, () => (Onto(ordered, source, rows[target]), target));
 	}
 

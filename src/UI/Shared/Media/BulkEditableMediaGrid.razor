@@ -24,7 +24,7 @@
                    MarkConfirm="@MarkConfirm"/>
 }
 
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<MediaGrid>
     @foreach (var item in Items)
     {
         var detail = Detail(item);
@@ -38,8 +38,8 @@
                            OnClick="@(() => HandleTileClickAsync(item))"/>
             @if (IsEditMode)
             {
-                <div data-testid="selection-layer" class="absolute inset-0 z-10 rounded-lg cursor-pointer select-none" @onclick="e => HandleSelectionClick(mediaId, e)" @onclick:stopPropagation="true"></div>
-                <div class="absolute top-3 right-3 z-20 pointer-events-none">
+                <div data-testid="selection-layer" data-long-press class="absolute inset-0 z-10 rounded-lg max-md:rounded-[14px] cursor-pointer select-none [-webkit-touch-callout:none]" @onclick="e => HandleSelectionClick(mediaId, e)" @onclick:stopPropagation="true"></div>
+                <div class="absolute top-3 right-3 z-20 pointer-events-none max-md:top-1.5 max-md:right-1.5">
                     <div data-testid="selection-badge" class="@SelectionPillClass(isSelected)">
                         @if (isSelected)
                         {
@@ -48,10 +48,13 @@
                     </div>
                 </div>
             }
-            @Overlay?.Invoke(item)
+            @if (!IsEditMode || !IsPhone)
+            {
+                @Overlay?.Invoke(item)
+            }
         </div>
     }
-</div>
+</MediaGrid>
 
 @code {
     [Parameter, EditorRequired] public IReadOnlyList<TItem> Items { get; set; } = [];
@@ -76,6 +79,9 @@
     [Parameter] public Func<int, BulkConfirm>? RemoveConfirm { get; set; }
     [Parameter] public Func<int, BulkConfirm>? MarkConfirm { get; set; }
 
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)]
+    private bool IsPhone { get; set; }
+
     private readonly BulkSelection<MediaId> _selection = new();
     private bool _isRemoving;
 
@@ -93,15 +99,15 @@
 
     private int RemovableCount => Removable.Count;
 
-    private const string SelectionPill = "flex h-7 w-7 items-center justify-center rounded-full border-2 border-white shadow-sm shadow-black/40";
+    private const string SelectionPill = "flex h-7 w-7 items-center justify-center rounded-full border-2 border-white shadow-sm shadow-black/40 max-md:h-6 max-md:w-6";
 
     private string SelectionFrameClass(bool selected) =>
         !IsEditMode ? ""
-        : selected ? "rounded-lg ring-2 ring-foreground ring-offset-3 ring-offset-background"
-        : "rounded-lg hover:ring-2 hover:ring-foreground/30 hover:ring-offset-3 hover:ring-offset-background";
+        : selected ? "rounded-lg max-md:rounded-[14px] ring-2 ring-foreground ring-offset-3 ring-offset-background"
+        : "rounded-lg max-md:rounded-[14px] hover:ring-2 hover:ring-foreground/30 hover:ring-offset-3 hover:ring-offset-background";
 
     private static string SelectionPillClass(bool selected) =>
-        selected ? $"{SelectionPill} bg-foreground text-background [&_svg]:stroke-3" : $"{SelectionPill} bg-black/30";
+        selected ? $"{SelectionPill} bg-foreground text-background [&_svg]:stroke-3 max-md:[&_svg]:size-3.5" : $"{SelectionPill} bg-black/30";
 
     protected override void OnParametersSet()
     {

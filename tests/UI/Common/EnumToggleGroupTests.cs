@@ -73,10 +73,19 @@ public class EnumToggleGroupTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_WithATooltipProvider_KeepsEachValueOneRadioAndExplainsItOnHover()
+	public async Task Render_WhenFilling_StretchesEveryValueOnPhones()
+	{
+		var cut = RenderGroup(Choice.First, parameters => parameters.Add(group => group.Fill, true));
+
+		await Assert.That(cut.Find("[role=radiogroup]").ClassList).Contains("max-md:w-full");
+		await Assert.That(Radios(cut).All(radio => radio.ClassList.Contains("max-md:flex-1"))).IsTrue();
+	}
+
+	[Test]
+	public async Task Render_WithATooltipProvider_KeepsEachValueOneRadioAndExplainsItOnHoverOrTap()
 	{
 		var portal = Render<BbPortalHost>();
-		var cut = RenderGroup(Choice.First, parameters => parameters.Add(group => group.TooltipProvider, choice => $"About {choice}"));
+		var cut = RenderGroup(Choice.First, Explained);
 
 		var radios = Radios(cut);
 		await radios[1].QuerySelector("span span")!.TriggerEventAsync("onmouseenter", new MouseEventArgs());
@@ -85,7 +94,24 @@ public class EnumToggleGroupTests : BunitContext
 		await Assert.That(cut.Find("[role=radiogroup]").GetAttribute("aria-label")).IsEqualTo("Enum selection");
 		await Assert.That(cut.FindAll("[role=radiogroup] [tabindex='0']").Count).IsEqualTo(1);
 		await Assert.That(radios[1].TextContent.Trim()).IsEqualTo(nameof(Choice.Second));
-		await Assert.That(portal.WaitForElement("[data-portal-content][data-state=open] [role=tooltip]").TextContent).Contains("About Second");
+		var tooltip = portal.WaitForElement("[data-portal-content][data-state=open] [role=tooltip]");
+		await Assert.That(tooltip.TextContent).Contains("About Second");
+		await Assert.That(tooltip.HasAttribute("data-label-tip")).IsFalse();
+		await Assert.That(cut.FindComponents<BbFieldDescription>()).IsEmpty();
+	}
+
+	[Test]
+	public async Task Phone_WithATooltipProvider_WritesTheChosenValuesExplanationAndKeepsTheTooltipOffTouch()
+	{
+		var cut = this.RenderOnPhone<EnumToggleGroup<Choice>>(parameters => Configure(parameters, Choice.Second, Explained));
+
+		await Assert.That(cut.Component.FindComponent<BbFieldDescription>().Markup).Contains("About Second");
+		await Assert.That(cut.Component.FindComponents<BbTooltipContent>().Count(tip => tip.Instance.AdditionalAttributes!["data-label-tip"] is true)).IsEqualTo(3);
+	}
+
+	private static void Explained(ComponentParameterCollectionBuilder<EnumToggleGroup<Choice>> parameters)
+	{
+		parameters.Add(group => group.TooltipProvider, choice => $"About {choice}");
 	}
 
 	private IRenderedComponent<EnumToggleGroup<Choice>> RenderGroup(
@@ -93,11 +119,17 @@ public class EnumToggleGroupTests : BunitContext
 		Action<ComponentParameterCollectionBuilder<EnumToggleGroup<Choice>>>? configure = null
 	)
 	{
-		return Render<EnumToggleGroup<Choice>>(parameters =>
-		{
-			parameters.Add(group => group.Value, value).Add(group => group.OnChange, _changes.Add);
-			configure?.Invoke(parameters);
-		});
+		return Render<EnumToggleGroup<Choice>>(parameters => Configure(parameters, value, configure));
+	}
+
+	private void Configure(
+		ComponentParameterCollectionBuilder<EnumToggleGroup<Choice>> parameters,
+		Choice value,
+		Action<ComponentParameterCollectionBuilder<EnumToggleGroup<Choice>>>? configure
+	)
+	{
+		parameters.Add(group => group.Value, value).Add(group => group.OnChange, _changes.Add);
+		configure?.Invoke(parameters);
 	}
 
 	private static IReadOnlyList<IElement> Radios(IRenderedComponent<EnumToggleGroup<Choice>> cut) => cut.FindAll("[role=radio]");

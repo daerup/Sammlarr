@@ -12,6 +12,14 @@ namespace UI.Tests.Changes;
 
 public class ChangeListTests : BunitContext
 {
+	[Before(Test)]
+	public void Setup()
+	{
+		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(ArtworkStub.Sizing());
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
 	[Test]
 	public async Task Render_ForAMixedChangeset_PutsRemovalsBeforeAdditions()
 	{
@@ -32,6 +40,17 @@ public class ChangeListTests : BunitContext
 
 		await Assert.That(cut.FindAll(".change-context")).Count().IsEqualTo(1);
 		await Assert.That(cut.Find(".change-row").TextContent).DoesNotContain("Absent from");
+	}
+
+	[Test]
+	public async Task Phone_ForARowWithContext_WritesItUnderTheTitleAndKeepsTheTooltipOffTouch()
+	{
+		var item = Removed("Gone") with { ContextIcon = "log-out", ContextTooltip = "Absent from 3 of 3 runs" };
+
+		var cut = this.RenderOnPhone<ChangeList>(parameters => parameters.Add(list => list.Items, [item]).Add(list => list.Chips, []));
+
+		await Assert.That(cut.Component.Find(".change-subtitle").TextContent).IsEqualTo("Absent from 3 of 3 runs");
+		await Assert.That(cut.Component.FindComponent<BbTooltipContent>().Instance.AdditionalAttributes!["data-label-tip"] is true).IsTrue();
 	}
 
 	[Test]
@@ -81,6 +100,8 @@ public class ChangeListTests : BunitContext
 
 		await Assert.That(chips[0].TagName).IsEqualTo("BUTTON");
 		await Assert.That(chips[1].TagName).IsNotEqualTo("BUTTON");
+		await Assert.That(chips[1].GetAttribute("aria-label")).IsEqualTo("Already yours: 178");
+		await Assert.That(chips[1].GetAttribute("role")).IsEqualTo("img");
 		await Assert.That(cut.FindAll(".change-chip-sep")).Count().IsEqualTo(1);
 	}
 
@@ -113,6 +134,8 @@ public class ChangeListTests : BunitContext
 		var chips = cut.FindAll(".change-chip");
 
 		await Assert.That(chips[1].TagName).IsNotEqualTo("BUTTON");
+		await Assert.That(chips[1].GetAttribute("aria-label")).IsEqualTo("Already yours: 178");
+		await Assert.That(chips[1].GetAttribute("role")).IsEqualTo("img");
 	}
 
 	[Test]
@@ -162,6 +185,25 @@ public class ChangeListTests : BunitContext
 		await Assert.That(groups[0]).Contains("Removing");
 		await Assert.That(groups[1]).Contains("Adding");
 		await Assert.That(portal.Find(".change-band").TextContent).Contains("Plex is unreachable");
+	}
+
+	[Test]
+	public async Task Dialog_Footer_MarksTheNoteAndTheActionsForPhones()
+	{
+		var portal = OpenDialog();
+
+		var footer = portal.Find("[data-dialog-actions]");
+		await Assert.That(footer.QuerySelector("a[data-dialog-lead]")!.TextContent.Trim()).IsEqualTo("7 runs");
+		await Assert.That(footer.QuerySelector("[data-dialog-buttons]")!.TextContent).IsEqualTo("Cancel");
+	}
+
+	[Test]
+	public async Task Dialog_WithOnlyANote_StaysAnOrdinaryDialogOnPhones()
+	{
+		var portal = OpenDialog(withActions: false);
+
+		await Assert.That(portal.FindAll("[data-dialog-actions]")).IsEmpty();
+		await Assert.That(portal.Find(".change-foot a").TextContent.Trim()).IsEqualTo("7 runs");
 	}
 
 	[Test]
@@ -289,6 +331,28 @@ public class ChangeListTests : BunitContext
 	}
 
 	[Test]
+	public async Task Search_FromTheMagnifier_OpensTheFieldAndCancelClearsIt()
+	{
+		var cut = RenderList(Added("Wanted"), Added("Other"));
+
+		await cut.Find(".change-search-open").ClickAsync(new());
+		await cut.Find(".change-search input").InputAsync(new ChangeEventArgs { Value = "Other" });
+
+		await Assert.That(cut.Find(".change-chips").ClassList).Contains("is-searching");
+		await Assert.That(cut.Find(".change-search input").ClassList).DoesNotContain("max-md:hidden");
+		await Assert.That(cut.FindAll(".change-row")).Count().IsEqualTo(1);
+		await Assert.That(JSInterop.Invocations.Any(invocation => invocation.Identifier == "Blazor._internal.domWrapper.focus")).IsTrue();
+
+		await cut.Find("button[aria-label='Cancel search']").ClickAsync(new());
+
+		await Assert.That(cut.Find(".change-chips").ClassList).DoesNotContain("is-searching");
+		await Assert.That(cut.Find(".change-search input").GetAttribute("value")).IsEmpty();
+		await Assert.That(cut.FindAll(".change-row")).Count().IsEqualTo(2);
+		await Assert.That(cut.FindAll(".change-search-open")).HasSingleItem();
+		await Assert.That(JSInterop.Invocations.Count(invocation => invocation.Identifier == "Blazor._internal.domWrapper.focus")).IsEqualTo(2);
+	}
+
+	[Test]
 	public async Task Render_WhenAKindIsFolded_ShowsOneLineAtTheFootInsteadOfItsGroup()
 	{
 		var cut = RenderList([Added("Fresh"), Unchanged("Held")], [], fold: Fold(2614), unchangedLabel: "Already in sync");
@@ -391,12 +455,9 @@ public class ChangeListTests : BunitContext
 		await Assert.That(cut.Find(".change-pin b").TextContent).IsEqualTo(2614.ToString("N0"));
 	}
 
-	private IRenderedComponent<BbPortalHost> OpenDialog()
+	private IRenderedComponent<BbPortalHost> OpenDialog(bool withActions = true)
 	{
-		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
-		Services.AddSingleton(ArtworkStub.Sizing());
-		JSInterop.Mode = JSRuntimeMode.Loose;
 
 		var portal = Render<BbPortalHost>();
 		Render<ChangeDialog>(parameters =>
@@ -413,10 +474,11 @@ public class ChangeListTests : BunitContext
 				.Add(dialog => dialog.UnchangedLabel, "Already in sync")
 				.Add(dialog => dialog.EmptyMessage, "Everything is in sync.")
 				.Add(dialog => dialog.Note, "7 runs")
+				.Add(dialog => dialog.NoteHref, "/feeds/x/runs")
 				.Add(dialog => dialog.BandTone, ChangeBandTone.Bad)
 				.Add(dialog => dialog.Prologue, builder => builder.AddContent(0, "5 waiting"))
 				.Add(dialog => dialog.Band, builder => builder.AddContent(0, "Plex is unreachable"))
-				.Add(dialog => dialog.Actions, builder => builder.AddContent(0, "Cancel"))
+				.Add(dialog => dialog.Actions, withActions ? builder => builder.AddContent(0, "Cancel") : null)
 		);
 
 		return portal;
@@ -481,10 +543,6 @@ public class ChangeListTests : BunitContext
 		ChangeFold? fold = null
 	)
 	{
-		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton(ArtworkStub.Sizing());
-		JSInterop.Mode = JSRuntimeMode.Loose;
-
 		return Render<ChangeList>(parameters =>
 		{
 			parameters.Add(list => list.Items, items);

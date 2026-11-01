@@ -4,7 +4,7 @@
 @inject NotificationTester Tester
 @inject Notifier Notifier
 
-<div class="flex flex-col gap-5 p-1 min-w-[26rem]">
+<div class="flex flex-col gap-5 p-1 md:min-w-[26rem]">
     @if (_createdSecret is { } secret)
     {
         <div class="flex flex-col gap-2">
@@ -16,8 +16,8 @@
                 @secret
             </BbCopyText>
         </div>
-        <div class="flex justify-end">
-            <BbButton OnClick="Done">Done</BbButton>
+        <div class="flex justify-end" data-dialog-actions>
+            <BbButton OnClick="Done" data-dialog-commit>Done</BbButton>
         </div>
     }
     else
@@ -57,8 +57,8 @@
             <p class="text-sm @(_testOk ? "text-success" : "text-destructive")">@testMessage</p>
         }
 
-        <div class="flex items-center justify-between gap-2">
-            <BbButton Variant="ButtonVariant.Outline" OnClick="TestAsync" Disabled="_busy">
+        <div class="flex items-center justify-between gap-2 max-md:contents">
+            <BbButton Variant="ButtonVariant.Outline" OnClick="TestAsync" Disabled="_busy" Class="max-md:w-full">
                 @if (_testing)
                 {
                     <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
@@ -69,9 +69,9 @@
                 }
                 <span>Test connection</span>
             </BbButton>
-            <div class="flex gap-2">
-                <BbButton Variant="ButtonVariant.Outline" OnClick="Cancel" Disabled="_busy">Cancel</BbButton>
-                <BbButton OnClick="SaveAsync" Disabled="_busy">
+            <div class="flex gap-2" data-dialog-actions>
+                <BbButton Variant="ButtonVariant.Outline" OnClick="Cancel" Disabled="_busy" data-dialog-cancel>Cancel</BbButton>
+                <BbButton OnClick="SaveAsync" Disabled="_busy" data-dialog-commit>
                     @if (_saving)
                     {
                         <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>

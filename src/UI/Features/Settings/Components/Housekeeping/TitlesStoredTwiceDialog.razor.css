@@ -43,8 +43,10 @@
     text-align: left;
 }
 
-.st-item:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--foreground) 4%, transparent);
+@media (hover: hover) and (pointer: fine) {
+    .st-item:hover:not(:disabled) {
+        background: color-mix(in srgb, var(--foreground) 4%, transparent);
+    }
 }
 
 .st-item.is-on {
@@ -204,9 +206,11 @@
     text-decoration: none;
 }
 
-a.st-id:hover {
-    color: var(--foreground);
-    text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+    a.st-id:hover {
+        color: var(--foreground);
+        text-decoration: underline;
+    }
 }
 
 .st-id.is-clash {
@@ -340,4 +344,98 @@ a.st-id:hover {
 .st-refused {
     font-size: 13px;
     color: var(--destructive);
+}
+
+.st-steps {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: auto;
+}
+
+.st-steps .st-progress {
+    margin-left: 0;
+    white-space: nowrap;
+}
+
+@media (width < 48rem) {
+    .st-head {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        gap: 6px;
+        padding: 6px 6px 6px 8px;
+        background: var(--card);
+    }
+
+    .st-body {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .st-rail {
+        display: none;
+    }
+
+    .st-pair {
+        isolation: isolate;
+        grid-template-columns: minmax(0, 1fr);
+        padding: 14px 16px;
+    }
+
+    .st-col {
+        display: grid;
+        grid-template-columns: 64px minmax(0, 1fr);
+        grid-template-rows: repeat(5, auto) 1fr;
+        align-items: start;
+        gap: 4px 12px;
+        text-align: left;
+    }
+
+    .st-col > :not(.st-poster) {
+        grid-column: 2;
+    }
+
+    .st-poster {
+        grid-row: 1 / -1;
+        width: 64px;
+    }
+
+    .st-poster-empty {
+        width: 64px;
+    }
+
+    .st-name {
+        margin-top: 0;
+        font-size: 15px;
+    }
+
+    .st-meta,
+    .st-genres,
+    .st-ids {
+        justify-content: flex-start;
+    }
+
+    .st-divider {
+        height: 40px;
+    }
+
+    .st-divider::before {
+        top: 50%;
+        right: 0;
+        bottom: auto;
+        left: 0;
+        border-top: 1px solid var(--border);
+        border-left: 0;
+    }
+
+    .st-seam {
+        top: 50%;
+        flex-direction: row;
+        padding: 5px 8px;
+        transform: translate(-50%, -50%);
+    }
+
+    .st-claim {
+        padding: 10px 16px;
+    }
 }

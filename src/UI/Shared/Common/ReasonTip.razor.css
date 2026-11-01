@@ -1,0 +1,7 @@
+.reason-tip {
+    cursor: pointer;
+}
+
+.reason-tip ::deep :is([disabled], [aria-disabled="true"], [data-disabled]) {
+    pointer-events: none;
+}

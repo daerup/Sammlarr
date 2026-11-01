@@ -29,6 +29,23 @@
     min-width: 0;
 }
 
+.source-use {
+    overflow: hidden;
+    font-size: 12px;
+    color: var(--muted-foreground);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.source-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 4px 16px 12px 43px;
+    font-size: 12.5px;
+}
+
 .source-chips {
     display: flex;
     flex-wrap: wrap;
@@ -57,10 +74,12 @@
     text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
 }
 
-.source-note a:hover,
-.credit-origin a:hover,
-.credit-source:hover {
-    color: var(--foreground);
+@media (hover: hover) and (pointer: fine) {
+    .source-note a:hover,
+    .credit-origin a:hover,
+    .credit-source:hover {
+        color: var(--foreground);
+    }
 }
 
 .source-open {
@@ -68,9 +87,14 @@
     color: var(--muted-foreground);
 }
 
-.source-open:hover,
 .source-open:focus-visible {
     color: var(--foreground);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .source-open:hover {
+        color: var(--foreground);
+    }
 }
 
 .source-band {
@@ -95,6 +119,24 @@
 
 .source-band-note {
     font-size: 11.5px;
+}
+
+.source-band-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px 8px;
+}
+
+.source-band-divider .source-band-title {
+    font-size: 12px;
+    color: var(--muted-foreground);
+}
+
+.source-band-rule {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
 }
 
 .source-band .source-row {
@@ -181,7 +223,17 @@
     color: color-mix(in oklch, var(--foreground) 85%, transparent);
 }
 
-@media (max-width: 640px) {
+@media (width < 48rem) {
+    .source-band {
+        padding: 0;
+        border-top: 0;
+        background: none;
+    }
+
+    .source-band-head {
+        padding-inline: 14px;
+    }
+
     .credit-group {
         grid-template-columns: minmax(0, 1fr);
         gap: 4px;

@@ -7,24 +7,24 @@
 @inject ICurrentUser CurrentUser
 @inject PersonPainter Painter
 
-<div class="flex min-h-8 items-end justify-between gap-3 px-1">
+<div class="flex min-h-8 items-end justify-between gap-3 px-1 max-md:items-center">
     <h4 class="text-sm font-semibold">People</h4>
     @if (_config is { AuthProvider: AuthProvider.Local })
     {
-        <InviteDialog Invited="LoadAsync"/>
+        <InviteDialog Compact="IsPhone" Invited="LoadAsync"/>
     }
 </div>
 
 @if (_config is { } config)
 {
-    <div class="overflow-hidden rounded-lg border bg-card">
+    <SectionCard>
         @foreach (var person in _people)
         {
             var key = Key(person);
             <PersonRow @key="key" Person="person" Colour="ColourOf(person)" SignIn="config.AuthProvider" Sink="config.Sink" IsYou="IsYou(person)" IsLastAdmin="IsLastAdmin(person)"
                        Open="_open == key" OpenChanged="open => _open = open ? key : null" Changed="LoadAsync"/>
         }
-    </div>
+    </SectionCard>
 }
 else
 {
@@ -32,6 +32,8 @@ else
 }
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     private ProviderConfig? _config;
 
     private IReadOnlyList<Person> _people = [];

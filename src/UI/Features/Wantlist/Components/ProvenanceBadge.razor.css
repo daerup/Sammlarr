@@ -20,3 +20,18 @@
         max-width: 33.333cqw;
     }
 }
+
+@media (width < 48rem) {
+    ::deep .wl-badge {
+        width: 26px;
+        height: 26px;
+        justify-content: center;
+        padding: 0;
+        border-radius: 7px;
+    }
+
+    ::deep .wl-badge svg {
+        width: 13px;
+        height: 13px;
+    }
+}

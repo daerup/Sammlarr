@@ -112,11 +112,11 @@
                 </BbFieldContent>
             </BbField>
             <p class="text-sm text-muted-foreground">@Why(changing)</p>
-            <BbDialogFooter>
+            <BbDialogFooter data-dialog-actions>
                 <BbDialogClose>
-                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">Cancel</BbButton>
+                    <BbButton data-dialog-cancel Variant="ButtonVariant.Outline" Size="ButtonSize.Small">Cancel</BbButton>
                 </BbDialogClose>
-                <BbButton Variant="ButtonVariant.Destructive" Size="ButtonSize.Small" Disabled="@(!CanChange(changing))" OnClick="() => ChangeAsync(changing)">
+                <BbButton data-dialog-commit Variant="ButtonVariant.Destructive" Size="ButtonSize.Small" Disabled="@(!CanChange(changing))" OnClick="() => ChangeAsync(changing)">
                     @Action(changing)
                 </BbButton>
             </BbDialogFooter>

@@ -2,7 +2,7 @@
 @inject MediaProviderBrandingService Branding
 
 <div class="feed-provider-select">
-    <BbSelect TValue="FeedProvider?" Value="@Value" ValueChanged="@ValueChanged" Class="w-full max-w-72">
+    <BbSelect TValue="FeedProvider?" Value="@Value" ValueChanged="@ValueChanged" Class="w-full max-w-72 max-md:max-w-none">
         <BbSelectTrigger Class="provider-trigger" style="@BrandStyle(HasNoKey ? null : Value)">
             @if (Value is { } selected)
             {

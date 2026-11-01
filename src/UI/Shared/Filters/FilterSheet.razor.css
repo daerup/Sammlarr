@@ -1,0 +1,88 @@
+.filter-sheet-search {
+    display: flex;
+    padding: 10px 20px 4px;
+}
+
+.filter-sheet-body {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 0 20px 14px;
+}
+
+.filter-sheet-group {
+    margin: 16px 0 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+}
+
+.filter-sheet-radio {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 2px;
+    border: 0;
+    border-bottom: 1px solid color-mix(in oklch, var(--border) 60%, transparent);
+    background: transparent;
+    color: var(--foreground);
+    font-size: 15px;
+    text-align: left;
+}
+
+.filter-sheet-radio:last-child {
+    border-bottom: 0;
+}
+
+.filter-sheet-radio-label {
+    flex: 1;
+    min-width: 0;
+}
+
+.filter-sheet-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.filter-sheet-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 12px;
+    border: 1px solid var(--input);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--foreground);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.filter-sheet-chip.is-on {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: var(--primary-foreground);
+}
+
+.filter-sheet-chip-count {
+    color: var(--muted-foreground);
+    font-size: 12px;
+}
+
+.filter-sheet-chip.is-on .filter-sheet-chip-count {
+    color: var(--primary-foreground);
+    opacity: 0.75;
+}
+
+.filter-sheet-foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 9px;
+    padding: 13px 20px 16px;
+    border-top: 1px solid var(--border);
+}

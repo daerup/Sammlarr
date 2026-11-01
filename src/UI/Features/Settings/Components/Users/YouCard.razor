@@ -5,7 +5,7 @@
 
 @if (_signIn is { } signIn)
 {
-    <div class="overflow-hidden rounded-lg border bg-card" data-you>
+    <SectionCard data-you>
         <BbCollapsible @bind-Open="_open">
             <div class="flex items-center gap-3.5 bg-foreground/5 py-3 pl-5 pr-4">
                 <UserAvatar Name="@CurrentUser.DisplayName" Url="@CurrentUser.AvatarUrl" Size="AvatarSize.Small"/>
@@ -16,10 +16,19 @@
                 @if (signIn == AuthProvider.Local)
                 {
                     <BbCollapsibleTrigger>
-                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Class="ml-auto">
-                            <LucideIcon Name="key-round" Size="14" Class="mr-2"/>
-                            Change password
-                        </BbButton>
+                        @if (IsPhone)
+                        {
+                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" Class="ml-auto shrink-0" AriaLabel="Change password">
+                                <LucideIcon Name="key-round" Size="18"/>
+                            </BbButton>
+                        }
+                        else
+                        {
+                            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Class="ml-auto">
+                                <LucideIcon Name="key-round" Size="14" Class="mr-2"/>
+                                Change password
+                            </BbButton>
+                        }
                     </BbCollapsibleTrigger>
                 }
             </div>
@@ -29,7 +38,7 @@
                 </div>
             </BbCollapsibleContent>
         </BbCollapsible>
-    </div>
+    </SectionCard>
 }
 else
 {
@@ -37,6 +46,8 @@ else
 }
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     private AuthProvider? _signIn;
 
     private bool _open;

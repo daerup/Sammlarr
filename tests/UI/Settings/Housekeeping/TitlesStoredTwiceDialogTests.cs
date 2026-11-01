@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Housekeeping;
+using UI.Shared.Layout;
 using UI.Shared.Services;
 using UI.Tests.Media;
 using static UI.Tests.Settings.Housekeeping.StoredTwicePairs;
@@ -177,6 +178,51 @@ public class TitlesStoredTwiceDialogTests : BunitContext
 		await Assert.That(Button(cut, "Apply 0").HasAttribute("disabled")).IsTrue();
 	}
 
+	[Test]
+	public async Task Phone_TopBar_StepsBetweenThePairsAndTheFooterDropsItsBack()
+	{
+		var cut = RenderOpenOnPhone();
+
+		await Assert.That(Arrow(cut, "Previous pair").HasAttribute("disabled")).IsTrue();
+		await Assert.That(Arrow(cut, "Next pair").HasAttribute("disabled")).IsTrue();
+		await Assert.That(cut.FindAll("button").Select(button => button.TextContent.Trim())).DoesNotContain("Back");
+		await Button(cut, "Keep apart").ClickAsync(new());
+		await Arrow(cut, "Previous pair").ClickAsync(new());
+
+		await Assert.That(Text(cut, "stored-twice-progress")).IsEqualTo("Pair 1 of 2");
+		await Arrow(cut, "Next pair").ClickAsync(new());
+		await Assert.That(Text(cut, "stored-twice-progress")).IsEqualTo("Pair 2 of 2");
+	}
+
+	[Test]
+	public async Task Phone_NextAfterTheLastPairToDecide_StepsThroughTheKeptApartPairsToTheSummary()
+	{
+		var cut = RenderOpenOnPhone();
+		await Button(cut, "Merge").ClickAsync(new());
+		await Button(cut, "Keep apart").ClickAsync(new());
+
+		await Assert.That(Text(cut, "stored-twice-progress")).IsEqualTo("Kept apart 1 of 2");
+		await Arrow(cut, "Previous pair").ClickAsync(new());
+		await Assert.That(Text(cut, "stored-twice-progress")).IsEqualTo("Pair 2 of 2");
+		await Arrow(cut, "Next pair").ClickAsync(new());
+		await Arrow(cut, "Next pair").ClickAsync(new());
+		await Arrow(cut, "Next pair").ClickAsync(new());
+		await Assert.That(cut.FindAll("[data-testid=stored-twice-summary]")).Count().IsEqualTo(1);
+		await Assert.That(Arrow(cut, "Previous pair").HasAttribute("disabled")).IsFalse();
+		await Assert.That(Arrow(cut, "Next pair").HasAttribute("disabled")).IsTrue();
+		await Button(cut, "Apply 2").ClickAsync(new());
+		cut.WaitForState(() => cut.FindAll("[data-testid=stored-twice-applied]").Count == 1);
+
+		await Assert.That(Arrow(cut, "Previous pair").HasAttribute("disabled")).IsTrue();
+		await Assert.That(Arrow(cut, "Next pair").HasAttribute("disabled")).IsTrue();
+	}
+
+	private IRenderedComponent<IComponent> RenderOpenOnPhone()
+	{
+		RenderTree.TryAdd<CascadingValue<bool>>(cascade => cascade.Add(value => value.Name, PhoneLayout.IsPhoneCascade).Add(value => value.Value, true));
+		return RenderOpen();
+	}
+
 	private IRenderedComponent<IComponent> RenderOpen()
 	{
 		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Changed, open => _opened.Add(open)));
@@ -193,6 +239,8 @@ public class TitlesStoredTwiceDialogTests : BunitContext
 	{
 		return cut.FindAll("button").Single(button => button.TextContent.Trim() == label);
 	}
+
+	private static IElement Arrow(IRenderedComponent<IComponent> cut, string label) => cut.Find($"button[aria-label='{label}']");
 
 	private static string Text(IRenderedComponent<IComponent> cut, string testId) => cut.Find($"[data-testid={testId}]").TextContent.Trim();
 

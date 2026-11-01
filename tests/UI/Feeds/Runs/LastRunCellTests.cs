@@ -111,7 +111,7 @@ public class LastRunCellTests : BunitContext
 	}
 
 	[Test]
-	public async Task Pill_PointedAt_ShowsBothTooltipSections()
+	public async Task Pill_PointedAt_ShowsBothTooltipSectionsAndStaysOffTouch()
 	{
 		RegisterServices();
 
@@ -122,6 +122,7 @@ public class LastRunCellTests : BunitContext
 
 		await Assert.That(cut.Find("[data-testid=last-run-tip]").TextContent).Contains("Finding the titles").And.Contains("What the run did");
 		await Assert.That(cut.Find("[data-testid=last-run-tip-did]").TextContent).Contains("Added to your collection");
+		await Assert.That(cut.Find("[data-testid=last-run-tip]").HasAttribute("data-label-tip")).IsTrue();
 	}
 
 	[Test]

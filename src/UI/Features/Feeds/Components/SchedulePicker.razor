@@ -54,9 +54,9 @@
 
     @if (_scheduleMode == ScheduleMode.Expression)
     {
-        <div class="flex flex-wrap items-center gap-2">
-            <div class="flex flex-col items-center gap-0.5">
-                <div style="@CronFieldStyle(_cronSecond)">
+        <div class="flex flex-wrap items-center gap-2 max-md:grid max-md:grid-cols-6 max-md:items-start max-md:gap-1.5" data-testid="cron-fields">
+            <div class="flex flex-col items-center gap-0.5 max-md:min-w-0">
+                <div class="max-md:!w-full" style="@CronFieldStyle(_cronSecond)">
                     <BbInput Value="@_cronSecond"
                              ValueChanged="@(v => SetCronField(v, () => _cronSecond))"
                              Class="w-full text-center font-mono px-1 bg-accent"
@@ -65,11 +65,11 @@
                              AriaInvalid="@(!IsCronSecondValid)"
                              UpdateTiming="UpdateTiming.Immediate"/>
                 </div>
-                <span class="text-xs text-muted-foreground select-none">Second</span>
+                <span class="text-xs text-muted-foreground select-none max-md:text-center max-md:text-[11px] max-md:leading-tight">Second</span>
                 <span class="text-[10px] @(IsCronSecondValid ? "invisible" : "text-destructive") select-none">0–59</span>
             </div>
-            <div class="flex flex-col items-center gap-0.5">
-                <div style="@CronFieldStyle(_cronMinute)">
+            <div class="flex flex-col items-center gap-0.5 max-md:min-w-0">
+                <div class="max-md:!w-full" style="@CronFieldStyle(_cronMinute)">
                     <BbInput Value="@_cronMinute"
                              ValueChanged="@(v => SetCronField(v, () => _cronMinute))"
                              Class="w-full text-center font-mono px-1 bg-accent"
@@ -78,11 +78,11 @@
                              AriaInvalid="@(!IsCronMinuteValid)"
                              UpdateTiming="UpdateTiming.Immediate"/>
                 </div>
-                <span class="text-xs text-muted-foreground select-none">Minute</span>
+                <span class="text-xs text-muted-foreground select-none max-md:text-center max-md:text-[11px] max-md:leading-tight">Minute</span>
                 <span class="text-[10px] @(IsCronMinuteValid ? "invisible" : "text-destructive") select-none">0–59</span>
             </div>
-            <div class="flex flex-col items-center gap-0.5">
-                <div style="@CronFieldStyle(_cronHour)">
+            <div class="flex flex-col items-center gap-0.5 max-md:min-w-0">
+                <div class="max-md:!w-full" style="@CronFieldStyle(_cronHour)">
                     <BbInput Value="@_cronHour"
                              ValueChanged="@(v => SetCronField(v, () => _cronHour))"
                              Class="w-full text-center font-mono px-1 bg-accent"
@@ -91,11 +91,11 @@
                              AriaInvalid="@(!IsCronHourValid)"
                              UpdateTiming="UpdateTiming.Immediate"/>
                 </div>
-                <span class="text-xs text-muted-foreground select-none">Hour</span>
+                <span class="text-xs text-muted-foreground select-none max-md:text-center max-md:text-[11px] max-md:leading-tight">Hour</span>
                 <span class="text-[10px] @(IsCronHourValid ? "invisible" : "text-destructive") select-none">0–23</span>
             </div>
-            <div class="flex flex-col items-center gap-0.5">
-                <div style="@CronFieldStyle(_cronDayOfMonth)">
+            <div class="flex flex-col items-center gap-0.5 max-md:min-w-0">
+                <div class="max-md:!w-full" style="@CronFieldStyle(_cronDayOfMonth)">
                     <BbInput Value="@_cronDayOfMonth"
                              ValueChanged="@(v => SetCronField(v, () => _cronDayOfMonth))"
                              Class="w-full text-center font-mono px-1 bg-accent"
@@ -104,11 +104,11 @@
                              AriaInvalid="@(!IsCronDayOfMonthValid)"
                              UpdateTiming="UpdateTiming.Immediate"/>
                 </div>
-                <span class="text-xs text-muted-foreground select-none">Day of Month</span>
+                <span class="text-xs text-muted-foreground select-none max-md:text-center max-md:text-[11px] max-md:leading-tight">Day of month</span>
                 <span class="text-[10px] @(IsCronDayOfMonthValid ? "invisible" : "text-destructive") select-none">1–31</span>
             </div>
-            <div class="flex flex-col items-center gap-0.5">
-                <div style="@CronFieldStyle(_cronMonth)">
+            <div class="flex flex-col items-center gap-0.5 max-md:min-w-0">
+                <div class="max-md:!w-full" style="@CronFieldStyle(_cronMonth)">
                     <BbInput Value="@_cronMonth"
                              ValueChanged="@(v => SetCronField(v, () => _cronMonth))"
                              Class="w-full text-center font-mono px-1 bg-accent"
@@ -117,11 +117,11 @@
                              AriaInvalid="@(!IsCronMonthValid)"
                              UpdateTiming="UpdateTiming.Immediate"/>
                 </div>
-                <span class="text-xs text-muted-foreground select-none">Month</span>
+                <span class="text-xs text-muted-foreground select-none max-md:text-center max-md:text-[11px] max-md:leading-tight">Month</span>
                 <span class="text-[10px] @(IsCronMonthValid ? "invisible" : "text-destructive") select-none">1–12</span>
             </div>
-            <div class="flex flex-col items-center gap-0.5">
-                <div style="@CronFieldStyle(_cronDayOfWeek)">
+            <div class="flex flex-col items-center gap-0.5 max-md:min-w-0">
+                <div class="max-md:!w-full" style="@CronFieldStyle(_cronDayOfWeek)">
                     <BbInput Value="@_cronDayOfWeek"
                              ValueChanged="@(v => SetCronField(v, () => _cronDayOfWeek))"
                              Class="w-full text-center font-mono px-1 bg-accent"
@@ -130,13 +130,13 @@
                              AriaInvalid="@(!IsCronDayOfWeekValid)"
                              UpdateTiming="UpdateTiming.Immediate"/>
                 </div>
-                <span class="text-xs text-muted-foreground select-none">Day of Week</span>
+                <span class="text-xs text-muted-foreground select-none max-md:text-center max-md:text-[11px] max-md:leading-tight">Day of week</span>
                 <span class="text-[10px] @(IsCronDayOfWeekValid ? "invisible" : "text-destructive") select-none">0–7</span>
             </div>
 
             @if (!string.IsNullOrEmpty(ComputedExpression))
             {
-                <div class="flex flex-col gap-0.5 w-full">
+                <div class="flex flex-col gap-0.5 w-full max-md:col-span-6">
                     <span class="text-xs text-muted-foreground font-mono flex items-center gap-1.5">
                         <LucideIcon Name="clock" Size="12"/>@ComputedExpression
                     </span>
@@ -297,21 +297,7 @@
 
     private RenderFragment TimeEntry(TimeSpan? time, Action<TimeSpan?> changed)
     {
-        return @<div class="relative w-fit">
-                   <BbTimeInput Value="time"
-                                ValueChanged="changed"
-                                Format="TimeFormat.Hour24"
-                                MinuteStep="5"
-                                ShowPicker="false"
-                                Class="pe-11"
-                                data-clamp/>
-                   <BbTimePicker Value="time"
-                                 ValueChanged="changed"
-                                 Format="TimeFormat.Hour24"
-                                 MinuteStep="5"
-                                 AriaLabel="Open time picker"
-                                 Class="absolute end-3 top-1.5 h-7 w-7 justify-center border-0 bg-transparent px-0 py-0 [&>span]:hidden [&>svg]:me-0"/>
-               </div>;
+        return @<ClockTimePicker Value="time" ValueChanged="changed" Title="Run at"/>;
     }
 
     private void TransferScheduleConfig(ScheduleMode from, ScheduleMode to)

@@ -4,10 +4,19 @@
 
 <BbDialog Open="_open" OpenChanged="SetOpen">
     <BbDialogTrigger>
-        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">
-            <LucideIcon Name="send" Size="13" Class="mr-1.5"/>
-            Invite member
-        </BbButton>
+        @if (Compact)
+        {
+            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Invite member">
+                <LucideIcon Name="plus" Size="18"/>
+            </BbButton>
+        }
+        else
+        {
+            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">
+                <LucideIcon Name="send" Size="13" Class="mr-1.5"/>
+                Invite member
+            </BbButton>
+        }
     </BbDialogTrigger>
     <BbDialogContent Class="sm:max-w-[460px]">
         @if (_issued is { } issued)
@@ -36,11 +45,11 @@
                     <span>@_error</span>
                 </p>
             }
-            <BbDialogFooter>
+            <BbDialogFooter data-dialog-actions>
                 <BbDialogClose>
-                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">Cancel</BbButton>
+                    <BbButton data-dialog-cancel Variant="ButtonVariant.Outline" Size="ButtonSize.Small">Cancel</BbButton>
                 </BbDialogClose>
-                <BbButton Size="ButtonSize.Small" Disabled="@(_username.Trim().Length == 0 || _creating)" OnClick="CreateAsync">Create link</BbButton>
+                <BbButton data-dialog-commit Size="ButtonSize.Small" Disabled="@(_username.Trim().Length == 0 || _creating)" OnClick="CreateAsync">Create link</BbButton>
             </BbDialogFooter>
         }
     </BbDialogContent>
@@ -48,6 +57,8 @@
 
 @code {
     [Parameter] public EventCallback Invited { get; set; }
+
+    [Parameter] public bool Compact { get; set; }
 
     private bool _open;
 

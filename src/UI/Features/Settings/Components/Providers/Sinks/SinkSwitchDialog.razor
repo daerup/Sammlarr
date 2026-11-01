@@ -22,11 +22,11 @@
                 <p data-testid="switch-unsent">@Unsent</p>
             }
         </div>
-        <BbDialogFooter>
+        <BbDialogFooter data-dialog-actions>
             <BbDialogClose>
-                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">Stay on @Branding.Name(From.Service)</BbButton>
+                <BbButton data-dialog-cancel Variant="ButtonVariant.Outline" Size="ButtonSize.Small">Stay on @Branding.Name(From.Service)</BbButton>
             </BbDialogClose>
-            <BbButton Size="ButtonSize.Small" OnClick="Confirmed" Disabled="Switching">
+            <BbButton data-dialog-commit Size="ButtonSize.Small" OnClick="Confirmed" Disabled="Switching">
                 <LucideIcon Name="arrow-right-left" Size="14" Class="mr-2"/>
                 Switch to @Branding.Name(Target.Service)
             </BbButton>

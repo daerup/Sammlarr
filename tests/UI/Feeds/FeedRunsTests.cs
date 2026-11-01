@@ -12,6 +12,7 @@ using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Usage;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
@@ -119,6 +120,85 @@ public class FeedRunsTests : BunitContext
 
 		await Assert.That(cut.FindAll(".runs-page[aria-busy='true']")).HasSingleItem();
 	}
+
+	[Test]
+	public async Task Phone_OnLoad_OpensNoRun()
+	{
+		RegisterServices(Runs);
+
+		var cut = this.RenderOnPhone<FeedRuns>(parameters => parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)));
+		cut.Component.WaitForState(() => cut.Component.FindAll(".runs-item").Count > 0);
+
+		await Assert.That(cut.Portal.FindAll(".runs-sheet")).IsEmpty();
+		await Assert.That(cut.Component.FindAll(".runs-detail")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Phone_RunTapped_OpensItInASheetAndKeepsTheAddress()
+	{
+		RegisterServices(Runs);
+		var navigation = Services.GetRequiredService<NavigationManager>();
+		var cut = this.RenderOnPhone<FeedRuns>(parameters => parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)));
+		cut.Component.WaitForState(() => cut.Component.FindAll(".runs-item").Count > 0);
+		var address = navigation.Uri;
+
+		await cut.Component.FindAll(".runs-item")[1].ClickAsync(new());
+
+		cut.Portal.WaitForElement(".runs-sheet");
+		await Assert.That(SheetTitle(cut)).Contains(At(Runs[1]));
+		await Assert.That(navigation.Uri).IsEqualTo(address);
+		await Assert.That(cut.Portal.FindAll(".runs-sheet h3")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Phone_RunRoute_OpensItsRunOnTheListAddressKeepingTheQuery()
+	{
+		RegisterServices(Runs);
+		var navigation = Services.GetRequiredService<NavigationManager>();
+		navigation.NavigateTo($"/feeds/{UrlGuid.Encode(Feed.Value)}/runs/{Link(Runs[3])}?item=abc");
+
+		var cut = this.RenderOnPhone<FeedRuns>(parameters =>
+			parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)).Add(page => page.RunIdParam, Link(Runs[3]))
+		);
+
+		cut.Portal.WaitForElement(".runs-sheet");
+		await Assert.That(SheetTitle(cut)).Contains(At(Runs[3]));
+		await Assert.That(navigation.Uri).EndsWith($"/feeds/{UrlGuid.Encode(Feed.Value)}/runs?item=abc");
+	}
+
+	[Test]
+	public async Task Phone_ListAddressAfterTheRunRoute_KeepsTheLinkedRunOpen()
+	{
+		RegisterServices(Runs);
+		var cut = this.RenderOnPhone<FeedRuns>(parameters =>
+			parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)).Add(page => page.RunIdParam, Link(Runs[3]))
+		);
+		cut.Portal.WaitForElement(".runs-sheet");
+
+		cut.Component.Render(parameters => parameters.Add(page => page.RunIdParam, null));
+
+		cut.Component.WaitForState(() => cut.Component.FindAll(".runs-item").Count > 0);
+		await Assert.That(SheetTitle(cut)).Contains(At(Runs[3]));
+	}
+
+	[Test]
+	public async Task Phone_AnotherRunLinkedWhileOpen_ShowsThatRun()
+	{
+		RegisterServices(Runs);
+		var cut = this.RenderOnPhone<FeedRuns>(parameters =>
+			parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)).Add(page => page.RunIdParam, Link(Runs[3]))
+		);
+		cut.Portal.WaitForElement(".runs-sheet");
+
+		cut.Component.Render(parameters => parameters.Add(page => page.RunIdParam, Link(Runs[5])));
+
+		cut.Portal.WaitForState(() => SheetTitle(cut).Contains(At(Runs[5]), StringComparison.Ordinal));
+		await Assert.That(SheetTitle(cut)).Contains(At(Runs[5]));
+	}
+
+	private static string SheetTitle(PhoneRender<FeedRuns> cut) => cut.Portal.Find("[data-sheet] h2").TextContent;
+
+	private static string At(FeedRun run) => run.StartedAt.ToLocalTime().ToString("HH:mm", CultureInfo.InvariantCulture);
 
 	private Mock<IFeedService> RegisterServices(IReadOnlyList<FeedRun> runs)
 	{

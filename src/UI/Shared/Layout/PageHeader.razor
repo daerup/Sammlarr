@@ -2,20 +2,20 @@
     <div class="min-w-0">
         @if (Heading is not null)
         {
-            <h1 class="text-3xl font-bold tracking-tight antialiased leading-none">@Heading</h1>
+            <h1 class="text-3xl font-bold tracking-tight antialiased leading-none max-md:hidden">@Heading</h1>
         }
         @if (DescriptionContent is not null)
         {
-            <p class="text-muted-foreground mt-2 text-sm leading-relaxed max-w-2xl">@DescriptionContent</p>
+            <p class="text-muted-foreground mt-2 text-sm leading-relaxed max-w-2xl max-md:mt-0">@DescriptionContent</p>
         }
         else if (Description is not null)
         {
-            <p class="text-muted-foreground mt-2 text-sm leading-relaxed max-w-2xl">@Description</p>
+            <p class="text-muted-foreground mt-2 text-sm leading-relaxed max-w-2xl max-md:mt-0">@Description</p>
         }
     </div>
     @if (Actions is not null)
     {
-        <div class="flex items-center gap-2 shrink-0">@Actions</div>
+        <div class="flex items-center gap-2 shrink-0 max-md:has-[.list-search-chip]:w-full max-md:flex-wrap">@Actions</div>
     }
 </div>
 

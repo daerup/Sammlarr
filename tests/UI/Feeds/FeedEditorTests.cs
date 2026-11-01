@@ -21,12 +21,15 @@ using Domain.Processing;
 using Domain.Providers;
 using Domain.Wantlist;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Sections;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
+using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Pages.Editor;
 using UI.Shared.Common;
+using UI.Shared.Layout;
 using UI.Shared.Services;
 using UI.Tests.Media;
 using FeedPage = UI.Features.Feeds.Pages.Editor.Feed;
@@ -236,6 +239,51 @@ public class FeedEditorTests : BunitContext
 
 		await Assert.That(cut.FindAll("[data-save-status]")).IsEmpty();
 		await Assert.That(SaveButton(cut).HasAttribute("disabled")).IsTrue();
+	}
+
+	[Test]
+	public async Task Phone_Toolbar_ReadsCloseThenPreviewThenSave()
+	{
+		var cut = RenderEditor(phone: true);
+		WhileLoading(cut);
+
+		var order = cut.FindAll(".toolbar-slot").OrderBy(slot => slot.GetAttribute("style")).Select(slot => slot.TextContent.Trim());
+
+		await Assert.That(order).IsEquivalentTo(["Close", "Preview", "Save"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Phone_PreviewSlot_SwapsThePanelAndBecomesSettings()
+	{
+		var cut = RenderEditor(phone: true);
+		WhileLoading(cut);
+
+		await Slot(cut, "Preview").ClickAsync(new MouseEventArgs());
+
+		await Assert.That(cut.Find("[data-view]").GetAttribute("data-view")).IsEqualTo("Preview");
+		await Assert.That(cut.FindAll(".toolbar-slot").Select(slot => slot.TextContent.Trim())).Contains("Settings");
+	}
+
+	[Test]
+	public async Task Phone_SaveSlot_LightsUpOnceSomethingChanged()
+	{
+		var cut = RenderEditor(phone: true);
+		WhileLoading(cut);
+		await Assert.That(Slot(cut, "Save").HasAttribute("disabled")).IsTrue();
+
+		await ChangeAsync(cut, config => config with { IsEnabled = false });
+
+		await Assert.That(Slot(cut, "Save").HasAttribute("disabled")).IsFalse();
+		await Assert.That(Slot(cut, "Save").ClassList).Contains("is-commit");
+	}
+
+	[Test]
+	public async Task Desktop_Header_OffersNoPreviewSwitch()
+	{
+		var cut = RenderEditor();
+		WhileLoading(cut);
+
+		await Assert.That(cut.FindAll("button").Select(button => button.TextContent.Trim())).DoesNotContain("Preview");
 	}
 
 	[Test]
@@ -567,8 +615,13 @@ public class FeedEditorTests : BunitContext
 
 	private Task DisposeFromTheDispatcherAsync() => Renderer.Dispatcher.InvokeAsync(DisposeComponentsAsync);
 
-	private IRenderedComponent<IComponent> RenderEditor(bool edit = true)
+	private IRenderedComponent<IComponent> RenderEditor(bool edit = true, bool phone = false)
 	{
+		if (phone)
+		{
+			RenderTree.TryAdd<CascadingValue<bool>>(cascade => cascade.Add(value => value.Name, PhoneLayout.IsPhoneCascade).Add(value => value.Value, true));
+		}
+
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
 		AddAuthorization().SetAuthorized("ana");
@@ -610,6 +663,9 @@ public class FeedEditorTests : BunitContext
 			builder.CloseComponent();
 			builder.OpenComponent<BbDialogProvider>(1);
 			builder.CloseComponent();
+			builder.OpenComponent<SectionOutlet>(4);
+			builder.AddAttribute(5, nameof(SectionOutlet.SectionName), PhoneLayout.ToolbarSection);
+			builder.CloseComponent();
 			builder.OpenComponent<FeedPage>(2);
 			if (edit)
 			{
@@ -649,6 +705,9 @@ public class FeedEditorTests : BunitContext
 	private static IElement Button(IRenderedComponent<IComponent> cut, string label) => cut.FindAll("button").First(button => button.TextContent.Trim() == label);
 
 	private static IElement SaveButton(IRenderedComponent<IComponent> cut) => Button(cut, "Save");
+
+	private static IElement Slot(IRenderedComponent<IComponent> cut, string label) =>
+		cut.FindAll(".toolbar-slot").First(slot => slot.TextContent.Trim() == label);
 
 	private static List<IElement> Dialogs(IRenderedComponent<IComponent> cut) => [.. cut.FindAll("[role='alertdialog'], [role='dialog']")];
 

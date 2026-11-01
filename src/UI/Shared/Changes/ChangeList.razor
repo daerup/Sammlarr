@@ -2,7 +2,7 @@
 @inject IJSRuntime Js
 
 <div class="change-list @(Fill ? "is-fill" : null)">
-    <div class="change-chips">
+    <div class="change-chips @(Searching ? "is-searching" : null)">
         <BbTooltipProvider>
             @foreach (var (chip, separator, countsOnly) in ChipRow())
             {
@@ -14,13 +14,14 @@
                     <BbTooltipTrigger AsChild="false" Class="p-0" Focusable="false">
                         @if (countsOnly)
                         {
-                            <span class="change-chip is-count @ToneClass(chip.Tone)">
+                            <span class="change-chip is-count @ToneClass(chip.Tone)" role="img" aria-label="@($"{chip.Tooltip}: {chip.Count:N0}")">
                                 @ChipFace(chip)
                             </span>
                         }
                         else
                         {
                             <button type="button"
+                                    aria-label="@($"{chip.Tooltip}: {chip.Count:N0}")"
                                     class="change-chip @ToneClass(chip.Tone) @(IsActive(chip) ? "is-on" : null) @(Clickable(chip) ? null : "is-dim")"
                                     disabled="@(!Clickable(chip))"
                                     @onclick="() => ToggleAsync(chip)">
@@ -28,14 +29,24 @@
                             </button>
                         }
                     </BbTooltipTrigger>
-                    <BbTooltipContent>@chip.Tooltip</BbTooltipContent>
+                    <BbTooltipContent data-label-tip="@(!chip.Detailed)">@chip.Tooltip</BbTooltipContent>
                 </BbTooltip>
             }
         </BbTooltipProvider>
         <span class="change-search">
-            <LucideIcon Name="search" Size="13"/>
-            <input type="text" placeholder="Search titles" value="@_search" @oninput="OnSearchChanged"/>
+            @if (!Searching)
+            {
+                <button type="button" class="change-search-open md:hidden" aria-label="Search titles" @onclick="OpenSearch" @ref="_openSearch">
+                    <LucideIcon Name="search" Size="16"/>
+                </button>
+            }
+            <LucideIcon Name="search" Size="13" Class="@SearchFieldClass"/>
+            <input type="text" class="@SearchFieldClass" placeholder="Search titles" aria-label="Search titles" enterkeyhint="search" value="@_search" @oninput="OnSearchChanged" @ref="_searchInput"/>
         </span>
+        @if (Searching)
+        {
+            <button type="button" class="change-search-cancel md:hidden" aria-label="Cancel search" @onclick="CancelSearch">Cancel</button>
+        }
     </div>
 
     <div class="change-body" @ref="_body">
@@ -114,6 +125,11 @@
     private ElementReference _body;
     private IJSObjectReference? _module;
     private string _search = string.Empty;
+    private bool _searching;
+    private bool _focusSearch;
+    private bool _focusOpenSearch;
+    private ElementReference _searchInput;
+    private ElementReference _openSearch;
     private MediaId? _pointedAt;
     private bool _dismissed;
     private bool _revealed;
@@ -150,6 +166,18 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (_focusSearch)
+        {
+            _focusSearch = false;
+            await _searchInput.FocusAsync();
+        }
+
+        if (_focusOpenSearch)
+        {
+            _focusOpenSearch = false;
+            await _openSearch.FocusAsync();
+        }
+
         if (_scroll is not { } scroll)
         {
             return;
@@ -282,6 +310,23 @@
     }
 
     private void OnSearchChanged(ChangeEventArgs args) => _search = args.Value?.ToString() ?? string.Empty;
+
+    private void OpenSearch()
+    {
+        _searching = true;
+        _focusSearch = true;
+    }
+
+    private void CancelSearch()
+    {
+        _searching = false;
+        _search = string.Empty;
+        _focusOpenSearch = true;
+    }
+
+    private bool Searching => _searching || _search.Length > 0;
+
+    private string? SearchFieldClass => Searching ? null : "max-md:hidden";
 
     private static ChipTone GroupTone(ChangeKind kind) =>
         kind switch

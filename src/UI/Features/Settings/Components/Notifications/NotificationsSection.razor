@@ -13,7 +13,7 @@
                 <h2 class="text-lg font-semibold">Clients</h2>
                 <p class="text-sm text-muted-foreground">Webhook or Pushover connections to deliver to.</p>
             </div>
-            <BbButton OnClick="AddClientAsync">
+            <BbButton OnClick="AddClientAsync" Class="shrink-0">
                 <LucideIcon Name="plus" Size="15" Class="mr-2"/>
                 Add client
             </BbButton>
@@ -34,6 +34,27 @@
         {
             @foreach (var client in _clients)
             {
+                @if (IsPhone)
+                {
+                    <UnfoldRow Columns="grid-cols-[15px_minmax(0,1fr)_auto]" Class="overflow-hidden rounded-lg border" data-client>
+                        <Summary>
+                            <span class="flex min-w-0 items-center gap-2.5">
+                                <LucideIcon Name="@ChannelIcon(client.Channel)" Size="16" Class="shrink-0 text-muted-foreground"/>
+                                <span class="@($"min-w-0 truncate font-medium {(client.Enabled ? null : "text-muted-foreground")}")">@client.Name</span>
+                            </span>
+                            <NotificationHealthDot Outcomes="Health(client.Id)" Interactive="false"/>
+                        </Summary>
+                        <Details>
+                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1 py-2.5 pl-[43px] pr-4">
+                                <span class="text-sm text-muted-foreground">@Subtitle(client)</span>
+                                @Hint(client)
+                                <NotificationHealthDot Outcomes="Health(client.Id)"/>
+                                <div class="ml-auto">@Controls(client)</div>
+                            </div>
+                        </Details>
+                    </UnfoldRow>
+                    continue;
+                }
                 <div class="flex items-center gap-3 rounded-lg border p-4" data-client>
                     <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                         <LucideIcon Name="@ChannelIcon(client.Channel)" Size="18"/>
@@ -41,26 +62,12 @@
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center gap-2">
                             <p class="min-w-0 truncate font-medium">@client.Name</p>
-                            @if (ChannelHint(client.Channel) is { } hint)
-                            {
-                                <BbTooltip>
-                                    <BbTooltipTrigger AsChild="false" Class="inline-flex shrink-0" Focusable="false">
-                                        <LucideIcon Name="info" Size="13" Class="shrink-0 text-muted-foreground"/>
-                                    </BbTooltipTrigger>
-                                    <BbTooltipContent>@hint</BbTooltipContent>
-                                </BbTooltip>
-                            }
+                            @Hint(client)
                             <NotificationHealthDot Outcomes="Health(client.Id)"/>
                         </div>
-                        <p class="text-xs text-muted-foreground">@client.Channel.Humanize()@(client.Enabled ? "" : " · disabled")</p>
+                        <p class="text-xs text-muted-foreground">@Subtitle(client)</p>
                     </div>
-                    <div class="flex shrink-0 items-center gap-1">
-                        <BbSwitch Checked="client.Enabled" CheckedChanged="value => ToggleEnabledAsync(client, value)"/>
-                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="() => EditClientAsync(client)">
-                            <LucideIcon Name="pencil" Size="14"/>
-                        </BbButton>
-                        @Delete($"Delete {client.Name}?", "This removes the client and all its alerts.", () => DeleteClientAsync(client))
-                    </div>
+                    @Controls(client)
                 </div>
             }
         }
@@ -72,7 +79,7 @@
                 <h2 class="text-lg font-semibold">Alerts</h2>
                 <p class="text-sm text-muted-foreground">Notify a client when an event happens, with an optional template.</p>
             </div>
-            <BbButton OnClick="AddAlert" Disabled="_clients.Count == 0">
+            <BbButton OnClick="AddAlert" Disabled="_clients.Count == 0" Class="shrink-0">
                 <LucideIcon Name="plus" Size="15" Class="mr-2"/>
                 Add alert
             </BbButton>
@@ -92,19 +99,19 @@
                     </div>
                     <div class="flex min-w-0 flex-1 flex-col">
                         <p class="min-w-0 truncate font-medium">@alert.Client.Name</p>
-                        <BbTooltip>
-                            <BbTooltipTrigger AsChild="false" Class="inline-flex min-w-0 max-w-full">
+                        <DetailTip Title="Notifies on" TriggerClass="inline-flex min-w-0 max-w-full" ContentClass="max-w-xs">
+                            <Trigger>
                                 <span class="min-w-0 truncate text-sm text-muted-foreground">@NotificationEventCatalog.Summarise(alert.Subscription.EventTypes)</span>
-                            </BbTooltipTrigger>
-                            <BbTooltipContent Class="max-w-xs">
+                            </Trigger>
+                            <Detail>
                                 <div class="flex flex-wrap gap-1">
                                     @foreach (var eventType in alert.Subscription.EventTypes)
                                     {
                                         <BbBadge Variant="BadgeVariant.Secondary" Class="px-2 py-0.5">@eventType.Humanize()</BbBadge>
                                     }
                                 </div>
-                            </BbTooltipContent>
-                        </BbTooltip>
+                            </Detail>
+                        </DetailTip>
                     </div>
                     <div class="flex shrink-0 items-center gap-1">
                         <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="() => EditAlert(alert)">
@@ -127,6 +134,8 @@
                          OnSaved="LoadAsync"/>
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     private sealed record Alert(NotificationSubscription Subscription, NotificationTarget Client);
 
     private List<NotificationTarget> _clients = [];
@@ -258,6 +267,25 @@
         }
     }
 
+    private static string Subtitle(NotificationTarget client) => $"{client.Channel.Humanize()}{(client.Enabled ? "" : " · disabled")}";
+
+    private RenderFragment Hint(NotificationTarget client) =>
+        @<text>
+            @if (ChannelHint(client.Channel) is { } hint)
+            {
+                <HelpTip Title="@client.Channel.Humanize()" IconSize="13" IconClass="shrink-0 text-muted-foreground" TriggerClass="inline-flex shrink-0" Focusable="false">@hint</HelpTip>
+            }
+        </text>;
+
+    private RenderFragment Controls(NotificationTarget client) =>
+        @<div class="flex shrink-0 items-center gap-1">
+            <BbSwitch Checked="client.Enabled" CheckedChanged="value => ToggleEnabledAsync(client, value)"/>
+            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="() => EditClientAsync(client)">
+                <LucideIcon Name="pencil" Size="14"/>
+            </BbButton>
+            @Delete($"Delete {client.Name}?", "This removes the client and all its alerts.", () => DeleteClientAsync(client))
+        </div>;
+
     private RenderFragment Delete(string title, string description, Func<Task> onConfirm) =>
         @<BbAlertDialog>
             <BbAlertDialogTrigger>
@@ -270,12 +298,12 @@
                     <BbAlertDialogTitle>@title</BbAlertDialogTitle>
                     <BbAlertDialogDescription>@description</BbAlertDialogDescription>
                 </BbAlertDialogHeader>
-                <BbAlertDialogFooter>
+                <BbAlertDialogFooter data-dialog-actions>
                     <BbAlertDialogCancel>
-                        <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                        <BbButton data-dialog-cancel Variant="ButtonVariant.Outline">Cancel</BbButton>
                     </BbAlertDialogCancel>
                     <BbAlertDialogAction>
-                        <HoverButton Preset="HoverButtonPreset.Destructive" Icon="trash-2" Text="Delete" OnClick="onConfirm"/>
+                        <HoverButton data-dialog-commit Preset="HoverButtonPreset.Destructive" Icon="trash-2" Text="Delete" OnClick="onConfirm"/>
                     </BbAlertDialogAction>
                 </BbAlertDialogFooter>
             </BbAlertDialogContent>

@@ -21,11 +21,11 @@
     opacity: 0.5;
 }
 
-.sync-status .is-added {
+.is-added {
     color: var(--alert-success);
 }
 
-.sync-status .is-removed {
+.is-removed {
     color: var(--destructive);
 }
 
@@ -34,8 +34,71 @@
     font-weight: 500;
 }
 
-.sync-status .sync-app {
+.sync-status .sync-app,
+.sync-badge {
     display: inline-flex;
     align-items: center;
     gap: 5px;
+}
+
+.sync-badge-add {
+    color: #4ade80;
+}
+
+.sync-badge-remove {
+    color: #f87171;
+}
+
+.dark .sync-badge-add {
+    color: #15803d;
+}
+
+.dark .sync-badge-remove {
+    color: #dc2626;
+}
+
+.sync-totals {
+    border-bottom: 1px solid var(--border);
+}
+
+.sync-total {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 10px 17px;
+}
+
+.sync-total + .sync-total {
+    border-top: 1px solid var(--border);
+}
+
+.sync-total-name {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    line-height: 1.25;
+}
+
+.sync-total-name span {
+    font-size: 12px;
+    color: var(--muted-foreground);
+}
+
+.sync-total-counts {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    font-size: 14px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.sync-total-same {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: var(--muted-foreground);
+    font-size: 13px;
+    font-weight: 500;
 }

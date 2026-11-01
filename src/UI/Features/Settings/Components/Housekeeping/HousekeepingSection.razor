@@ -21,7 +21,7 @@ else
     var now = Clock.GetUtcNow();
     var cache = overview.Cache;
     var nextTrim = HousekeepingView.Next(overview.Pass.NextRun, now);
-    <div class="overflow-hidden rounded-xl border bg-card">
+    <SectionCard Look="SectionCardLook.Large">
         <div class="px-[18px] py-3.5">
             <h4 class="text-sm font-semibold">Housekeeping</h4>
             <p class="mt-0.5 text-xs text-muted-foreground" data-testid="housekeeping-size" data-bloated="@(HousekeepingView.Bloated(overview.Size) ? "true" : "false")">
@@ -42,44 +42,30 @@ else
         </div>
 
         <div class="@GroupHead">Runs by itself</div>
-        <div class="overflow-x-auto">
-        <table class="w-full border-collapse text-[13px]">
-            <thead>
-                <tr class="border-b text-left text-[11.5px] font-medium whitespace-nowrap text-muted-foreground">
-                    <th class="py-2 pr-3 pl-[18px] font-medium">Task</th>
-                    <th class="px-3 py-2 font-medium">Runs</th>
-                    <th class="px-3 py-2 font-medium">Last run</th>
-                    <th class="px-3 py-2 font-medium">What it did</th>
-                    <th class="px-3 py-2 font-medium">Next</th>
-                    <th class="py-2 pr-[18px] pl-3"></th>
-                </tr>
-            </thead>
-            <tbody>
-                <HousekeepingTaskRow Tile="@IconTile("brush")"
-                                     Name="Housekeeping"
-                                     What="trims history and the cache"
-                                     Runs="@HousekeepingView.Runs(overview.Pass.NextRun)"
-                                     Line="HousekeepingView.Pass(overview.Pass, now)"
-                                     Breakdown="Breakdown(overview.Pass, now)"
-                                     Next="@HousekeepingView.Next(overview.Pass.NextRun, now)"
-                                     TestId="pass"
-                                     OnRun="() => RunAsync(() => Tasks.RunPassAsync())"/>
-                @foreach (var dataset in overview.Datasets)
-                {
-                    var look = HousekeepingView.Datasets[dataset.Service];
-                    <HousekeepingTaskRow Tile="DatasetTile(dataset)"
-                                         Name="@look.Name"
-                                         Href="Some.Of(look.Href)"
-                                         What="@look.What"
-                                         Runs="@HousekeepingView.Runs(dataset.NextRun)"
-                                         Line="HousekeepingView.Dataset(dataset, now)"
-                                         Next="@HousekeepingView.Next(dataset.NextRun, now)"
-                                         TestId="@dataset.Service.ToString()"
-                                         OnRun="() => RunAsync(() => Tasks.LoadDatasetAsync(dataset.Service))"/>
-                }
-            </tbody>
-        </table>
-        </div>
+        @if (IsPhone)
+        {
+            @TaskRows(overview, now)
+        }
+        else
+        {
+            <div class="overflow-x-auto">
+            <table class="w-full border-collapse text-[13px]">
+                <thead>
+                    <tr class="border-b text-left text-[11.5px] font-medium whitespace-nowrap text-muted-foreground">
+                        <th class="py-2 pr-3 pl-[18px] font-medium">Task</th>
+                        <th class="px-3 py-2 font-medium">Runs</th>
+                        <th class="px-3 py-2 font-medium">Last run</th>
+                        <th class="px-3 py-2 font-medium">What it did</th>
+                        <th class="px-3 py-2 font-medium">Next</th>
+                        <th class="py-2 pr-[18px] pl-3"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @TaskRows(overview, now)
+                </tbody>
+            </table>
+            </div>
+        }
 
         @if (overview.StoredTwice.Undecided + overview.StoredTwice.KeptApart > 0)
         {
@@ -100,14 +86,17 @@ else
         }
         <TitlesStoredTwiceDialog Open="_reviewing" OpenChanged="ReviewChangedAsync"/>
 
-        <div class="overflow-x-auto">
-            <div class="min-w-max">
-                <div class="@($"{GroupHead} {HousekeepingCacheRow.Grid}")" data-testid="housekeeping-caches-band">
+        <div class="overflow-x-auto max-md:overflow-visible">
+            <div class="min-w-max max-md:min-w-0">
+                <div class="@($"{GroupHead} {(IsPhone ? null : HousekeepingCacheRow.Grid)}")" data-testid="housekeeping-caches-band">
                     <span>Caches</span>
-                    <span>Holds</span>
-                    <span>Size</span>
-                    <span>Next trim</span>
-                    <span></span>
+                    @if (!IsPhone)
+                    {
+                        <span>Holds</span>
+                        <span>Size</span>
+                        <span>Next trim</span>
+                        <span></span>
+                    }
                 </div>
                 <div class="divide-y">
                     <HousekeepingCacheRow TestId="housekeeping-clear-unmatched"
@@ -165,13 +154,41 @@ else
                 </div>
             </div>
         </div>
-    </div>
+    </SectionCard>
 }
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     private const string GroupHead = "border-t bg-foreground/[0.03] px-[18px] pt-2.5 pb-1.5 text-[11px] font-semibold tracking-[.07em] text-muted-foreground uppercase";
 
-    private const string ActionRow = "grid grid-cols-[22px_minmax(0,1fr)_76px_120px] items-center gap-3.5 px-[18px] py-3.5 [&>:last-child]:justify-self-end";
+    private const string ActionRow = "grid grid-cols-[22px_minmax(0,1fr)_76px_120px] items-center gap-3.5 px-[18px] py-3.5 [&>:last-child]:justify-self-end max-md:grid-cols-[22px_minmax(0,1fr)_auto] max-md:gap-x-3 max-md:gap-y-2 max-md:px-4 max-md:[&>:nth-child(2)]:col-span-2 max-md:[&>:nth-child(3)]:col-start-2 max-md:[&>:nth-child(3)]:justify-self-start";
+
+    private RenderFragment TaskRows(HousekeepingOverview overview, DateTimeOffset now) =>
+        @<text>
+            <HousekeepingTaskRow Tile="@IconTile("brush")"
+                                 Name="Housekeeping"
+                                 What="trims history and the cache"
+                                 Runs="@HousekeepingView.Runs(overview.Pass.NextRun)"
+                                 Line="HousekeepingView.Pass(overview.Pass, now)"
+                                 Breakdown="Breakdown(overview.Pass, now)"
+                                 Next="@HousekeepingView.Next(overview.Pass.NextRun, now)"
+                                 TestId="pass"
+                                 OnRun="() => RunAsync(() => Tasks.RunPassAsync())"/>
+            @foreach (var dataset in overview.Datasets)
+            {
+                var look = HousekeepingView.Datasets[dataset.Service];
+                <HousekeepingTaskRow Tile="DatasetTile(dataset)"
+                                     Name="@look.Name"
+                                     Href="Some.Of(look.Href)"
+                                     What="@look.What"
+                                     Runs="@HousekeepingView.Runs(dataset.NextRun)"
+                                     Line="HousekeepingView.Dataset(dataset, now)"
+                                     Next="@HousekeepingView.Next(dataset.NextRun, now)"
+                                     TestId="@dataset.Service.ToString()"
+                                     OnRun="() => RunAsync(() => Tasks.LoadDatasetAsync(dataset.Service))"/>
+            }
+        </text>;
 
     private const string UnmatchedWhy = "Titles no provider recognised. Sammlarr skips them for an hour instead of asking again on every run. Clear it to try them on the next run, for example after a provider was down.";
 

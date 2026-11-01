@@ -4,15 +4,24 @@ header ::deep .nav-link {
 	transition: color 0.15s ease;
 }
 
-header ::deep .nav-link:hover {
-	color: color-mix(in oklab, var(--foreground) 80%, transparent);
+@media (hover: hover) and (pointer: fine) {
+	header ::deep .nav-link:hover {
+		color: color-mix(in oklab, var(--foreground) 80%, transparent);
+	}
 }
 
-header ::deep .nav-link[aria-current="page"],
-header ::deep .nav-link[aria-current="page"]:hover {
+header ::deep .nav-link[aria-current="page"] {
 	color: var(--foreground);
 	background-color: transparent;
 	text-decoration: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+	header ::deep .nav-link[aria-current="page"]:hover {
+		color: var(--foreground);
+		background-color: transparent;
+		text-decoration: none;
+	}
 }
 
 header ::deep nav > ul {
@@ -50,9 +59,11 @@ header ::deep nav > ul[data-underline-ready="true"]::after {
     cursor: pointer;
 }
 
-.search-trigger:hover {
-    color: var(--foreground);
-    border-color: var(--muted-foreground);
+@media (hover: hover) and (pointer: fine) {
+    .search-trigger:hover {
+        color: var(--foreground);
+        border-color: var(--muted-foreground);
+    }
 }
 
 .search-trigger-label {
@@ -61,4 +72,53 @@ header ::deep nav > ul[data-underline-ready="true"]::after {
 
 .search-trigger ::deep svg {
     display: block;
+}
+
+header:has(.phone-select-bar) {
+    background: color-mix(in oklch, var(--accent) 70%, var(--background));
+}
+
+header:has(.phone-select-bar) > div:first-child {
+    display: none;
+}
+
+.page-slots {
+    display: contents;
+}
+
+header:has(.phone-select-bar) ~ .page-toolbar .page-slots {
+    display: none;
+}
+
+.page-toolbar {
+    flex: none;
+    position: relative;
+    z-index: 20;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-around;
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: var(--background);
+}
+
+.page-toolbar:not(:has(button)) {
+    display: none;
+}
+
+@media (width < 48rem) {
+    .search-trigger {
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: var(--foreground);
+    }
+
+    .search-trigger ::deep svg {
+        width: 20px;
+        height: 20px;
+    }
 }

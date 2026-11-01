@@ -4,7 +4,7 @@
 @{
     var feedUrl = ProvenanceView.RunUrl(Provenance, ItemId);
 }
-@if (feedUrl is not null)
+@if (feedUrl is not null && !IsPhone)
 {
     <a href="@feedUrl" class="wl-badge-brand inline-flex cursor-pointer" style="@BrandStyle">
         @Badge
@@ -18,6 +18,8 @@ else
 }
 
 @code {
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
+
     [Parameter, EditorRequired]
     public required WantlistItemProvenance Provenance { get; set; }
 
@@ -32,15 +34,24 @@ else
 
     private RenderFragment Badge =>
         @<BbBadge Variant="@ProvenanceBadgeVariant(Provenance)" Class="wl-badge">
-            <BbTooltip>
-                <BbTooltipTrigger AsChild="false" Class="p-0">
+            <DetailTip Title="Where it came from" TriggerClass="p-0" PhoneClass="relative after:absolute after:-inset-4">
+                <Trigger>
                     <span class="flex items-center gap-1 wl-badge-content">
                         <LucideIcon Name="@ProvenanceView.Icon(Provenance)" Size="14" Color="@IconColor"/>
-                        <span class="wl-badge-label">@ProvenanceView.Label(Provenance, Branding, Type)</span>
+                        <span class="wl-badge-label max-md:sr-only">@ProvenanceView.Label(Provenance, Branding, Type)</span>
                     </span>
-                </BbTooltipTrigger>
-                <BbTooltipContent>@ProvenanceView.Description(Provenance, Branding, AddedAt, Type)</BbTooltipContent>
-            </BbTooltip>
+                </Trigger>
+                <Detail>
+                    @if (IsPhone)
+                    {
+                        <ProvenanceDetails Provenance="Provenance" AddedAt="AddedAt" ItemId="ItemId" Type="Type"/>
+                    }
+                    else
+                    {
+                        @ProvenanceView.Description(Provenance, Branding, AddedAt, Type)
+                    }
+                </Detail>
+            </DetailTip>
         </BbBadge>;
 
     private static BadgeVariant ProvenanceBadgeVariant(WantlistItemProvenance provenance) =>

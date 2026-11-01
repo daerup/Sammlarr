@@ -42,12 +42,9 @@
                         @if (locked)
                         {
                             <span class="rating-picker-switch">
-                                <BbTooltip DelayDuration="150" Placement="PopoverPlacement.Bottom">
-                                    <BbTooltipTrigger AsChild="false">
-                                        <BbSwitch Checked="true" Disabled="true" Size="SwitchSize.Small" aria-label="@($"{RatingTexts.Name(source)} counts")"/>
-                                    </BbTooltipTrigger>
-                                    <BbTooltipContent>@RatingTexts.LastOneOn</BbTooltipContent>
-                                </BbTooltip>
+                                <ReasonTip Reason="@RatingTexts.LastOneOn" Delay="150" Placement="PopoverPlacement.Bottom" Focusable="true">
+                                    <BbSwitch Checked="true" Disabled="true" Size="SwitchSize.Small" aria-label="@($"{RatingTexts.Name(source)} counts")"/>
+                                </ReasonTip>
                             </span>
                         }
                         else

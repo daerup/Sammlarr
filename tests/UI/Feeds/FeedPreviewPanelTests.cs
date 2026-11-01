@@ -20,12 +20,15 @@ using Domain.Processing;
 using Domain.Providers;
 using Domain.Usage;
 using Domain.Wantlist;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Observability.Usage;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Pages.Editor;
+using UI.Shared.Layout;
+using UI.Shared.Media;
 using UI.Shared.Services;
 using UI.Tests.Media;
 using FilterOperator = BlazorBlueprint.Primitives.Filtering.FilterOperator;
@@ -67,6 +70,45 @@ public class FeedPreviewPanelTests : BunitContext
 		var tip = portal.WaitForElement("[data-portal-content][data-state=open] [role=tooltip]");
 		await Assert.That(tip.QuerySelector(".verdict-popover-title")!.TextContent).IsEqualTo("Filtered out by this rule");
 		await Assert.That(tip.QuerySelector(".culled-rule")!.TextContent.Words()).IsEqualTo("Votes greater than 5 no rating yet, failed");
+	}
+
+	[Test]
+	public async Task Phone_Search_WaitsBehindTheMagnifierThenFiltersAsYouType()
+	{
+		var cut = await PhonePanelAsync();
+		await Assert.That(cut.FindAll("input")).IsEmpty();
+		await Assert.That(cut.Find("[data-preview-heading]").TextContent).Contains("Media Results");
+
+		await cut.Find("[aria-label='Search titles']").ClickAsync(new());
+		await cut.Find("input[type=search]").InputAsync(new ChangeEventArgs { Value = "Movie 1" });
+
+		await Assert.That(Rows(cut).Count).IsEqualTo(1);
+		await Assert.That(cut.Find("[data-preview-heading]").TextContent).DoesNotContain("Media Results");
+	}
+
+	[Test]
+	public async Task Phone_SearchCancel_BringsBackEveryTitleAndTheHeading()
+	{
+		var cut = await PhonePanelAsync();
+		await cut.Find("[aria-label='Search titles']").ClickAsync(new());
+		await cut.Find("input[type=search]").InputAsync(new ChangeEventArgs { Value = "Movie 1" });
+
+		await cut.FindAll("[data-preview-heading] button").Single(button => button.TextContent.Trim() == "Cancel").ClickAsync(new());
+
+		await Assert.That(Rows(cut).Count).IsEqualTo(3);
+		await Assert.That(cut.FindAll("input")).IsEmpty();
+		await Assert.That(cut.Find("[data-preview-heading]").TextContent).Contains("Media Results");
+	}
+
+	[Test]
+	public async Task Phone_RefreshBesideTheHeading_AsksFirst()
+	{
+		var cut = await PhonePanelAsync();
+		var portal = Render<BbPortalHost>();
+
+		await cut.Find("[data-preview-heading] [aria-label='Refresh assets']").ClickAsync(new());
+
+		await Assert.That(portal.WaitForElement("[role=alertdialog]").TextContent).Contains("Refresh assets?");
 	}
 
 	[Test]
@@ -163,6 +205,25 @@ public class FeedPreviewPanelTests : BunitContext
 	}
 
 	[Test]
+	public async Task Details_ClosedAfterAChange_RefreshesTheRow()
+	{
+		var gone = MediaId.From(new Guid(99, 0, 0, new byte[8]));
+		var wantlist = IWantlistService.Mock();
+		var cut = RenderPanel(new GonePlanner(gone), resolved: 5, unmatched: 0, gone: gone, wantlist: wantlist);
+		await ApplyAsync(cut, new Mirror(3));
+		cut.WaitForState(() => cut.FindAll(".preview-gone-results .result-open").Count == 1);
+
+		await cut.Find(".preview-gone-results .result-open").ClickAsync(new());
+		var sheet = cut.FindComponent<MediaDetailSheet>();
+		await Assert.That(sheet.Instance.Open).IsTrue();
+		wantlist.GetAsync(Any()).Returns(new WantlistSnapshot([new WantlistItem(gone, DateTimeOffset.UnixEpoch, new ManualOrigin(ManualSource.FeedPreview))]));
+		await cut.InvokeAsync(() => sheet.Instance.OnOpenChanged.InvokeAsync(false));
+
+		cut.WaitForState(() => cut.FindAll(".preview-gone-results button[aria-label='Remove from wantlist']").Count == 1);
+		await Assert.That(sheet.Instance.Open).IsFalse();
+	}
+
+	[Test]
 	public async Task Preview_ForAWantlistedGoneRow_OffersWhereItCameFrom()
 	{
 		var gone = MediaId.From(new Guid(99, 0, 0, new byte[8]));
@@ -195,12 +256,11 @@ public class FeedPreviewPanelTests : BunitContext
 	[Test]
 	public async Task Preview_WhenTheViewportIsMeasuredOnlyAfterTheListGrew_ShowsTheRows()
 	{
-		JSInterop.SetupVoid("Blazor._internal.Virtualize.init", _ => true).SetVoidResult();
-		JSInterop.SetupVoid("Blazor._internal.Virtualize.restoreAnchor", _ => true);
+		this.MeasureVirtualizeByHand();
 		var cut = RenderPanel(new NewestFirstPlanner(), resolved: 5, unmatched: 0);
 
 		await ApplyAsync(cut, new Append());
-		await ReportViewportAsync(cut);
+		await this.ReportViewportAsync(cut);
 
 		await Assert.That(cut.FindAll(".preview-main-results .search-result-row")).Count().IsEqualTo(5);
 	}
@@ -487,15 +547,6 @@ public class FeedPreviewPanelTests : BunitContext
 		);
 	}
 
-	private Task ReportViewportAsync(IRenderedComponent<FeedPreviewPanel> cut)
-	{
-		const int viewportFill = 2;
-		var reference = JSInterop.Invocations["Blazor._internal.Virtualize.init"][^1].Arguments[0]!;
-		var virtualize = reference.GetType().GetProperty("Value")!.GetValue(reference)!;
-		var report = virtualize.GetType().GetMethod("OnSpacerBeforeVisible")!;
-		return cut.InvokeAsync(() => report.Invoke(virtualize, [0f, 0f, 800f, viewportFill]));
-	}
-
 	private static List<int> BadgeCounts(IRenderedComponent<FeedPreviewPanel> cut) =>
 		[.. cut.FindAll(".stat-badges-row .preview-filter-badge span").Select(badge => int.Parse(badge.TextContent))];
 
@@ -506,7 +557,8 @@ public class FeedPreviewPanelTests : BunitContext
 		MediaId? gone = null,
 		IFeedProvider? provider = null,
 		Mock<IMediaService>? media = null,
-		IReadOnlyList<WantlistItem>? wantlisted = null
+		IReadOnlyList<WantlistItem>? wantlisted = null,
+		Mock<IWantlistService>? wantlist = null
 	)
 	{
 		Services.AddBlazorBlueprintComponents();
@@ -514,11 +566,11 @@ public class FeedPreviewPanelTests : BunitContext
 		Services.AddSingleton(RatingStub.Context());
 		Services.AddLogging();
 		Services.AddSingleton(planner);
-		var wantlist = IWantlistService.Mock();
-		wantlist.GetAsync(Any()).Returns(new WantlistSnapshot(wantlisted ?? []));
+		var wantlistService = wantlist ?? IWantlistService.Mock();
+		wantlistService.GetAsync(Any()).Returns(new WantlistSnapshot(wantlisted ?? []));
 		var blocklist = IBlocklistService.Mock();
 		blocklist.GetAsync(Any()).Returns(new BlocklistSnapshot([]));
-		Services.AddSingleton(wantlist.Object);
+		Services.AddSingleton(wantlistService.Object);
 		Services.AddSingleton(blocklist.Object);
 		Services.AddSingleton(ICurrentUser.Mock().Object);
 		Services.AddSingleton(IUserScope.Mock().Object);
@@ -634,6 +686,15 @@ public class FeedPreviewPanelTests : BunitContext
 	private const string Tagline = "Truth has a deadline.";
 
 	private static IReadOnlyList<IElement> Rows(IRenderedComponent<FeedPreviewPanel> cut) => cut.FindAll(".preview-main-results .search-result-row");
+
+	private async Task<IRenderedComponent<FeedPreviewPanel>> PhonePanelAsync()
+	{
+		RenderTree.TryAdd<CascadingValue<bool>>(cascade => cascade.Add(value => value.Name, PhoneLayout.IsPhoneCascade).Add(value => value.Value, true));
+		var cut = RenderPanel(new OwnedPlanner(), resolved: 3, unmatched: 0);
+		await ApplyAsync(cut, new Append());
+		cut.WaitForState(() => Rows(cut).Count == 3);
+		return cut;
+	}
 
 	private static IFeedRunPlanner TaglineSortPlanner()
 	{

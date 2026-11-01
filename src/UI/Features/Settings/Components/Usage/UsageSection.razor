@@ -1,20 +1,20 @@
 @using Contracts.Usage
 @inject IUsageReport Report
 
-<div class="flex flex-col gap-4">
-    <div class="flex items-start gap-4">
+<div class="flex flex-col gap-4 max-md:gap-3">
+    <div class="flex items-start gap-4 max-md:flex-wrap max-md:gap-3">
         <div>
             <h3 class="text-lg font-semibold">Usage</h3>
             <p class="text-sm text-muted-foreground">How often Sammlarr calls each service, how those calls ended, and what made them.</p>
         </div>
-        <div class="ml-auto">
+        <div class="ml-auto max-md:ml-0">
             <UsageSegments TValue="UsageRange" Value="_range" Options="Ranges" OnChange="SelectAsync" Label="Window"/>
         </div>
     </div>
 
     @if (_shown is not { } shown)
     {
-        <div class="grid grid-cols-4 gap-3" data-testid="usage-loading">
+        <div class="grid grid-cols-4 gap-3 max-md:grid-cols-2" data-testid="usage-loading">
             @for (var card = 0; card < 4; card++)
             {
                 <BbSkeleton Class="h-[118px] rounded-xl"/>
@@ -38,7 +38,7 @@
     }
     else
     {
-        <div class="@($"flex flex-col gap-4 transition-opacity {(shown.Range == _range ? string.Empty : "opacity-60")}")" aria-busy="@(shown.Range == _range ? "false" : "true")">
+        <div class="@($"flex flex-col gap-4 max-md:gap-3 transition-opacity {(shown.Range == _range ? string.Empty : "opacity-60")}")" aria-busy="@(shown.Range == _range ? "false" : "true")">
             <UsageStatCards Snapshot="shown.Snapshot" Range="shown.Range"/>
             <UsageCallsCard Period="shown.Snapshot.Current" Quotas="shown.Snapshot.Quotas" Range="shown.Range" @bind-Picked="_picked"/>
             <UsageCausesCard Period="shown.Snapshot.Current" Range="shown.Range" @bind-Picked="_picked"/>

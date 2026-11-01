@@ -10,139 +10,112 @@
 @inject ICurrentUser CurrentUser
 @inject MediaProviderBrandingService Branding
 
-<div id="@ProviderRows.Id(new Arr())" class="arr-row" style="--mix: @Branding.Color(SinkKind.Arr.Service)">
-    <BbCollapsible Open="Open" OpenChanged="OpenChanged">
-        <BbCollapsibleTrigger AsChild="false"
-                              Class="arr-row-head group w-full grid grid-cols-[15px_190px_1fr_auto] items-center gap-3.5 pl-5 pr-4 py-4 text-left bg-foreground/5 hover:bg-foreground/8 transition-colors">
-            <LucideIcon Name="chevron-right" Size="15" Class="text-muted-foreground transition-transform duration-150 group-data-[state=open]:rotate-90"/>
-            <span class="arr-lockup">
-                <BrandedLogo Brand="Branding.GetBrandingInfo(RemoteService.Radarr)" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
-                Radarr
-                <span class="arr-lockup-plus">+</span>
-                <BrandedLogo Brand="Branding.GetBrandingInfo(RemoteService.Sonarr)" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
-                Sonarr
-            </span>
-            <RoleIcons Key="new Arr()"/>
-            <span>
-                @if (SettingUp)
-                {
-                    <BbBadge Variant="BadgeVariant.Outline" Class="@WarnBadge">
-                        <span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--alert-warning)]"></span>
-                        Needs setup
-                    </BbBadge>
-                }
-                else if (_config is null || States.Contains(ArrConnectionState.Testing))
-                {
-                    <BbBadge Variant="BadgeVariant.Secondary" Class="h-6 items-center gap-1.5 text-muted-foreground">
-                        <BbSpinner Size="SpinnerSize.Small"/>
-                        Checking…
-                    </BbBadge>
-                }
-                else if (Silent.Count > 0)
-                {
-                    <BbBadge Variant="BadgeVariant.Outline" Class="@WarnBadge">
-                        <span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--alert-warning)]"></span>
-                        @Silent.Select(app => app.Name).Humanize(Notation.Words) not answering
-                    </BbBadge>
-                }
-                else
-                {
-                    <BbBadge Variant="BadgeVariant.Outline" Class="h-6 items-center gap-1.5 text-success border-success">
-                        <span class="inline-block h-1.5 w-1.5 rounded-full bg-success"></span>
-                        Connected
-                    </BbBadge>
-                }
-            </span>
-        </BbCollapsibleTrigger>
-        <BbCollapsibleContent>
-            @if (_config is { } config)
-            {
-                <div class="arr-panel" style="--seg: @SegColour">
-                    <BbTabs Value="@OpenTab" ValueChanged="tab => _picked = Optional.Of(tab).Or(() => _picked)">
-                        <BbTabsList>
-                            @foreach (var app in Apps)
-                            {
-                                <BbTabsTrigger Value="@app.Name" Class="gap-2">
-                                    <BrandedLogo Brand="Branding.GetBrandingInfo(app.Remote)" Form="ProviderLogoForm.Mark" Size="16" Decorative="true"/>
-                                    <span>@app.Name</span>
-                                    @StateMark(app)
-                                </BbTabsTrigger>
-                            }
-                            @if (ShowsTags)
-                            {
-                                <BbTabsTrigger Value="@TagsTab" Class="gap-2">
-                                    <LucideIcon Name="tag" Size="15"/>
-                                    <span>Tags</span>
-                                </BbTabsTrigger>
-                            }
-                        </BbTabsList>
+<UnfoldRow id="@ProviderRows.Id(new Arr())" Class="arr-row scroll-mt-20" Edge="@Branding.Color(SinkKind.Arr.Service)" Open="Open" OpenChanged="OpenChanged"
+           Columns="grid-cols-[15px_190px_1fr_auto]" PhoneColumns="grid-cols-[15px_minmax(0,1fr)_auto]" TriggerClass="arr-row-head py-4">
+    <Summary>
+        @Lockup
+        <RoleIcons Key="new Arr()"/>
+        @Status
+    </Summary>
+    <PhoneSummary>
+        <span class="min-w-0 overflow-hidden">@Lockup</span>
+        @Status
+    </PhoneSummary>
+    <Details>
+        @if (IsPhone)
+        {
+            <div class="arr-roles">
+                <RoleIcons Key="new Arr()" Named="true"/>
+            </div>
+        }
+        @if (_config is { } config)
+        {
+            <div class="arr-panel" style="--seg: @SegColour">
+                <BbTabs Value="@OpenTab" ValueChanged="tab => _picked = Optional.Of(tab).Or(() => _picked)">
+                    <BbTabsList>
                         @foreach (var app in Apps)
                         {
-                            var status = _apps[app];
-                            <BbTabsContent Value="@app.Name" ForceMount="true">
-                                <div class="pt-2">
-                                    <ArrAppSection App="app" Instance="config.Of(app)" State="status.State" Error="@status.Error" KeyRefused="status.KeyRefused" Choices="status.Choices"
-                                                   Edited="typed => Edited(app, typed)" Test="typed => TestAsync(app, typed)"
-                                                   InstanceChanged="instance => StoreAsync(app, instance)"/>
-                                </div>
-                            </BbTabsContent>
+                            <BbTabsTrigger Value="@app.Name" Class="gap-2">
+                                <BrandedLogo Brand="Branding.GetBrandingInfo(app.Remote)" Form="ProviderLogoForm.Mark" Size="16" Decorative="true"/>
+                                <span>@app.Name</span>
+                                @StateMark(app)
+                            </BbTabsTrigger>
                         }
                         @if (ShowsTags)
                         {
-                            <BbTabsContent Value="@TagsTab">
-                                <div class="pt-2">
-                                    <ArrTagsSection Scheme="config.Tags" SchemeChanged="tags => StoreAsync(config with { Tags = tags })" Users="_users" Feed="_feed"/>
-                                </div>
-                            </BbTabsContent>
+                            <BbTabsTrigger Value="@TagsTab" Class="gap-2">
+                                <LucideIcon Name="tag" Size="15"/>
+                                <span>Tags</span>
+                            </BbTabsTrigger>
                         }
-                    </BbTabs>
-                </div>
-
-                @if (SettingUp && ShowsSetup)
-                {
-                    <div class="arr-shared">
-                        <p class="arr-shared-note">
-                            <LucideIcon Name="info" Size="13" Class="mt-px shrink-0"/>
-                            <span>
-                                @(BothReady
-                                    ? "Both apps answered. Switching makes every user's next sync mirror their wantlist into Radarr and Sonarr."
-                                    : "Test both apps to switch; each needs a quality profile and a root folder. Until then the wantlist keeps syncing to Plex; picking Plex again in the map puts this away.")
-                            </span>
-                        </p>
-                        @if (OffersSwitch)
-                        {
-                            <div class="flex flex-wrap items-center gap-2">
-                                <BbButton Size="ButtonSize.Small" Disabled="@(!BothReady || Switching)" OnClick="SwitchRequested">
-                                    @if (Switching)
-                                    {
-                                        <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                                        <span>Switching…</span>
-                                    }
-                                    else
-                                    {
-                                        <LucideIcon Name="arrow-right-left" Size="14" Class="mr-2"/>
-                                        <span>Switch the wantlist to Radarr + Sonarr</span>
-                                    }
-                                </BbButton>
-                                <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Disabled="Switching" OnClick="StayOnPlex">Stay on Plex</BbButton>
+                    </BbTabsList>
+                    @foreach (var app in Apps)
+                    {
+                        var status = _apps[app];
+                        <BbTabsContent Value="@app.Name" ForceMount="true">
+                            <div class="pt-2">
+                                <ArrAppSection App="app" Instance="config.Of(app)" State="status.State" Error="@status.Error" KeyRefused="status.KeyRefused" Choices="status.Choices"
+                                               Edited="typed => Edited(app, typed)" Test="typed => TestAsync(app, typed)"
+                                               InstanceChanged="instance => StoreAsync(app, instance)"/>
                             </div>
-                        }
-                    </div>
-                }
-            }
-            else
+                        </BbTabsContent>
+                    }
+                    @if (ShowsTags)
+                    {
+                        <BbTabsContent Value="@TagsTab">
+                            <div class="pt-2">
+                                <ArrTagsSection Scheme="config.Tags" SchemeChanged="tags => StoreAsync(config with { Tags = tags })" Users="_users" Feed="_feed"/>
+                            </div>
+                        </BbTabsContent>
+                    }
+                </BbTabs>
+            </div>
+
+            @if (SettingUp && ShowsSetup)
             {
-                <div class="px-5 py-4">
-                    <BbSkeleton Class="h-40 w-full rounded-md"/>
+                <div class="arr-shared">
+                    <p class="arr-shared-note">
+                        <LucideIcon Name="info" Size="13" Class="mt-px shrink-0"/>
+                        <span>
+                            @(BothReady
+                                ? "Both apps answered. Switching makes every user's next sync mirror their wantlist into Radarr and Sonarr."
+                                : "Test both apps to switch; each needs a quality profile and a root folder. Until then the wantlist keeps syncing to Plex; picking Plex again in the map puts this away.")
+                        </span>
+                    </p>
+                    @if (OffersSwitch)
+                    {
+                        <div class="flex flex-wrap items-center gap-2">
+                            <BbButton Size="ButtonSize.Small" Disabled="@(!BothReady || Switching)" OnClick="SwitchRequested">
+                                @if (Switching)
+                                {
+                                    <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                                    <span>Switching…</span>
+                                }
+                                else
+                                {
+                                    <LucideIcon Name="arrow-right-left" Size="14" Class="mr-2"/>
+                                    <span>Switch the wantlist to Radarr + Sonarr</span>
+                                }
+                            </BbButton>
+                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Disabled="Switching" OnClick="StayOnPlex">Stay on Plex</BbButton>
+                        </div>
+                    }
                 </div>
             }
-        </BbCollapsibleContent>
-    </BbCollapsible>
-</div>
+        }
+        else
+        {
+            <div class="px-5 py-4">
+                <BbSkeleton Class="h-40 w-full rounded-md"/>
+            </div>
+        }
+    </Details>
+</UnfoldRow>
 
 @code {
-    [Parameter] public bool Open { get; set; }
+    [CascadingParameter(Name = PhoneLayout.IsPhoneCascade)] private bool IsPhone { get; set; }
 
+    [Parameter] public bool Open { get; set; }
 
     [Parameter] public EventCallback<bool> OpenChanged { get; set; }
 
@@ -190,6 +163,8 @@
     private bool BothReady => _config is { } config && Apps.All(app => _apps[app].State == ArrConnectionState.Connected && IsChosen(config.Of(app)));
 
     private IReadOnlyList<ArrApp> Silent => [.. Apps.Where(app => _apps[app].State != ArrConnectionState.Connected)];
+
+    private string SilentText => IsPhone ? "Not answering" : $"{Silent.Select(app => app.Name).Humanize(Notation.Words)} not answering";
 
     private const string TagsTab = "Tags";
 
@@ -353,4 +328,45 @@
 
         public static AppStatus Of(ArrConnectionState state) => new(state, string.Empty, new ArrInstanceChoices([], []));
     }
+
+    private RenderFragment Lockup =>
+        @<span class="arr-lockup">
+            <BrandedLogo Brand="Branding.GetBrandingInfo(RemoteService.Radarr)" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
+            Radarr
+            <span class="arr-lockup-plus">+</span>
+            <BrandedLogo Brand="Branding.GetBrandingInfo(RemoteService.Sonarr)" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
+            Sonarr
+        </span>;
+
+    private RenderFragment Status =>
+        @<span>
+            @if (SettingUp)
+            {
+                <BbBadge Variant="BadgeVariant.Outline" Class="@WarnBadge">
+                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--alert-warning)]"></span>
+                    Needs setup
+                </BbBadge>
+            }
+            else if (_config is null || States.Contains(ArrConnectionState.Testing))
+            {
+                <BbBadge Variant="BadgeVariant.Secondary" Class="h-6 items-center gap-1.5 text-muted-foreground">
+                    <BbSpinner Size="SpinnerSize.Small"/>
+                    Checking…
+                </BbBadge>
+            }
+            else if (Silent.Count > 0)
+            {
+                <BbBadge Variant="BadgeVariant.Outline" Class="@WarnBadge">
+                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--alert-warning)]"></span>
+                    @SilentText
+                </BbBadge>
+            }
+            else
+            {
+                <BbBadge Variant="BadgeVariant.Outline" Class="h-6 items-center gap-1.5 text-success border-success">
+                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-success"></span>
+                    Connected
+                </BbBadge>
+            }
+        </span>;
 }

@@ -14,3 +14,16 @@
     background: var(--secondary);
     color: var(--muted-foreground);
 }
+
+.provider-roles.is-named {
+    flex-wrap: wrap;
+}
+
+.provider-roles.is-named ::deep .provider-role {
+    width: auto;
+    height: 26px;
+    gap: 6px;
+    padding: 0 9px;
+    font-size: 12px;
+}
+

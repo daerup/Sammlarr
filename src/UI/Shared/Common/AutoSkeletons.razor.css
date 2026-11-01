@@ -23,3 +23,22 @@
     border-radius: 9999px;
     opacity: 0.75;
 }
+
+@media (width < 48rem) {
+    .auto-skeleton-search-result-poster {
+        width: 64px;
+        height: 96px;
+    }
+
+    .auto-skeleton-search-result-content {
+        padding-left: 12px;
+    }
+
+    .auto-skeleton-search-result-content ::deep > * {
+        max-width: 100%;
+    }
+
+    .auto-skeleton-search-result-content ::deep > :nth-child(n + 3) {
+        display: none;
+    }
+}

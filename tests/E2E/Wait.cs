@@ -22,5 +22,8 @@ internal static class Wait
 			assertions.ToHaveCountAsync(count, new LocatorAssertionsToHaveCountOptions { Timeout = timeout });
 
 		internal Task ToHaveTextAsync(string text, float timeout) => assertions.ToHaveTextAsync(text, new LocatorAssertionsToHaveTextOptions { Timeout = timeout });
+
+		internal Task ToHaveTextAsync(IEnumerable<string> texts, float timeout) =>
+			assertions.ToHaveTextAsync(texts, new LocatorAssertionsToHaveTextOptions { Timeout = timeout });
 	}
 }

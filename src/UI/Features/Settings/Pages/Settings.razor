@@ -1,6 +1,5 @@
 @page "/settings"
 @using Contracts.Identity
-@using Domain.Identity
 @inject AccountConnectionPrompt AccountConnectionPrompt
 @inject ICurrentUser CurrentUser
 @inject NavigationManager Navigation
@@ -10,12 +9,14 @@
 <SignInGuard AccessChanged="HandleSignInChanged"/>
 
 <PageContainer Heading="Settings"
+               PhoneTitle="@_activeSection.Label"
+               PhoneHeader="false"
                Description="Connect providers, manage your keys, and keep the local cache and diagnostics in check.">
     <ProtectedSection GuardState="IsSignedIn"
                       DeniedActionDescription="manage your settings"
                       FallbackAction="() => AccountConnectionPrompt.RequestAsync()">
-    <div class="flex items-start gap-8 pt-2">
-        <nav class="w-48 shrink-0 flex flex-col gap-0.5 sticky top-0" aria-label="Settings sections">
+    <div class="flex items-start gap-8 pt-2 max-md:pt-3">
+        <nav class="w-48 shrink-0 flex flex-col gap-0.5 sticky top-0 max-md:hidden" aria-label="Settings sections">
             @foreach (var item in VisibleSections)
             {
                 var isActive = _activeSection == item;
@@ -24,7 +25,7 @@
                           OnClick="() => Show(item)">
                     @if (item.Mark is { } mark)
                     {
-                        <span class="mr-2.5 inline-flex shrink-0">@mark</span>
+                        <span class="mr-2.5 inline-flex shrink-0"><SammlarrLogo Form="mark" Size="16"/></span>
                     }
                     else
                     {
@@ -35,7 +36,7 @@
             }
         </nav>
 
-        <div class="border-l self-stretch"></div>
+        <div class="border-l self-stretch max-md:hidden"></div>
 
         <div class="flex-1 min-w-0">
             <DynamicComponent Type="_activeSection.ComponentType" Parameters="SectionParameters"/>
@@ -46,27 +47,7 @@
 
 @code {
 
-    private record SettingsSection(string Label, string Icon, Type ComponentType, UserRole? RequiredRole = null, RenderFragment? Mark = null);
-
-    private static readonly RenderFragment MagpieStarOutline = @<MagpieStarIcon Variant="MagpieStarVariant.Outline" Size="16"/>;
-
-    private readonly List<SettingsSection> _sections =
-    [
-        new("Providers", "plug", typeof(ProvidersSection)),
-        new("Ratings", "star", typeof(RatingsSection), Mark: MagpieStarOutline),
-        new("Notifications", "bell", typeof(NotificationsSection)),
-        new("Housekeeping", "database", typeof(HousekeepingSection), UserRole.Admin),
-        new("Usage", "chart-column", typeof(UsageSection), UserRole.Admin),
-        new("Diagnostics", "activity", typeof(DiagnosticsSection), UserRole.Admin),
-        new("Users", "users", typeof(UsersSection), UserRole.Admin),
-        new("Account", "user-round", typeof(AccountSection), UserRole.Member),
-#if DEBUG
-        new("Testing", "flask-conical", typeof(UI.Features.Settings.Components.Testing.TestingSection), UserRole.Admin),
-#endif
-        new("About", "info", typeof(AboutSection)),
-    ];
-
-    private IEnumerable<SettingsSection> VisibleSections => _sections.Where(section => section.RequiredRole is null || CurrentUser.Role == section.RequiredRole);
+    private IEnumerable<SettingsSection> VisibleSections => AppSections.SettingsFor(CurrentUser.Role);
 
     private SettingsSection _activeSection = null!;
     private bool _isSignedIn;
@@ -76,10 +57,7 @@
     private void HandleSignInChanged(bool hasAccess)
     {
         _isSignedIn = hasAccess;
-        if (!VisibleSections.Contains(_activeSection))
-        {
-            _activeSection = VisibleSections.First();
-        }
+        _activeSection = AppSections.SectionFor(CurrentUser.Role, Section);
     }
 
     private const string SectionQuery = "section";
@@ -118,14 +96,10 @@
 
     protected override void OnParametersSet()
     {
-        _activeSection = ResolveSection() ?? VisibleSections.First();
+        _activeSection = AppSections.SectionFor(CurrentUser.Role, Section);
     }
 
     private void Show(SettingsSection section) =>
-        Navigation.NavigateTo(Navigation.GetUriWithQueryParameters(new Dictionary<string, object?> { [SectionQuery] = Slug(section.Label), [ProviderQuery] = null, [SearchQuery] = null }));
+        Navigation.NavigateTo(Navigation.GetUriWithQueryParameters(new Dictionary<string, object?> { [SectionQuery] = section.Slug, [ProviderQuery] = null, [SearchQuery] = null }));
 
-    private SettingsSection? ResolveSection() =>
-        string.IsNullOrEmpty(Section) ? null : VisibleSections.FirstOrDefault(section => Slug(section.Label).Equals(Section, StringComparison.OrdinalIgnoreCase));
-
-    private static string Slug(string label) => string.Join("-", label.Split(' ')).ToLowerInvariant();
 }

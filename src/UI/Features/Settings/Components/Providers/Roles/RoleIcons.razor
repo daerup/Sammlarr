@@ -1,16 +1,27 @@
-<span class="provider-roles">
+<span class="provider-roles @(Named ? "is-named" : null)">
     @foreach (var role in ServiceRoles.For(Key))
     {
-        <BbTooltip DelayDuration="150">
-            <BbTooltipTrigger AsChild="false" Class="provider-role" Focusable="false">
+        @if (Named)
+        {
+            <span class="provider-role">
                 <LucideIcon Name="@role.Icon" Size="13"/>
-                <span class="sr-only">@role.Name</span>
-            </BbTooltipTrigger>
-            <BbTooltipContent>@role.Name</BbTooltipContent>
-        </BbTooltip>
+                @role.Name
+            </span>
+        }
+        else
+        {
+            <BbTooltip DelayDuration="150">
+                <BbTooltipTrigger AsChild="false" Class="provider-role" Focusable="false">
+                    <LucideIcon Name="@role.Icon" Size="13"/>
+                    <span class="sr-only">@role.Name</span>
+                </BbTooltipTrigger>
+                <BbTooltipContent data-label-tip>@role.Name</BbTooltipContent>
+            </BbTooltip>
+        }
     }
 </span>
 
 @code {
     [Parameter] [EditorRequired] public required Service Key { get; set; }
+    [Parameter] public bool Named { get; set; }
 }

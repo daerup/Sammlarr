@@ -8,6 +8,7 @@
 @using Domain.Announcing
 @using Domain.Identity
 @using UI.Shared.Announcing
+@using UI.Shared.Filters
 @using UI.Shared.Services.Branding
 @inject IBlocklistService BlocklistService
 @inject ToastService ToastService
@@ -35,14 +36,10 @@
                 OnAccessChanged="HandleAccessChanged"
                 Search="@Filter.Search"
                 SearchChanged="ApplySearchAsync">
-    <HeaderExtras>
-        <MediaListViewActions HasItems="@(_items is { Count: > 0 })"
-                              IsEditMode="IsEditMode"
-                              ShowFilters="ShowFilters"
-                              ActiveFilters="Filter.ActiveCount"
-                              OnEnterEditMode="EnterEditMode"
-                              OnToggleFilters="ToggleFilterBar"/>
-    </HeaderExtras>
+    <Actions>
+        <PageAction Icon="square-check" Label="Select" DesktopLabel="Bulk edit" OnClick="EnterEditMode" Visible="HasItems && !IsEditMode"/>
+        <PageAction Icon="sliders-horizontal" Label="Filter" DesktopLabel="View" Active="ShowFilters" Badge="Filter.ActiveCount" OnClick="ToggleFilterBar" PhoneOnClick="OpenFilterSheet" Visible="HasItems"/>
+    </Actions>
     <ChildContent>
         <MediaListBody IsLoading="IsLoadingList"
                        ErrorMessage="@ErrorMessage"
@@ -54,7 +51,8 @@
                        FilterChanged="ApplyFilterAsync"
                        CurrentPage="@PageWithin(gridItems.Count)"
                        PageCount="@PageCount(gridItems.Count)"
-                       PageChanged="GoToPageAsync">
+                       PageChanged="GoToPageAsync"
+                       OnReachEnd="ShowMoreAsync">
             <EmptyState>
                 <MediaListEmptyState Icon="shield-off" Heading="Nothing blocklisted.">
                     <ChildContent>@ListTexts.EmptyBlocklist</ChildContent>
@@ -94,6 +92,11 @@
                   OnOpenChanged="SheetOpenChangedAsync"
                   Media="SelectedMedia"/>
 
+@if (IsFilterSheetOpen)
+{
+    <ListFilterSheet OpenChanged="open => IsFilterSheetOpen = open" Filter="Filter" OnApply="ApplyFilterAsync" Count="filter => ItemsFor(filter).Count"/>
+}
+
 @code {
     private IReadOnlyList<BlocklistedMedia>? _items;
     private BlocklistedMedia? _selectedItem;
@@ -102,10 +105,14 @@
     private CoalescedReload _blocklistReload = null!;
     private CoalescedReload _wantlistReload = null!;
 
-    private IReadOnlyList<BlocklistedMedia> GridItems =>
+    private bool HasItems => _items is { Count: > 0 };
+
+    private IReadOnlyList<BlocklistedMedia> GridItems => ItemsFor(Filter);
+
+    private IReadOnlyList<BlocklistedMedia> ItemsFor(ListFilter filter) =>
         [
-            .. Filter.SortBy(
-                (_items ?? []).Where(item => Filter.MatchesType(item.Media.Details.Type) && Filter.MatchesSearch(item.Media.Details.Title)),
+            .. filter.SortBy(
+                (_items ?? []).Where(item => filter.MatchesType(item.Media.Details.Type) && filter.MatchesSearch(item.Media.Details.Title)),
                 item => item.Media,
                 item => item.AddedAt
             ),

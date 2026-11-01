@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <base href="/"/>
     <link rel="icon" type="image/svg+xml" href="@Assets["favicon.svg"]"/>
+    <script src="@Assets["_content/BlazorBlueprint.Components/js/theme-init.js"]" data-default-dark="true"></script>
     <!-- BlazorBlueprint themes -->
     <link href="@Assets["_content/BlazorBlueprint.Components/css/themes.css"]" rel="stylesheet"/>
     <!-- BlazorBlueprint component styles -->
@@ -19,6 +20,7 @@
 </head>
 <body class="font-sans antialiased">
 <Routes @rendermode="InteractiveServer"/>
+<ReconnectModal/>
 
 <div id="blazor-error-ui" class="hidden fixed bottom-0 left-0 right-0 z-50 p-4 bg-destructive text-destructive-foreground">
     An error has occurred. This application may no longer respond until reloaded.
@@ -33,6 +35,10 @@
 </script>
 
 <script src="@Assets["js/random-uuid.js"]"></script>
+<script src="@Assets["js/phone-sheets.js"]"></script>
+<script src="@Assets["js/toast-swipe.js"]"></script>
+<script src="@Assets["js/long-press.js"]"></script>
+<script src="@Assets["js/logo-hop.js"]"></script>
 <script src="@Assets["_framework/blazor.web.js"]"></script>
 <script src="@Assets["js/nav-underline.js"]"></script>
 <script src="@Assets["js/notification-template.js"]"></script>

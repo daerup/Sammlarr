@@ -4,7 +4,7 @@
             <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
                 <LucideIcon Name="@(Total ? "sigma" : "tv")" Size="15"/>
             </BbTooltipTrigger>
-            <BbTooltipContent>@Name</BbTooltipContent>
+            <BbTooltipContent data-label-tip>@Name</BbTooltipContent>
         </BbTooltip>
     </BbPopoverTrigger>
     <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.Start" Class="flex w-[300px] flex-col gap-2 px-3.5 py-3 text-[13px] leading-normal" aria-label="Runtime of a show">

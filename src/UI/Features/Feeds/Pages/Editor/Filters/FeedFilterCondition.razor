@@ -2,7 +2,7 @@
 @using FilterOperator = BlazorBlueprint.Primitives.Filtering.FilterOperator
 
 <div class="flex flex-wrap items-center gap-2" role="group" aria-label="Filter condition">
-    <div class="w-[200px] @AdornedClass">
+    <div class="w-[200px] max-md:w-full @AdornedClass">
         <BbSelect TValue="string" Value="@Field.Property" ValueChanged="ChangeFieldAsync" DisplayTextSelector="FeedFields.LabelOf" Class="min-w-0 flex-1">
             <BbSelectTrigger>
                 <BbSelectValue/>
@@ -24,7 +24,7 @@
         </BbSelect>
         @Adornment
     </div>
-    <BbSelect TValue="FilterOperator" Value="@Condition.Operator" ValueChanged="ChangeOperatorAsync" Class="w-[180px]">
+    <BbSelect TValue="FilterOperator" Value="@Condition.Operator" ValueChanged="ChangeOperatorAsync" Class="w-[180px] max-md:w-auto max-md:min-w-0 max-md:flex-1 max-md:basis-[40%]">
         <BbSelectTrigger>
             <span class="truncate">@OperatorLabel</span>
         </BbSelectTrigger>
@@ -39,7 +39,7 @@
     {
         case FeedFieldKind.Text:
             <BbInput Value="@(Condition.Value as string)" ValueChanged="SetAsync" Placeholder="Enter value..."
-                     UpdateTiming="UpdateTiming.Immediate" Class="w-[180px]"/>
+                     UpdateTiming="UpdateTiming.Immediate" Class="w-[180px] max-md:w-auto max-md:min-w-0 max-md:flex-1 max-md:basis-[40%]"/>
             break;
         case FeedFieldKind.Number:
             <FeedNumberRuleEditor Condition="Condition" Label="@Field.Label" Rule="Field.Number" Changed="Changed"/>
@@ -48,10 +48,10 @@
             <FeedRuntimeRuleEditor Condition="Condition" Label="@Field.Label" Rule="Field.Number" Changed="Changed"/>
             break;
         case FeedFieldKind.Choice when IsMultiple:
-            <BbMultiSelect TValue="string" Values="@Picked" ValuesChanged="SetPickedAsync" Options="Field.Options" Placeholder="Select..." Class="w-[180px]"/>
+            <BbMultiSelect TValue="string" Values="@Picked" ValuesChanged="SetPickedAsync" Options="Field.Options" Placeholder="Select..." Class="w-[180px] max-md:w-auto max-md:min-w-0 max-md:flex-1 max-md:basis-[40%]"/>
             break;
         case FeedFieldKind.Choice:
-            <BbSelect TValue="string" Value="@(Condition.Value as string)" ValueChanged="SetAsync" Options="Field.Options" Placeholder="Select..." Class="w-[180px]"/>
+            <BbSelect TValue="string" Value="@(Condition.Value as string)" ValueChanged="SetAsync" Options="Field.Options" Placeholder="Select..." Class="w-[180px] max-md:w-auto max-md:min-w-0 max-md:flex-1 max-md:basis-[40%]"/>
             break;
         case FeedFieldKind.Genres:
             <FeedGenreRuleEditor Value="@(Condition.Value as GenreMatch ?? GenreMatch.None)" ValueChanged="SetAsync" Label="@Field.Label"/>

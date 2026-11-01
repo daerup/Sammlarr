@@ -10,14 +10,44 @@
     transition: color 0.15s ease, background-color 0.15s ease;
 }
 
-.preview-filter-badge:hover {
-    color: var(--foreground);
-    background-color: color-mix(in oklab, var(--accent) 45%, transparent);
+@media (hover: hover) and (pointer: fine) {
+    .preview-filter-badge:hover {
+        color: var(--foreground);
+        background-color: color-mix(in oklab, var(--accent) 45%, transparent);
+    }
 }
 
 .preview-filter-badge.is-active {
     color: var(--accent-foreground);
     background-color: var(--accent);
+}
+
+.preview-filter-badge.is-chip {
+    flex: none;
+    flex-direction: row;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    font-size: 12.5px;
+    white-space: nowrap;
+}
+
+.preview-filter-badge.is-chip b {
+    color: var(--foreground);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.preview-filter-badge.is-chip.is-active {
+    border-color: transparent;
+    background-color: var(--foreground);
+    color: var(--background);
+}
+
+.preview-filter-badge.is-chip.is-active b {
+    color: inherit;
 }
 
 .preview-filter-badge.is-flashing {

@@ -5,21 +5,14 @@
 @inject IServiceReadiness Readiness
 @inject RatingContext RatingContext
 
-<BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden rounded-lg bg-card border border-border shadow-sm">
-    <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 py-6" style="scrollbar-gutter: stable;">
+<BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden rounded-lg bg-card border border-border shadow-sm max-md:-mx-4 max-md:overflow-visible max-md:rounded-none max-md:border-x-0 max-md:shadow-none">
+    <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 py-6 max-md:overflow-visible max-md:px-4" style="scrollbar-gutter: stable;">
         <div class="space-y-8 pb-4">
 
             <BbField>
                 <BbFieldLabel Class="flex items-center leading-none">
                     Enabled
-                    <BbTooltipProvider>
-                        <BbTooltip DelayDuration="0">
-                            <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                <LucideIcon Name="info" Size="14"/>
-                            </BbTooltipTrigger>
-                            <BbTooltipContent>Toggle to enable or disable this feed.</BbTooltipContent>
-                        </BbTooltip>
-                    </BbTooltipProvider>
+                    <HelpTip Title="Enabled" Delay="0">Toggle to enable or disable this feed.</HelpTip>
                 </BbFieldLabel>
                 <BbFieldContent>
                     <BbSwitch @bind-Checked="@_isEnabled" @bind-Checked:after="NotifyChange"/>
@@ -29,14 +22,7 @@
             <BbField>
                 <BbFieldLabel For="name" Class="flex items-center leading-none">
                     Name <span class="text-destructive ml-0.5">*</span>
-                    <BbTooltipProvider>
-                        <BbTooltip DelayDuration="0">
-                            <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                <LucideIcon Name="info" Size="14"/>
-                            </BbTooltipTrigger>
-                            <BbTooltipContent>A friendly label to identify this feed across your collection.</BbTooltipContent>
-                        </BbTooltip>
-                    </BbTooltipProvider>
+                    <HelpTip Title="Name" Delay="0">A friendly label to identify this feed across your collection.</HelpTip>
                 </BbFieldLabel>
                 <BbFieldContent>
                     <BbInput id="name" Placeholder="e.g. My Top Movies"
@@ -50,14 +36,7 @@
                 <BbField>
                     <BbFieldLabel Class="flex items-center leading-none">
                         Provider <span class="text-destructive ml-0.5">*</span>
-                        <BbTooltipProvider>
-                            <BbTooltip DelayDuration="0">
-                                <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                    <LucideIcon Name="info" Size="14"/>
-                                </BbTooltipTrigger>
-                                <BbTooltipContent>The external service that hosts the list you want to import.</BbTooltipContent>
-                            </BbTooltip>
-                        </BbTooltipProvider>
+                        <HelpTip Title="Provider" Delay="0">The external service that hosts the list you want to import.</HelpTip>
                     </BbFieldLabel>
                     <BbFieldContent>
                         <FeedProviderSelect Value="@_provider" ValueChanged="@ChangeProvider" Unavailable="@_disabledProviders"/>
@@ -73,14 +52,7 @@
                 <BbField>
                     <BbFieldLabel Class="flex leading-none">
                         Strategy
-                        <BbTooltipProvider>
-                            <BbTooltip>
-                                <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex p-0 text-muted-foreground cursor-default">
-                                    <LucideIcon Name="info" Size="14"/>
-                                </BbTooltipTrigger>
-                                <BbTooltipContent>Append only adds. Mirror also removes items this feed added, once they leave the list.</BbTooltipContent>
-                            </BbTooltip>
-                        </BbTooltipProvider>
+                        <HelpTip Title="Strategy" TriggerClass="ml-1 inline-flex p-0 text-muted-foreground cursor-default">Append only adds. Mirror also removes items this feed added, once they leave the list.</HelpTip>
                     </BbFieldLabel>
                     <BbFieldContent>
                         <div class="relative">
@@ -104,16 +76,7 @@
             <BbField>
                 <BbFieldLabel For="list-identifier" Class="flex items-center leading-none">
                     List identifier <span class="text-destructive ml-0.5">*</span>
-                    <BbTooltipProvider>
-                        <BbTooltip>
-                            <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                <LucideIcon Name="info" Size="14"/>
-                            </BbTooltipTrigger>
-                            <BbTooltipContent>The unique string that locates your list within the selected provider. The exact format varies by provider; check
-                                the list's URL or the provider's documentation.
-                            </BbTooltipContent>
-                        </BbTooltip>
-                    </BbTooltipProvider>
+                    <HelpTip Title="List identifier">The unique string that locates your list within the selected provider. The exact format varies by provider; check the list's URL or the provider's documentation.</HelpTip>
                 </BbFieldLabel>
                 <BbFieldContent>
                     <div class="relative" @onkeyup="CommitOnEnterAsync" @onpaste="CommitAfterPaste">
@@ -140,7 +103,7 @@
 
         <BbCollapsible Open="@_filtersSectionOpen" OpenChanged="@(v => _filtersSectionOpen = v)">
             <BbCollapsibleTrigger AsChild="false"
-                                  Class="group w-full flex items-center justify-between -mx-6 pl-2 pr-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors border-t">
+                                  Class="group w-full flex items-center justify-between -mx-6 max-md:-mx-4 max-md:w-[calc(100%+2rem)] pl-2 pr-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors border-t">
                 <span class="flex items-center gap-2">
                     <LucideIcon Name="sliders-horizontal" Size="14"/>
                     Filters, Sorting & Limits
@@ -154,16 +117,7 @@
                     <BbField>
                         <BbFieldLabel Class="flex items-center leading-none">
                             Enable filters
-                            <BbTooltipProvider>
-                                <BbTooltip DelayDuration="0">
-                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                        <LucideIcon Name="info" Size="14"/>
-                                    </BbTooltipTrigger>
-                                    <BbTooltipContent>Limit which imported items are added to your collection. Filter by genre, rating, release year, and
-                                        more.
-                                    </BbTooltipContent>
-                                </BbTooltip>
-                            </BbTooltipProvider>
+                            <HelpTip Title="Enable filters" Delay="0">Limit which imported items are added to your collection. Filter by genre, rating, release year, and more.</HelpTip>
                         </BbFieldLabel>
                         <BbFieldContent>
                             <BbSwitch @bind-Checked="@_filterEnabled" @bind-Checked:after="NotifyChange"/>
@@ -187,14 +141,7 @@
                     <BbField>
                         <BbFieldLabel Class="flex items-center leading-none">
                             Enable custom sorting
-                            <BbTooltipProvider>
-                                <BbTooltip DelayDuration="0">
-                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                        <LucideIcon Name="info" Size="14"/>
-                                    </BbTooltipTrigger>
-                                    <BbTooltipContent>Sort imported items by a specific field before applying the limit.</BbTooltipContent>
-                                </BbTooltip>
-                            </BbTooltipProvider>
+                            <HelpTip Title="Enable custom sorting" Delay="0">Sort imported items by a specific field before applying the limit.</HelpTip>
                         </BbFieldLabel>
                         <BbFieldContent>
                             <BbSwitch @bind-Checked="@_sortEnabled" @bind-Checked:after="NotifyChange"/>
@@ -209,10 +156,10 @@
                             </BbFieldLabel>
                             <BbFieldContent>
                                 <div class="flex items-center gap-3">
-                                    <div class="field-adorned">
+                                    <div class="field-adorned max-md:flex-1">
                                         <BbSelect TValue="string"
                                                   Value="@SortSelection"
-                                                  Class="w-40"
+                                                  Class="w-40 max-md:w-full"
                                                   ValueChanged="@ChangeSortField"
                                                   Options="FeedFields.SortOptions"/>
                                         @if (SortField == nameof(MediaQueryRow.Rating))
@@ -238,7 +185,7 @@
                                                     <LucideIcon Name="arrow-up" Size="14" Class="@GetSortIconClass()"/>
                                                 </BbButton>
                                             </BbTooltipTrigger>
-                                            <BbTooltipContent>@GetSortTooltip()</BbTooltipContent>
+                                            <BbTooltipContent data-label-tip>@GetSortTooltip()</BbTooltipContent>
                                         </BbTooltip>
                                     </BbTooltipProvider>
                                 </div>
@@ -249,14 +196,7 @@
                     <BbField>
                         <BbFieldLabel Class="flex items-center leading-none">
                             Enable limit
-                            <BbTooltipProvider>
-                                <BbTooltip DelayDuration="0">
-                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                        <LucideIcon Name="info" Size="14"/>
-                                    </BbTooltipTrigger>
-                                    <BbTooltipContent>Cap the number of imported items.</BbTooltipContent>
-                                </BbTooltip>
-                            </BbTooltipProvider>
+                            <HelpTip Title="Enable limit" Delay="0">Cap the number of imported items.</HelpTip>
                         </BbFieldLabel>
                         <BbFieldContent>
                             <BbSwitch @bind-Checked="@_limitEnabled" @bind-Checked:after="NotifyChange"/>
@@ -268,24 +208,17 @@
                         <BbField IsInvalid="@LimitIsInvalid">
                             <BbFieldLabel For="limit" Class="flex items-center leading-none">
                                 Maximum items
-                                <BbTooltipProvider>
-                                    <BbTooltip DelayDuration="0">
-                                        <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                            <LucideIcon Name="info" Size="14"/>
-                                        </BbTooltipTrigger>
-                                        <BbTooltipContent>@PickTooltip</BbTooltipContent>
-                                    </BbTooltip>
-                                </BbTooltipProvider>
+                                <HelpTip Title="Maximum items" Delay="0">@PickTooltip</HelpTip>
                             </BbFieldLabel>
                             <BbFieldContent>
-                                <div class="flex items-center gap-4">
+                                <div class="flex items-center gap-4 max-md:flex-col max-md:items-stretch max-md:gap-2.5">
                                     <BbInput id="limit"
                                              Placeholder="e.g. 100"
                                              Value="@_limitRaw" ValueChanged="@ChangeLimitRaw"
-                                             Class="bg-accent w-40"
+                                             Class="bg-accent w-40 max-md:w-full"
                                              AriaInvalid="@LimitIsInvalid"
                                              UpdateTiming="UpdateTiming.Immediate"/>
-                                    <EnumToggleGroup TEnum="LimitPick" Value="@_limit.Pick" OnChange="@ChangeLimitPick" TooltipProvider="null"/>
+                                    <EnumToggleGroup TEnum="LimitPick" Value="@_limit.Pick" OnChange="@ChangeLimitPick" TooltipProvider="null" Fill="true"/>
                                 </div>
                                 @if (_limit.Pick is LimitPick.Random && ParsedLimit is { } count)
                                 {
@@ -305,17 +238,7 @@
                             <BbField>
                                 <BbFieldLabel Class="flex items-center leading-none">
                                     Wantlist slot policy
-                                    <BbTooltipProvider>
-                                        <BbTooltip>
-                                            <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                                <LucideIcon Name="info" Size="14"/>
-                                            </BbTooltipTrigger>
-                                            <BbTooltipContent>
-                                                Wantlisted items are never imported. This decides whether they still take a slot, and takes precedence if
-                                                the item is blocklisted too.
-                                            </BbTooltipContent>
-                                        </BbTooltip>
-                                    </BbTooltipProvider>
+                                    <HelpTip Title="Wantlist slot policy">Wantlisted items are never imported. This decides whether they still take a slot, and takes precedence if the item is blocklisted too.</HelpTip>
                                 </BbFieldLabel>
                                 <BbFieldContent>
                                     <EnumToggleGroup TEnum="SlotPolicy"
@@ -329,16 +252,7 @@
                             <BbField>
                                 <BbFieldLabel Class="flex items-center leading-none">
                                     Blocklist slot policy
-                                    <BbTooltipProvider>
-                                        <BbTooltip>
-                                            <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                                <LucideIcon Name="info" Size="14"/>
-                                            </BbTooltipTrigger>
-                                            <BbTooltipContent>
-                                                Blocklisted items are never imported. This decides whether they still take a slot.
-                                            </BbTooltipContent>
-                                        </BbTooltip>
-                                    </BbTooltipProvider>
+                                    <HelpTip Title="Blocklist slot policy">Blocklisted items are never imported. This decides whether they still take a slot.</HelpTip>
                                 </BbFieldLabel>
                                 <BbFieldContent>
                                     <EnumToggleGroup TEnum="SlotPolicy"
@@ -356,7 +270,7 @@
 
         <BbCollapsible Open="@_syncFrequencySectionOpen" OpenChanged="@(v => _syncFrequencySectionOpen = v)">
             <BbCollapsibleTrigger AsChild="false"
-                                  Class="group w-full flex items-center justify-between -mx-6 pl-2 pr-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors border-t">
+                                  Class="group w-full flex items-center justify-between -mx-6 max-md:-mx-4 max-md:w-[calc(100%+2rem)] pl-2 pr-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors border-t">
                 <span class="flex items-center gap-2">
                     <LucideIcon Name="clock" Size="14"/>
                     Sync Frequency
@@ -369,14 +283,7 @@
                     <BbField>
                         <BbFieldLabel Class="flex items-center leading-none">
                             Trigger
-                            <BbTooltipProvider>
-                                <BbTooltip DelayDuration="0">
-                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                        <LucideIcon Name="info" Size="14"/>
-                                    </BbTooltipTrigger>
-                                    <BbTooltipContent>When to sync this feed, on demand or on a recurring schedule.</BbTooltipContent>
-                                </BbTooltip>
-                            </BbTooltipProvider>
+                            <HelpTip Title="Trigger" Delay="0">When to sync this feed, on demand or on a recurring schedule.</HelpTip>
                         </BbFieldLabel>
                         <BbFieldContent>
                             <EnumToggleGroup TEnum="ScheduleMode"
@@ -390,14 +297,7 @@
                         <BbField>
                             <BbFieldLabel Class="flex items-center leading-none">
                                 Schedule
-                                <BbTooltipProvider>
-                                    <BbTooltip DelayDuration="0">
-                                        <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                            <LucideIcon Name="info" Size="14"/>
-                                        </BbTooltipTrigger>
-                                        <BbTooltipContent>Define a CRON schedule for automatic runs.</BbTooltipContent>
-                                    </BbTooltip>
-                                </BbTooltipProvider>
+                                <HelpTip Title="Schedule" Delay="0">Define a CRON schedule for automatic runs.</HelpTip>
                             </BbFieldLabel>
                             <BbFieldContent>
                                 <SchedulePicker CronExpression="@_scheduleCronExpression"

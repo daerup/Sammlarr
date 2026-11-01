@@ -31,3 +31,11 @@
     text-transform: uppercase;
     color: var(--muted-foreground);
 }
+
+@media (width < 48rem) {
+    .feeds-grid {
+        gap: 0;
+        margin-inline: -1rem;
+        border-top: 1px solid var(--border);
+    }
+}

@@ -16,6 +16,10 @@ internal sealed class WebModule : IServiceModule
 		services.AddModule<InstrumentationModule>();
 		services.AddModule<RateLimitingModule>();
 		services.AddRazorComponents().AddInteractiveServerComponents();
-		services.AddBlazorBlueprintComponents();
+		services.AddBlazorBlueprintComponents(configureTheme: theme =>
+		{
+			theme.DefaultDarkMode = true;
+			theme.DetectSystemPreference = false;
+		});
 	}
 }

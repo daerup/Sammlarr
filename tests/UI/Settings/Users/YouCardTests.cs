@@ -41,6 +41,19 @@ public class YouCardTests : BunitContext
 	}
 
 	[Test]
+	public async Task Card_OnAPhone_OpensThePasswordFormFromItsKeyButton()
+	{
+		SignsInWith(AuthProvider.Local);
+		var cut = this.RenderOnPhone<YouCard>(_ => { }).Component;
+		cut.WaitForState(() => cut.FindAll("[data-you]").Count == 1);
+
+		await Assert.That(cut.FindAll("button").Select(button => button.TextContent.Trim())).DoesNotContain("Change password");
+		await cut.Find("button[aria-label='Change password']").ClickAsync();
+
+		await Assert.That(cut.FindAll("[data-change-password]")).HasSingleItem();
+	}
+
+	[Test]
 	public async Task Card_OnAPlexInstall_HasNoPasswordToChange()
 	{
 		SignsInWith(AuthProvider.Plex);

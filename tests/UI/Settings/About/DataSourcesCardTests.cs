@@ -51,6 +51,17 @@ public class DataSourcesCardTests : BunitContext
 	}
 
 	[Test]
+	public async Task Band_OnPhones_IsALabelledDividerWithTheNoteBehindAnInfoTip()
+	{
+		var cut = this.RenderOnPhone<DataSourcesCard>(_ => { });
+
+		await Assert.That(cut.Component.Find(".source-band-divider .source-band-title").TextContent).IsEqualTo("Pages and ratings");
+		await Assert.That(cut.Component.FindAll(".source-band-note")).IsEmpty();
+		cut.Component.Find("[data-testid=source-band-tip]").Click();
+		await Assert.That(cut.Portal.WaitForElement("[role=dialog]").TextContent).Contains("These reach Sammlarr only through other services.");
+	}
+
+	[Test]
 	public async Task Band_HoldsTheTvdbFirstAndThenTheRatingSites_AndTheTvdbIsNotAServiceAsked()
 	{
 		var cut = Render<DataSourcesCard>();
@@ -211,6 +222,21 @@ public class DataSourcesCardTests : BunitContext
 		await Assert
 			.That(rottenTomatoes.QuerySelectorAll(".credit-source").Select(link => link.TextContent))
 			.IsEquivalentTo(["www.rottentomatoes.com", "file"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Phone_EachSourceIsOneLineOfLogoAndUseThatUnfoldsTheChipsTheNoteAndTheLink()
+	{
+		var cut = this.RenderOnPhone<DataSourcesCard>(_ => { }).Component;
+		var tmdb = cut.Find(".unfold-row[data-source='Tmdb']");
+
+		await Assert.That(cut.FindAll(".source-row")).IsEmpty();
+		await Assert.That(tmdb.QuerySelector(".unfold-row-trigger .source-use")!.TextContent).IsEqualTo("Search, Trending, Feeds, Ratings");
+		await Assert.That(Chips(cut, "Tmdb")).IsEquivalentTo(["Search", "Trending", "Feeds", "Ratings"], CollectionOrdering.Matching);
+		await Assert.That(tmdb.QuerySelector(".source-details")!.TextContent).Contains("not endorsed").And.Contains("Open The Movie Database");
+		await Assert.That(cut.FindAll("a img")).IsEmpty();
+		await cut.Find(".unfold-row[data-source='Tmdb'] .unfold-row-trigger").ClickAsync();
+		await Assert.That(cut.Find(".unfold-row[data-source='Tmdb'] .unfold-row-trigger").GetAttribute("aria-expanded")).IsEqualTo("true");
 	}
 
 	private static async Task OpenCreditsAsync(IRenderedComponent<DataSourcesCard> cut)

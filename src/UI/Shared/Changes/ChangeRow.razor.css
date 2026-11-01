@@ -7,8 +7,10 @@
     cursor: pointer;
 }
 
-.change-row:hover {
-    background: color-mix(in srgb, var(--foreground) 5%, transparent);
+@media (hover: hover) and (pointer: fine) {
+    .change-row:hover {
+        background: color-mix(in srgb, var(--foreground) 5%, transparent);
+    }
 }
 
 .change-row.is-highlight {
@@ -79,6 +81,14 @@
 .change-subtitle {
     color: var(--muted-foreground);
     font-size: 11.5px;
+}
+
+@media (width < 48rem) {
+    .change-subtitle {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 }
 
 .change-context {
