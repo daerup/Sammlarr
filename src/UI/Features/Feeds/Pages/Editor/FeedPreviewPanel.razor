@@ -70,23 +70,7 @@
             <div class="preview-heading" data-preview-heading>
                 @if (_searching)
                 {
-                    <div class="relative min-w-0 flex-1">
-                        <LucideIcon Name="search" Size="16" Class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
-                        <input @ref="_phoneSearch"
-                               type="search"
-                               class="preview-search-input"
-                               placeholder="Search titles"
-                               aria-label="Search titles"
-                               enterkeyhint="search"
-                               value="@_searchQuery"
-                               @oninput="OnPhoneTypedAsync"/>
-                        @if (_searchQuery.Length > 0)
-                        {
-                            <button type="button" class="absolute right-1 top-1/2 grid size-9 -translate-y-1/2 place-items-center text-muted-foreground" aria-label="Clear search" @onclick="ClearSearch">
-                                <LucideIcon Name="circle-x" Size="18"/>
-                            </button>
-                        }
-                    </div>
+                    <SearchField @ref="_phoneSearch" Value="@_searchQuery" Placeholder="Search titles" OnInput="OnPhoneTypedAsync" OnClear="ClearSearch"/>
                     <button type="button" class="preview-search-cancel" @onclick="CloseSearch">Cancel</button>
                 }
                 else
@@ -390,7 +374,7 @@
 
     private int _typed;
 
-    private ElementReference _phoneSearch;
+    private SearchField _phoneSearch = null!;
 
     private RenderFragment Heading =>
         @<text>
@@ -429,13 +413,13 @@
         _focusSearch = true;
     }
 
-    private async Task OnPhoneTypedAsync(ChangeEventArgs args)
+    private async Task OnPhoneTypedAsync(string text)
     {
         var typed = ++_typed;
         await Task.Delay(SearchPause);
         if (typed == _typed)
         {
-            OnSearchQueryChanged(args.Value as string ?? string.Empty);
+            OnSearchQueryChanged(text);
         }
     }
 
@@ -443,7 +427,6 @@
     {
         _typed++;
         OnSearchQueryChanged(string.Empty);
-        _focusSearch = true;
     }
 
     private void CloseSearch()
