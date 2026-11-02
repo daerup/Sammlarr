@@ -3,18 +3,18 @@
 
 |||
 |:---|:---|
-| Generated on: | 11/01/2026 - 22:32:37 |
+| Generated on: | 11/02/2026 - 06:19:51 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
 | Classes: | 1601 |
 | Files: | 1130 |
-| **Line coverage:** | 88.3% (44321 of 50173) |
-| Covered lines: | 44321 |
-| Uncovered lines: | 5852 |
+| **Line coverage:** | 88.3% (44319 of 50173) |
+| Covered lines: | 44319 |
+| Uncovered lines: | 5854 |
 | Coverable lines: | 50173 |
 | Total lines: | 74001 |
-| **Branch coverage:** | 80.8% (16780 of 20745) |
-| Covered branches: | 16780 |
+| **Branch coverage:** | 80.8% (16779 of 20745) |
+| Covered branches: | 16779 |
 | Total branches: | 20745 |
 | **Method coverage:** | [Feature is only available for sponsors](https://reportgenerator.io/pro) |
 
@@ -399,11 +399,11 @@
 |Contracts.Wantlist.WantlistAdded|100%||
 
 </details>
-<details><summary>Core - 96.8%</summary>
+<details><summary>Core - 97%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Core**|**96.8%**|**88.1%**|
+|**Core**|**97%**|**88.1%**|
 |Core.Announcing.Announcer|100%||
 |Core.Announcing.AnnouncingModule|100%||
 |Core.Announcing.EventPublisher|100%|100%|
@@ -480,8 +480,8 @@
 |Core.Jobs.FeedRunJobHandler|100%|100%|
 |Core.Jobs.JobAlarm|90.2%|83.3%|
 |Core.Jobs.JobQueue|98.4%|88.8%|
-|Core.Jobs.JobRunner|76.1%|83.3%|
-|Core.Jobs.JobRunner<TRequest>|76.1%|83.3%|
+|Core.Jobs.JobRunner|79.5%|83.3%|
+|Core.Jobs.JobRunner<TRequest>|79.5%|83.3%|
 |Core.Jobs.JobRunnerStatus|100%||
 |Core.Jobs.JobRunnerStatus.Session|100%||
 |Core.Jobs.JobSignal|100%||
@@ -563,7 +563,7 @@
 |Core.TickerFunctions.DatasetTicker|0%||
 |Core.TickerFunctions.FeedRunTicker|0%||
 |Core.TickerFunctions.HousekeepingTicker|0%||
-|Core.TickerQInstanceFactoryExtensions|34.2%|100%|
+|Core.TickerQInstanceFactoryExtensions|45.7%|100%|
 |Core.Usage.FeedRunUsage|100%|100%|
 |Core.Usage.FeedRunUsage.Running|100%|100%|
 |Core.Usage.Medians|100%|100%|
@@ -590,7 +590,7 @@
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**DB**|**96%**|**85.7%**|
+|**DB**|**96%**|**85.8%**|
 |DB.AnonymousCurrentUser|0%||
 |DB.Conversion.ConversionModule|100%||
 |DB.Conversion.Encryption.DataProtectionKeyRing|100%|100%|
@@ -696,7 +696,7 @@
 |DB.Data.Notifications.NotificationDataModule|100%||
 |DB.Data.Notifications.NotificationDeliveryOutcomeRepository|100%|81.8%|
 |DB.Data.Notifications.NotificationModelConfiguration|100%|100%|
-|DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|66.6%|
+|DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|83.3%|
 |DB.Data.Notifications.NotificationTargetRepository|96.4%|81.2%|
 |DB.Data.Notifications.NotificationTargetRow|100%||
 |DB.Data.QueryableResultExtensions|100%||
@@ -905,7 +905,7 @@
 |Domain.Wantlist.Arr.ArrSearchTerm|100%||
 |Domain.Wantlist.Arr.ArrSinkConfig|100%|85.7%|
 |Domain.Wantlist.Arr.ArrTagFeed|100%||
-|Domain.Wantlist.Arr.ArrTagScheme|100%|88.8%|
+|Domain.Wantlist.Arr.ArrTagScheme|97.8%|88.8%|
 |Domain.Wantlist.Arr.ArrTagSlug|100%|100%|
 |Domain.Wantlist.Arr.ArrTagUser|100%||
 |Domain.Wantlist.Outbox.OutboxSnapshot|100%|100%|
@@ -1263,7 +1263,7 @@
 |UI.Features.Settings.Components.About.ThirdPartyNotices|100%|100%|
 |UI.Features.Settings.Components.About.VersionCard|100%|100%|
 |UI.Features.Settings.Components.ComponentsModule|0%||
-|UI.Features.Settings.Components.Diagnostics.DiagnosticsSection|64.7%|52.5%|
+|UI.Features.Settings.Components.Diagnostics.DiagnosticsSection|60.2%|50.5%|
 |UI.Features.Settings.Components.Diagnostics.DiagnosticsSection.LogDetail|100%||
 |UI.Features.Settings.Components.Housekeeping.DatasetLook|100%||
 |UI.Features.Settings.Components.Housekeeping.FilePart|100%||
