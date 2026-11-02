@@ -751,7 +751,7 @@
           "Contracts": "[1.0.0, )",
           "Serilog": "[4.4.0, )",
           "Shared": "[1.0.0, )",
-          "TUnit.Assertions": "[1.76.45, )"
+          "TUnit.Assertions": "[1.78.0, )"
         }
       },
       "Cronos": {
@@ -960,9 +960,9 @@
       },
       "TUnit.Assertions": {
         "type": "CentralTransitive",
-        "requested": "[1.76.45, )",
-        "resolved": "1.76.45",
-        "contentHash": "Yi1tiULYXNlQtmq1hw8nuE1EDXjgGJJ4aBC7m9onLCE7Kv63kgLQxg/qvtc2G3DvhTFEd2kIBKFfLbRhFbikJA=="
+        "requested": "[1.78.0, )",
+        "resolved": "1.78.0",
+        "contentHash": "5LFBA5Nh18RumRWbP1Y+b8QBqXuPyJ61f2HEJpZRCwpeD5n4uQCvTQ5TwE8RQq70wdTVR0ee0EYr6KVPJWm2sg=="
       },
       "Vogen": {
         "type": "CentralTransitive",
