@@ -28,9 +28,9 @@
       },
       "TUnit.Assertions": {
         "type": "Direct",
-        "requested": "[1.76.45, )",
-        "resolved": "1.76.45",
-        "contentHash": "Yi1tiULYXNlQtmq1hw8nuE1EDXjgGJJ4aBC7m9onLCE7Kv63kgLQxg/qvtc2G3DvhTFEd2kIBKFfLbRhFbikJA=="
+        "requested": "[1.78.0, )",
+        "resolved": "1.78.0",
+        "contentHash": "5LFBA5Nh18RumRWbP1Y+b8QBqXuPyJ61f2HEJpZRCwpeD5n4uQCvTQ5TwE8RQq70wdTVR0ee0EYr6KVPJWm2sg=="
       },
       "Microsoft.Extensions.Configuration": {
         "type": "Transitive",
