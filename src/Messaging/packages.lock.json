@@ -16,9 +16,9 @@
       },
       "Meziantou.Analyzer": {
         "type": "Direct",
-        "requested": "[3.0.317, )",
-        "resolved": "3.0.317",
-        "contentHash": "IC9fCjxniZol2dcdj+hiXjK01a8gBWQproGL/qWjBI7CgB5GeEOD5oGV0PwpQaSr7Aa/RPaM8Ddho3Y1OAZe1Q=="
+        "requested": "[3.0.321, )",
+        "resolved": "3.0.321",
+        "contentHash": "aFP7GiBBIb2x9rBTuUpw/jSs0JVbTofADlt6WxmYVYQ24KPAjFYyxcnNNVVf4F/eqKyzjik170nOpURmmyJDKg=="
       },
       "Microsoft.CodeAnalysis.BannedApiAnalyzers": {
         "type": "Direct",
@@ -28,14 +28,14 @@
       },
       "WolverineFx": {
         "type": "Direct",
-        "requested": "[6.57.0, )",
-        "resolved": "6.57.0",
-        "contentHash": "mzEAGdj9PEqIQAGNERWG+Umq5ym9EumDr2TIoQ+F4rV7GQvH7unIz5wVVKPJb7ALp6niEKnYuZbExWgIT68xlA==",
+        "requested": "[6.62.0, )",
+        "resolved": "6.62.0",
+        "contentHash": "0KashWEcGtbB0ugMpcupHFaeS9iq8vRA+FXAGM7O2hEGJWsMxah5B663Z1TBwHD3LhhODWiuC5mSeU0GR50YGA==",
         "dependencies": {
           "Cronos": "0.11.0",
-          "JasperFx": "2.96.1",
-          "JasperFx.Events": "2.96.1",
-          "JasperFx.SourceGenerator": "2.96.1",
+          "JasperFx": "2.100.1",
+          "JasperFx.Events": "2.100.1",
+          "JasperFx.SourceGenerator": "2.100.1",
           "Microsoft.Extensions.Caching.Memory": "10.0.0",
           "Microsoft.Extensions.Configuration": "10.0.0",
           "Microsoft.Extensions.Configuration.Binder": "10.0.0",
@@ -48,12 +48,12 @@
       },
       "WolverineFx.Sqlite": {
         "type": "Direct",
-        "requested": "[6.57.0, )",
-        "resolved": "6.57.0",
-        "contentHash": "P1suKnXaFHeM4PxAu6M3BRVUTIKTgC/ab99ghRrwwfcF0qWLzAyn6dUR3EoCXRYBodyHAX5lS1uzGXGuPOqJXA==",
+        "requested": "[6.62.0, )",
+        "resolved": "6.62.0",
+        "contentHash": "Hs4p8YsBqlCQx/CdJa1Y5NQYwR0AeSNEzQNBzaBjOru/mn4MTQyui+mhzrE69jig0fzRjEdprTws6gLagYn2KA==",
         "dependencies": {
-          "Weasel.Sqlite": "9.47.1",
-          "WolverineFx.RDBMS": "6.57.0"
+          "Weasel.Sqlite": "9.49.0",
+          "WolverineFx.RDBMS": "6.62.0"
         }
       },
       "FastExpressionCompiler": {
@@ -68,8 +68,8 @@
       },
       "JasperFx": {
         "type": "Transitive",
-        "resolved": "2.96.1",
-        "contentHash": "v18ZoBNSz4x+DcNJV36hNsQ6fuXsoeP7KI3HtnyzQSSo2fHqIw4Ssg72HtlyvgDkWRfK0s1+UiMrBWD2oMkhSg==",
+        "resolved": "2.100.1",
+        "contentHash": "w/+2y30g2dcqWLz4666RtxSRQEMCieQprOZAoaJoFUKfC3GPehbYElzgNbqzZomKkcw7w70mgyg1QoiYy8SaAQ==",
         "dependencies": {
           "FastExpressionCompiler": "5.4.1",
           "ImTools": "4.0.0",
@@ -84,16 +84,16 @@
       },
       "JasperFx.Events": {
         "type": "Transitive",
-        "resolved": "2.96.1",
-        "contentHash": "psPNxP27GBu5QjlmaBGnQtaZ0udUu1X6tzIgCTyxWp3QTkIC5+tiKIjifHuIl3jmdRkqi2xQi6nGEVkbX2Br7A==",
+        "resolved": "2.100.1",
+        "contentHash": "b0N1bnZmRqlIOKsct6dIqN5AqR7K1fpviFQpt+Pq/bptVLq9ev16bAnb6KvX5PQ7N++dXOBvV2X4yRUK7tW3Rw==",
         "dependencies": {
-          "JasperFx": "2.96.1"
+          "JasperFx": "2.100.1"
         }
       },
       "JasperFx.SourceGenerator": {
         "type": "Transitive",
-        "resolved": "2.96.1",
-        "contentHash": "m5KC5GDbZ1uYjwJm3bXd43Tocs4RJOfPhhYcPvFEhPaE1szl6WGqUVWA0efBB3pmCg2HkWIU8CDCV711MsI/tg=="
+        "resolved": "2.100.1",
+        "contentHash": "m8k2mdJfJcQ+Xvbtkh/oxf/fFmC6lNfyBSbb3SPN5bqO4cxEL6S6P6MVMAwoYjHcnlN1AgzjzgTlgznFPG3IPw=="
       },
       "Microsoft.Bcl.TimeProvider": {
         "type": "Transitive",
@@ -324,29 +324,29 @@
       },
       "Weasel.Core": {
         "type": "Transitive",
-        "resolved": "9.47.1",
-        "contentHash": "RVlNuFRaOGrna0w4fqQrrkShrTJvUGJIT8hYHiJK/P3vHzy5LF0cXgL04Q0F0a2Uqy+RBf0bftDpx0g5gcDnPg==",
+        "resolved": "9.49.0",
+        "contentHash": "MppUhhd4TvosEMyvERSM8krsxjmyoHhIlaob9zLAqbM17pxiOqWtilfCtuJGTjRb4XSpqFNG5iWuXGC83F1eOw==",
         "dependencies": {
-          "JasperFx": "2.90.2"
+          "JasperFx": "2.100.0"
         }
       },
       "Weasel.Sqlite": {
         "type": "Transitive",
-        "resolved": "9.47.1",
-        "contentHash": "MY1JxgjcMwzHLyIsEQFJfkZ9qmTPsy6g/NFoEgV8OnhabBpvS/+6kHilZD2TTK+EB5vmfT7vGrnDodhuj1oMyw==",
+        "resolved": "9.49.0",
+        "contentHash": "xoUxYP3y2QQZQAJAXVDzT4VXu9UeWUTk3a6nK+dfYsTSGJ2D791pph3JWkwO366c77jLlVPP6tdUPO6MiuOMzw==",
         "dependencies": {
           "Microsoft.Data.Sqlite": "10.0.9",
           "SQLitePCLRaw.bundle_e_sqlite3": "3.0.3",
-          "Weasel.Core": "9.47.1"
+          "Weasel.Core": "9.49.0"
         }
       },
       "WolverineFx.RDBMS": {
         "type": "Transitive",
-        "resolved": "6.57.0",
-        "contentHash": "JmIxLGI7d6z1M+vKevWfnnT6mFDfy+mFHa662Vx8rYZQivl2CZekVvmUNnzVeJflg4ZViZ/ih/JrsZP7wx2AbQ==",
+        "resolved": "6.62.0",
+        "contentHash": "RtHmuHImLXXo5P1C1i0UWZPT35M96PKkkSrwcACv/0zBYcisa5lB4tImCa4z0PnPxMu6iE5A8R6M5Ux1VFwaEg==",
         "dependencies": {
-          "Weasel.Core": "9.47.1",
-          "WolverineFx": "6.57.0"
+          "Weasel.Core": "9.49.0",
+          "WolverineFx": "6.62.0"
         }
       },
       "contracts": {
