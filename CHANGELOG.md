@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.2.0](https://github.com/daerup/Sammlarr/compare/v0.1.3...v0.2.0) (2026-11-09)
+
+
+### Features
+
+* **ui:** add a mobile layout built for touch ([e3624d8](https://github.com/daerup/Sammlarr/commit/e3624d839c3dbb5302c9d06f8454a4774226a5b5))
+* **ui:** pick schedule times on a clock dial ([e3624d8](https://github.com/daerup/Sammlarr/commit/e3624d839c3dbb5302c9d06f8454a4774226a5b5))
+* **ui:** start in the dark theme without a white flash on load ([e3624d8](https://github.com/daerup/Sammlarr/commit/e3624d839c3dbb5302c9d06f8454a4774226a5b5))
+* **ui:** theme the reconnect overlay ([e3624d8](https://github.com/daerup/Sammlarr/commit/e3624d839c3dbb5302c9d06f8454a4774226a5b5))
+
+
+### Bug Fixes
+
+* **staging:** show the same version as a development build ([#24](https://github.com/daerup/Sammlarr/issues/24)) ([d998e8f](https://github.com/daerup/Sammlarr/commit/d998e8fad4ddf31e2c09139857ed08a8cab0381a))
+* **ui:** keep hover styles from sticking after a tap on touch screens ([e3624d8](https://github.com/daerup/Sammlarr/commit/e3624d839c3dbb5302c9d06f8454a4774226a5b5))
+
 ## [0.1.3](https://github.com/daerup/Sammlarr/compare/v0.1.2...v0.1.3) (2026-10-25)
 
 
