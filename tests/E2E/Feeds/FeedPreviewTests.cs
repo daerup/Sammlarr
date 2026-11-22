@@ -104,8 +104,9 @@ public class FeedPreviewTests
 		await E2EApp.WaitForRequestsBeyondAsync($"/lists/{identifier}/items", listed);
 		await Expect(page.Locator(FeedEditor.UnmatchedRow)).ToHaveCountAsync(3);
 
-		await FeedEditor.FillAsync(page, SearchBox, "Unmatched 1");
-		await Expect(page.Locator(FeedEditor.UnmatchedRow)).ToHaveCountAsync(1, Wait.Settle);
+		await FeedEditor.FillAsync(page, SearchBox, Guid.NewGuid().ToString("N"));
+		await Expect(page.Locator(FeedEditor.UnmatchedRow)).ToHaveCountAsync(0, Wait.Settle);
+		await Expect(page.GetByText("No results match")).ToBeVisibleAsync();
 		await FeedEditor.FillAsync(page, SearchBox, string.Empty);
 		await Expect(page.Locator(FeedEditor.UnmatchedRow)).ToHaveCountAsync(3, Wait.Settle);
 	}

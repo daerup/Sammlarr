@@ -163,7 +163,6 @@
         }
         else
         {
-            <VirtualizeGuard>
                 <Virtualize Items="_filteredLogs" Context="entry" ItemSize="@(IsPhone ? 96 : 68)" OverscanCount="10">
                     <ItemContent>
                         @if (IsPhone)
@@ -192,7 +191,6 @@
                         }
                     </ItemContent>
                 </Virtualize>
-            </VirtualizeGuard>
         }
     </div>
 </div>
