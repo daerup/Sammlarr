@@ -239,6 +239,28 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	}
 
 	[Test]
+	public async Task Sheets_WhenTheBrowserHasNoRandomUuid_CloseOneAtATimeOnBack()
+	{
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		await page.AddInitScriptAsync("delete Crypto.prototype.randomUUID");
+		await page.VisitAsync(SettingsPage.Section("diagnostics"));
+		var options = page.Modal("Options");
+		var verbose = page.Option("Verbose");
+		await page.Toolbar.Button("Options").TapAsync();
+		await Expect(options).ToBeVisibleAsync(Wait.Settle);
+		await options.GetByRole(AriaRole.Combobox, new() { Name = "Verbosity" }).TapAsync();
+		await Expect(verbose).ToBeVisibleAsync(Wait.Settle);
+
+		await page.GoBackAsync();
+		await Expect(verbose).ToBeHiddenAsync();
+		await Expect(options).ToBeVisibleAsync();
+		await page.GoBackAsync();
+
+		await Expect(options).ToHaveCountAsync(0);
+		await Expect(page.Toolbar.Button("Options")).ToBeVisibleAsync();
+	}
+
+	[Test]
 	public async Task Diagnostics_OnAPhone_ListsEntriesWithinTheScreen()
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
