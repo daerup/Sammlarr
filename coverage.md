@@ -3,18 +3,18 @@
 
 |||
 |:---|:---|
-| Generated on: | 11/22/2026 - 20:30:08 |
+| Generated on: | 11/22/2026 - 20:50:49 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
 | Classes: | 1600 |
 | Files: | 1129 |
-| **Line coverage:** | 88.3% (44257 of 50111) |
-| Covered lines: | 44257 |
-| Uncovered lines: | 5854 |
+| **Line coverage:** | 88.3% (44268 of 50111) |
+| Covered lines: | 44268 |
+| Uncovered lines: | 5843 |
 | Coverable lines: | 50111 |
 | Total lines: | 73947 |
-| **Branch coverage:** | 80.8% (16781 of 20749) |
-| Covered branches: | 16781 |
+| **Branch coverage:** | 80.8% (16780 of 20749) |
+| Covered branches: | 16780 |
 | Total branches: | 20749 |
 | **Method coverage:** | [Feature is only available for sponsors](https://reportgenerator.io/pro) |
 
@@ -399,11 +399,11 @@
 |Contracts.Wantlist.WantlistAdded|100%||
 
 </details>
-<details><summary>Core - 96.8%</summary>
+<details><summary>Core - 97%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Core**|**96.8%**|**88.1%**|
+|**Core**|**97%**|**88.1%**|
 |Core.Announcing.Announcer|100%||
 |Core.Announcing.AnnouncingModule|100%||
 |Core.Announcing.EventPublisher|100%|100%|
@@ -544,8 +544,8 @@
 |Core.Processing.QueryProcessor.RuleChecks<T>|100%|100%|
 |Core.Processing.QueryProcessor.SlotLine<T>|100%||
 |Core.Processing.QueryProcessor.SlotLine<T>|100%|100%|
-|Core.Processing.QueryProcessor<T>|100%|96.8%|
 |Core.Processing.QueryProcessor<T>|100%|92.3%|
+|Core.Processing.QueryProcessor<T>|100%|96.8%|
 |Core.Processing.ShuffleRank|100%||
 |Core.Providers.ProviderRateLimitReporter|100%|100%|
 |Core.Providers.ProvidersModule|100%||
@@ -563,7 +563,7 @@
 |Core.TickerFunctions.DatasetTicker|0%||
 |Core.TickerFunctions.FeedRunTicker|0%||
 |Core.TickerFunctions.HousekeepingTicker|0%||
-|Core.TickerQInstanceFactoryExtensions|34.2%|100%|
+|Core.TickerQInstanceFactoryExtensions|65.7%|100%|
 |Core.Usage.FeedRunUsage|100%|100%|
 |Core.Usage.FeedRunUsage.Running|100%|100%|
 |Core.Usage.Medians|100%|100%|
@@ -590,7 +590,7 @@
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**DB**|**96%**|**85.8%**|
+|**DB**|**96%**|**85.7%**|
 |DB.AnonymousCurrentUser|0%||
 |DB.Conversion.ConversionModule|100%||
 |DB.Conversion.Encryption.DataProtectionKeyRing|100%|100%|
@@ -658,7 +658,7 @@
 |DB.Data.Identity.IdentityDataModule|100%|100%|
 |DB.Data.Identity.IdentityExtensions|91.3%|83.3%|
 |DB.Data.Identity.IdentityExtensions<T>|91.3%|83.3%|
-|DB.Data.Identity.LocalAccountRepository|100%|96%|
+|DB.Data.Identity.LocalAccountRepository|100%|94%|
 |DB.Data.Identity.Members|100%||
 |DB.Data.Identity.UserRepository|99.4%|96.4%|
 |DB.Data.Identity.UserRepository<T>|99.4%|96.4%|
