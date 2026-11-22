@@ -3,16 +3,16 @@
 
 |||
 |:---|:---|
-| Generated on: | 11/22/2026 - 13:52:53 |
+| Generated on: | 11/22/2026 - 16:06:22 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
 | Classes: | 1601 |
 | Files: | 1130 |
-| **Line coverage:** | 88.3% (44257 of 50112) |
-| Covered lines: | 44257 |
-| Uncovered lines: | 5855 |
-| Coverable lines: | 50112 |
-| Total lines: | 73948 |
+| **Line coverage:** | 88.3% (44279 of 50119) |
+| Covered lines: | 44279 |
+| Uncovered lines: | 5840 |
+| Coverable lines: | 50119 |
+| Total lines: | 73975 |
 | **Branch coverage:** | 80.8% (16784 of 20753) |
 | Covered branches: | 16784 |
 | Total branches: | 20753 |
@@ -399,11 +399,11 @@
 |Contracts.Wantlist.WantlistAdded|100%||
 
 </details>
-<details><summary>Core - 96.8%</summary>
+<details><summary>Core - 97%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Core**|**96.8%**|**88.1%**|
+|**Core**|**97%**|**88.1%**|
 |Core.Announcing.Announcer|100%||
 |Core.Announcing.AnnouncingModule|100%||
 |Core.Announcing.EventPublisher|100%|100%|
@@ -433,7 +433,7 @@
 |Core.Datasets.DatasetRequest|100%||
 |Core.Datasets.DatasetSchedule|80%|83.3%|
 |Core.Datasets.DatasetsModule|100%||
-|Core.Datasets.DatasetTicker|81.8%|100%|
+|Core.Datasets.DatasetTicker|90.9%|100%|
 |Core.DI.DiModule|100%||
 |Core.DI.KeyedServiceIndex<TKey, TService>|100%||
 |Core.DI.KeyedServiceSet<TKey, TService>|100%||
@@ -480,8 +480,8 @@
 |Core.Jobs.FeedRunJobHandler|100%|100%|
 |Core.Jobs.JobAlarm|90.2%|83.3%|
 |Core.Jobs.JobQueue|98.4%|88.8%|
-|Core.Jobs.JobRunner|76.1%|83.3%|
-|Core.Jobs.JobRunner<TRequest>|76.1%|83.3%|
+|Core.Jobs.JobRunner|79.5%|83.3%|
+|Core.Jobs.JobRunner<TRequest>|79.5%|83.3%|
 |Core.Jobs.JobRunnerStatus|100%||
 |Core.Jobs.JobRunnerStatus.Session|100%||
 |Core.Jobs.JobSignal|100%||
@@ -563,7 +563,7 @@
 |Core.TickerFunctions.DatasetTicker|0%||
 |Core.TickerFunctions.FeedRunTicker|0%||
 |Core.TickerFunctions.HousekeepingTicker|0%||
-|Core.TickerQInstanceFactoryExtensions|34.2%|100%|
+|Core.TickerQInstanceFactoryExtensions|54.2%|100%|
 |Core.Usage.FeedRunUsage|100%|100%|
 |Core.Usage.FeedRunUsage.Running|100%|100%|
 |Core.Usage.Medians|100%|100%|
@@ -734,11 +734,11 @@
 |System.Text.RegularExpressions.Generated.RunnerFactory.Runner|||
 
 </details>
-<details><summary>Domain - 97.6%</summary>
+<details><summary>Domain - 97.7%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Domain**|**97.6%**|**89.3%**|
+|**Domain**|**97.7%**|**89.3%**|
 |Domain.Auth.SecretRejectedException|100%||
 |Domain.Blocklist.BlocklistChangedEvent|100%||
 |Domain.Blocklist.BlocklistedMedia|0%||
