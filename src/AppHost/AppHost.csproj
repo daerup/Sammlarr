@@ -1,9 +1,10 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.6.4">
+<Project Sdk="Microsoft.NET.Sdk">
 	<ItemGroup>
-		<ProjectReference Include="..\Web\Web.csproj" />
-		<ProjectReference Include="..\Shared\Shared.csproj" IsAspireProjectResource="false" />
+		<ProjectReference Include="..\Shared\Shared.csproj" />
 	</ItemGroup>
 	<ItemGroup>
+		<PackageReference Include="Aspire.Hosting.AppHost" />
+		<PackageReference Include="Aspire.Hosting.Dotnet" />
 		<PackageReference Include="MessagePack" />
 	</ItemGroup>
 	<PropertyGroup>
@@ -13,6 +14,5 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<UserSecretsId>dd1c3e72-9603-4986-88d2-125fe513419d</UserSecretsId>
-		<MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);ASPIRE010</MSBuildWarningsAsMessages>
 	</PropertyGroup>
 </Project>

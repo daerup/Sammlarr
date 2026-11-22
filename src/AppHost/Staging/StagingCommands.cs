@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Aspire.Hosting.Dotnet;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AppHost.Staging;
@@ -8,7 +9,7 @@ internal sealed record StagingResources(
 	StagingScenarioChoice Scenario,
 	IResourceBuilder<ContainerResource> Radarr,
 	IResourceBuilder<ContainerResource> Sonarr,
-	IResourceBuilder<ProjectResource> Seed
+	IResourceBuilder<DotnetProjectResource> Seed
 );
 
 internal static class StagingCommands

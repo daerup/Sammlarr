@@ -4,6 +4,7 @@ using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
+using Aspire.Hosting.Dotnet;
 using Aspire.Hosting.Testing;
 using E2E.Tests.Recording;
 using Microsoft.Extensions.DependencyInjection;
@@ -121,7 +122,7 @@ internal sealed partial class SelfHostedStack
 		}
 
 		var wiremockHttp = wiremock.GetEndpoint("http");
-		var web = builder.Resources.OfType<ProjectResource>().Single(resource => resource.Name == Web);
+		var web = builder.Resources.OfType<DotnetProjectResource>().Single(resource => resource.Name == Web);
 		var webBuilder = builder
 			.CreateResourceBuilder(web)
 			.WithEndpoint("http", endpoint => endpoint.Port = null)

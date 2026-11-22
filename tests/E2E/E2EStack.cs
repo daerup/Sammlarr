@@ -1,5 +1,6 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
+using Aspire.Hosting.Dotnet;
 using Aspire.Hosting.Testing;
 using Domain.Identity;
 using Domain.Providers;
@@ -72,7 +73,7 @@ internal sealed class E2EStack
 				.WithBindMount(WireMockStubs.ResponsesDirectory, "/home/wiremock/__files", isReadOnly: true);
 		}
 
-		var web = builder.Resources.OfType<ProjectResource>().Single(resource => resource.Name == "blazor-ui");
+		var web = builder.Resources.OfType<DotnetProjectResource>().Single(resource => resource.Name == "blazor-ui");
 		var webBuilder = builder
 			.CreateResourceBuilder(web)
 			.WithEndpoint("http", endpoint => endpoint.Port = null)
