@@ -285,20 +285,17 @@ public class KeyedLaneTests
 
 	private static LaneCall<int, int> Echo(List<SentBatch> sent, Func<int, string> batchKey, Func<LaneClass, Task> wait)
 	{
-		return new LaneCall<int, int>(
-			batchKey,
-			async (keys, _) =>
+		return new LaneCall<int, int>(batchKey, async (keys, _) =>
+		{
+			var asking = LanePriority.Current.Class;
+			lock (sent)
 			{
-				var asking = LanePriority.Current.Class;
-				lock (sent)
-				{
-					sent.Add(new SentBatch(asking, Asker.Value ?? string.Empty, keys));
-				}
-
-				await wait(asking);
-				return Success.Of<IReadOnlyDictionary<int, int>>(keys.ToDictionary(key => key, key => key));
+				sent.Add(new SentBatch(asking, Asker.Value ?? string.Empty, keys));
 			}
-		);
+
+			await wait(asking);
+			return Success.Of<IReadOnlyDictionary<int, int>>(keys.ToDictionary(key => key, key => key));
+		});
 	}
 
 	private sealed record SentBatch(LaneClass Class, string Context, IReadOnlyList<int> Keys);

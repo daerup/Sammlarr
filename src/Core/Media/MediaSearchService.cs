@@ -30,9 +30,8 @@ internal sealed class MediaSearchService(
 		);
 		return new SearchResults(
 			[
-				.. found.Zip(
-					registered,
-					(item, identity) => identity.Match(claimed => item.MatchTo(claimed), () => Owned(item, OwnKey(provider, item).Map(key => owners.GetValueOrNone(key))))
+				.. found.Zip(registered, (item, identity) =>
+					identity.Match(claimed => item.MatchTo(claimed), () => Owned(item, OwnKey(provider, item).Map(key => owners.GetValueOrNone(key))))
 				),
 			],
 			answer.Missed

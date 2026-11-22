@@ -77,14 +77,11 @@ public class GitHubReleaseFeedTests
 		builder.WebHost.UseUrls("http://127.0.0.1:0");
 		await using var github = builder.Build();
 		(string Agent, string Accept) sent = default;
-		github.MapGet(
-			"/repos/daerup/Sammlarr/releases/latest",
-			(HttpRequest request) =>
-			{
-				sent = (request.Headers.UserAgent.ToString(), request.Headers.Accept.ToString());
-				return Results.Text("""{"tag_name":"v1.5.0","html_url":"https://github.com/daerup/Sammlarr/releases/tag/v1.5.0"}""", "application/json");
-			}
-		);
+		github.MapGet("/repos/daerup/Sammlarr/releases/latest", (HttpRequest request) =>
+		{
+			sent = (request.Headers.UserAgent.ToString(), request.Headers.Accept.ToString());
+			return Results.Text("""{"tag_name":"v1.5.0","html_url":"https://github.com/daerup/Sammlarr/releases/tag/v1.5.0"}""", "application/json");
+		});
 		await github.StartAsync();
 		using var host = new HostBuilder()
 			.ConfigureServices(services =>

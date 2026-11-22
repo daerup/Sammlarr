@@ -54,9 +54,8 @@ internal static class ProviderBranding
 		registered.AddModule<LinksModule>();
 		var linkers = registered.BuildServiceProvider();
 		return Enum.GetValues<MediaProvider>()
-			.Aggregate(
-				new FakeKeyedServiceIndex<MediaProvider, IExternalPageLinker>(),
-				(index, provider) => index.Register(provider, linkers.GetRequiredKeyedService<IExternalPageLinker>(provider))
+			.Aggregate(new FakeKeyedServiceIndex<MediaProvider, IExternalPageLinker>(), (index, provider) =>
+				index.Register(provider, linkers.GetRequiredKeyedService<IExternalPageLinker>(provider))
 			);
 	}
 }

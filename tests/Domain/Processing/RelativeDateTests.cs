@@ -9,11 +9,8 @@ public class RelativeDateTests
 {
 	private static readonly DateOnly Today = new(2026, 10, 18);
 
-	private static readonly Gen<RelativeDate> Dates = Gen.Select(
-		Gen.Int[0, 500],
-		Gen.Enum<DateUnit>(),
-		Gen.Bool,
-		(amount, unit, ahead) => new RelativeDate(amount, unit, ahead)
+	private static readonly Gen<RelativeDate> Dates = Gen.Select(Gen.Int[0, 500], Gen.Enum<DateUnit>(), Gen.Bool, (amount, unit, ahead) =>
+		new RelativeDate(amount, unit, ahead)
 	);
 
 	[Test]

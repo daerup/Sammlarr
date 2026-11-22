@@ -246,14 +246,11 @@ public class UiInvariantTests
 	internal static async Task<ILocator> DropTheCircuitAsync(IPage page)
 	{
 		List<IWebSocketRoute> sockets = [];
-		await page.RouteWebSocketAsync(
-			Circuit,
-			socket =>
-			{
-				sockets.Add(socket);
-				socket.ConnectToServer();
-			}
-		);
+		await page.RouteWebSocketAsync(Circuit, socket =>
+		{
+			sockets.Add(socket);
+			socket.ConnectToServer();
+		});
 		await page.VisitAsync(Routes.Feeds);
 		await page.RouteAsync(Circuit, route => route.AbortAsync());
 		foreach (var socket in sockets)

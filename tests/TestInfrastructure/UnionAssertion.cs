@@ -1,7 +1,6 @@
 using System.Runtime.CompilerServices;
 using Domain.Providers;
 using TUnit.Assertions.Core;
-using TUnit.Assertions.Sources;
 
 namespace TestInfrastructure;
 
@@ -67,7 +66,7 @@ public static class UnionAssertionExtensions
 }
 
 public class UnionCollectionAssertion<TCollection, TItem>(AssertionContext<TCollection> context, IEnumerable<Type> expectedTypes)
-	: CollectionAssertionBase<TCollection, TItem>(context)
+	: Assertion<TCollection>(context)
 	where TCollection : IEnumerable<TItem>
 	where TItem : IUnion
 {

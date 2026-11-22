@@ -71,21 +71,18 @@ internal static class AuthEndpoints
 			)
 			.RequireRateLimiting(RateLimitingModule.SignInForms);
 		endpoints
-			.MapPost(
-				"/setup/plex",
-				async ([FromForm] string code, HttpContext context, IOnboardingService onboarding) =>
-				{
-					var problem = await onboarding.CodeProblemAsync(new Secret(code), context.RequestAborted);
-					return problem.Match(
-						error => Results.Redirect(SetupRedirect.For(error, AuthProvider.Plex)),
-						() =>
-						{
-							SetupClaim.Issue(context, code);
-							return Results.Redirect(QueryHelpers.AddQueryString("/auth/plex/login", "returnUrl", SetupPath));
-						}
-					);
-				}
-			)
+			.MapPost("/setup/plex", async ([FromForm] string code, HttpContext context, IOnboardingService onboarding) =>
+			{
+				var problem = await onboarding.CodeProblemAsync(new Secret(code), context.RequestAborted);
+				return problem.Match(
+					error => Results.Redirect(SetupRedirect.For(error, AuthProvider.Plex)),
+					() =>
+					{
+						SetupClaim.Issue(context, code);
+						return Results.Redirect(QueryHelpers.AddQueryString("/auth/plex/login", "returnUrl", SetupPath));
+					}
+				);
+			})
 			.RequireRateLimiting(RateLimitingModule.SignInForms);
 		endpoints
 			.MapPost("/auth/setup/confirm", ConfirmAdminAsync)
@@ -217,12 +214,8 @@ internal static class AuthEndpoints
 		IAccountLinkService links
 	)
 	{
-		return RedeemAsync(
-			"join",
-			user,
-			token,
-			context,
-			id => links.JoinAsync(id, new Secret(token), new Secret(password), new Secret(confirmation), context.RequestAborted)
+		return RedeemAsync("join", user, token, context, id =>
+			links.JoinAsync(id, new Secret(token), new Secret(password), new Secret(confirmation), context.RequestAborted)
 		);
 	}
 
@@ -235,12 +228,8 @@ internal static class AuthEndpoints
 		IAccountLinkService links
 	)
 	{
-		return RedeemAsync(
-			"reset",
-			user,
-			token,
-			context,
-			id => links.ResetPasswordAsync(id, new Secret(token), new Secret(password), new Secret(confirmation), context.RequestAborted)
+		return RedeemAsync("reset", user, token, context, id =>
+			links.ResetPasswordAsync(id, new Secret(token), new Secret(password), new Secret(confirmation), context.RequestAborted)
 		);
 	}
 

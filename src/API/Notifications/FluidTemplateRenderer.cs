@@ -41,20 +41,15 @@ internal sealed class FluidTemplateRenderer : INotificationTemplateRenderer
 		}
 	}
 
-	private static TemplateOptions BuildOptions()
-	{
-		var options = new TemplateOptions { MaxSteps = 400 };
-		options.ValueConverters.Add(value => value is NotificationEventType type ? type.ToString() : null);
-		options.ValueConverters.Add(value => value is NotificationLevel level ? level.ToString() : null);
-		options.ValueConverters.Add(value => value is RemoteService remote ? remote.ToString() : null);
-		options.ValueConverters.Add(value => value is FeedProvider feedProvider ? feedProvider.ToString() : null);
-		options.ValueConverters.Add(value => value is MediaType mediaType ? mediaType.ToString() : null);
-		options.ValueConverters.Add(value => value is TimeSpan span ? span.ToString(@"hh\:mm\:ss") : null);
-		options.MemberAccessStrategy.MemberNameStrategy = MemberNameStrategies.CamelCase;
-		options.MemberAccessStrategy.Register<NotificationContext>();
-		options.MemberAccessStrategy.Register<NotificationData>();
-		options.MemberAccessStrategy.Register<NotificationMedia>();
-		options.MemberAccessStrategy.Register<NotificationFeed>();
-		return options;
-	}
+	private static TemplateOptions BuildOptions() =>
+		new TemplateOptionsBuilder()
+			.WithMaxSteps(400)
+			.WithModelNamesComparer(StringComparers.CamelCase)
+			.AddValueConverter(value => value is NotificationEventType type ? type.ToString() : null)
+			.AddValueConverter(value => value is NotificationLevel level ? level.ToString() : null)
+			.AddValueConverter(value => value is RemoteService remote ? remote.ToString() : null)
+			.AddValueConverter(value => value is FeedProvider feedProvider ? feedProvider.ToString() : null)
+			.AddValueConverter(value => value is MediaType mediaType ? mediaType.ToString() : null)
+			.AddValueConverter(value => value is TimeSpan span ? span.ToString(@"hh\:mm\:ss") : null)
+			.Build();
 }

@@ -6,10 +6,8 @@ namespace Domain.Tests.Processing;
 
 public class DurationTests
 {
-	private static readonly Gen<Duration> Durations = Gen.Select(
-		Gen.Int[0, 20000],
-		Gen.Enum<DurationUnit>(),
-		(hundredths, unit) => new Duration(hundredths / 100.0, unit)
+	private static readonly Gen<Duration> Durations = Gen.Select(Gen.Int[0, 20000], Gen.Enum<DurationUnit>(), (hundredths, unit) =>
+		new Duration(hundredths / 100.0, unit)
 	);
 
 	[Test]

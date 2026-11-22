@@ -1,5 +1,6 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
+using Aspire.Hosting.Dotnet;
 using Aspire.Hosting.Testing;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,7 +22,7 @@ internal static class StackBoot
 		builder.Configuration["DEBUG_SESSION_PORT"] = "";
 	}
 
-	internal static IResourceBuilder<ProjectResource> WithoutTelemetryExport(this IResourceBuilder<ProjectResource> web)
+	internal static IResourceBuilder<DotnetProjectResource> WithoutTelemetryExport(this IResourceBuilder<DotnetProjectResource> web)
 	{
 		return web.WithEnvironment("OTEL_EXPORTER_OTLP_ENDPOINT", "");
 	}

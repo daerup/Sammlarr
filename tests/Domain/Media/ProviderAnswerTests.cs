@@ -9,18 +9,15 @@ public class ProviderAnswerTests
 	private static readonly DateTimeOffset At = new(2026, 10, 5, 12, 0, 0, TimeSpan.Zero);
 	private static readonly TimeSpan FreshFor = TimeSpan.FromDays(14);
 
-	private static readonly Gen<MovieDetails> Titles = Gen.Select(
-		Gen.Bool.Array[3],
-		MediaFieldsGen.RatingSources,
-		(present, rated) =>
-			new MovieDetails
-			{
-				Title = "Dune",
-				Tagline = present[0] ? "Fear is the mind-killer." : null,
-				Summary = present[1] ? "A noble family becomes embroiled in a war." : null,
-				Runtime = present[2] ? TimeSpan.FromMinutes(155) : null,
-				Ratings = MediaRatings.From([.. rated.Select(source => source.Card.Rate(8, new None()))]),
-			}
+	private static readonly Gen<MovieDetails> Titles = Gen.Select(Gen.Bool.Array[3], MediaFieldsGen.RatingSources, (present, rated) =>
+		new MovieDetails
+		{
+			Title = "Dune",
+			Tagline = present[0] ? "Fear is the mind-killer." : null,
+			Summary = present[1] ? "A noble family becomes embroiled in a war." : null,
+			Runtime = present[2] ? TimeSpan.FromMinutes(155) : null,
+			Ratings = MediaRatings.From([.. rated.Select(source => source.Card.Rate(8, new None()))]),
+		}
 	);
 
 	[Test]

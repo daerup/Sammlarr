@@ -91,15 +91,12 @@ app.MapAuthEndpoints();
 app.MapHealthEndpoints();
 app.MapNoticesEndpoint(AppContext.BaseDirectory);
 
-app.MapGet(
-		"/diagnostics/export",
-		(LogCaptureService capture, TimeProvider clock) =>
-		{
-			var stream = capture.ExportZip();
-			var fileName = FormattableString.Invariant($"diagnostics-{clock.GetUtcNow():yyyyMMdd-HHmmss}.zip");
-			return Results.File(stream, "application/zip", fileName);
-		}
-	)
+app.MapGet("/diagnostics/export", (LogCaptureService capture, TimeProvider clock) =>
+	{
+		var stream = capture.ExportZip();
+		var fileName = FormattableString.Invariant($"diagnostics-{clock.GetUtcNow():yyyyMMdd-HHmmss}.zip");
+		return Results.File(stream, "application/zip", fileName);
+	})
 	.RequireAuthorization(policy => policy.RequireRole(nameof(UserRole.Admin)));
 
 await app.RunAsync();

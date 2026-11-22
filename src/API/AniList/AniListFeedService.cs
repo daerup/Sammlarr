@@ -46,9 +46,8 @@ internal sealed partial class AniListFeedService(AniListClient client, LaterSeas
 	{
 		var match = ListPattern.Match(input.Trim());
 		var status = match.Groups["status"].Value.ToLowerInvariant();
-		return Optional.When(
-			match.Success && (status.Length == 0 || Statuses.Contains(status)),
-			() => status.Length == 0 ? match.Groups["user"].Value : $"{match.Groups["user"].Value}/{status}"
+		return Optional.When(match.Success && (status.Length == 0 || Statuses.Contains(status)), () =>
+			status.Length == 0 ? match.Groups["user"].Value : $"{match.Groups["user"].Value}/{status}"
 		);
 	}
 

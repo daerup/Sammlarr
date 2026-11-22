@@ -11,7 +11,7 @@ if (builder.Configuration["Staging"] == "true")
 else
 {
 	var ui = builder
-		.AddProject<Projects.Web>("blazor-ui")
+		.AddDotnetProject("blazor-ui", "../Web/Web.csproj")
 		.WithHttpEndpoint(port: 6769, name: "http")
 		.WithExternalHttpEndpoints()
 		.WithHttpHealthCheck("/health")

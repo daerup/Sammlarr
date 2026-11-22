@@ -71,19 +71,16 @@ internal static class PlexStub
 		var failed = false;
 		foreach (var guid in Guids(v))
 		{
-			http.RespondForUrl(
-				MatchUrl(v.Type, guid),
-				_ =>
+			http.RespondForUrl(MatchUrl(v.Type, guid), _ =>
+			{
+				if (!failed)
 				{
-					if (!failed)
-					{
-						failed = true;
-						return new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
-					}
-
-					return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(MatchJson(plexId, v), Encoding.UTF8, "application/json") };
+					failed = true;
+					return new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
 				}
-			);
+
+				return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(MatchJson(plexId, v), Encoding.UTF8, "application/json") };
+			});
 		}
 	}
 
@@ -115,22 +112,21 @@ internal static class PlexStub
 		}
 		""";
 
-	private static string SearchJson(IReadOnlyList<ResolvedVersion> results) =>
-		$$"""
-			{
-			  "MediaContainer": {
-			    "suggestedTerms": [],
-			    "identifier": "com.plexapp.plugins.library",
-			    "size": 1,
-			    "SearchResults": [
-			      {
-			        "size": {{results.Count}},
-			        "SearchResult": [{{string.Join(",", results.Select(SearchMetadataJson))}}]
-			      }
-			    ]
-			  }
-			}
-			""";
+	private static string SearchJson(IReadOnlyList<ResolvedVersion> results) => $$"""
+		{
+		  "MediaContainer": {
+		    "suggestedTerms": [],
+		    "identifier": "com.plexapp.plugins.library",
+		    "size": 1,
+		    "SearchResults": [
+		      {
+		        "size": {{results.Count}},
+		        "SearchResult": [{{string.Join(",", results.Select(SearchMetadataJson))}}]
+		      }
+		    ]
+		  }
+		}
+		""";
 
 	private static string SearchMetadataJson(ResolvedVersion v)
 	{
@@ -151,34 +147,33 @@ internal static class PlexStub
 			""";
 	}
 
-	private static string LookupJson(ResolvedVersion v, string plexId, double? imdbRating, int imdbVotes) =>
-		$$"""
-			{
-			  "MediaContainer": {
-			    "librarySectionID": "1",
-			    "librarySectionTitle": "Movies",
-			    "offset": 0,
-			    "totalSize": 1,
-			    "Metadata": [
-			      {
-			        "ratingKey": "{{plexId}}",
-			        "type": "{{TypeString(v.Type)}}",
-			        "title": "{{v.Title}}",
-			        "summary": {{SummaryJson(v)}},
-			        "addedAt": 0,
-			        "audienceRating": 7.5,
-			        "originallyAvailableAt": "{{v.Year}}-01-15",
-			        "thumb": "{{v.Poster ?? "/poster.jpg"}}",
-			        "art": "/backdrop.jpg",
-			        "year": {{v.Year}},
-			        "duration": 9000000,
-			        "Guid": [{{GuidsJson(v)}}],
-			        "Genre": [{{GenresJson(v)}}]{{ImdbJson(imdbRating, imdbVotes)}}
-			      }
-			    ]
-			  }
-			}
-			""";
+	private static string LookupJson(ResolvedVersion v, string plexId, double? imdbRating, int imdbVotes) => $$"""
+		{
+		  "MediaContainer": {
+		    "librarySectionID": "1",
+		    "librarySectionTitle": "Movies",
+		    "offset": 0,
+		    "totalSize": 1,
+		    "Metadata": [
+		      {
+		        "ratingKey": "{{plexId}}",
+		        "type": "{{TypeString(v.Type)}}",
+		        "title": "{{v.Title}}",
+		        "summary": {{SummaryJson(v)}},
+		        "addedAt": 0,
+		        "audienceRating": 7.5,
+		        "originallyAvailableAt": "{{v.Year}}-01-15",
+		        "thumb": "{{v.Poster ?? "/poster.jpg"}}",
+		        "art": "/backdrop.jpg",
+		        "year": {{v.Year}},
+		        "duration": 9000000,
+		        "Guid": [{{GuidsJson(v)}}],
+		        "Genre": [{{GenresJson(v)}}]{{ImdbJson(imdbRating, imdbVotes)}}
+		      }
+		    ]
+		  }
+		}
+		""";
 
 	private static string ImdbJson(double? rating, int votes)
 	{

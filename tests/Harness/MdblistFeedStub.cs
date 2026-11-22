@@ -24,10 +24,10 @@ internal static class MdblistFeedStub
 	internal static void ReturnsStatus(HttpStub http, string identifier, HttpStatusCode status) => http.RespondWithStatusForUrl(Url(identifier), status);
 
 	internal static void ReturnsInvalidJson(HttpStub http, string identifier) =>
-		http.RespondForUrl(
-			Url(identifier),
-			_ => new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("<html>not json</html>", Encoding.UTF8, "application/json") }
-		);
+		http.RespondForUrl(Url(identifier), _ => new HttpResponseMessage(HttpStatusCode.OK)
+		{
+			Content = new StringContent("<html>not json</html>", Encoding.UTF8, "application/json"),
+		});
 
 	internal static HeldRequest Hold(HttpStub http, string identifier) => http.Hold(Url(identifier));
 
@@ -37,57 +37,48 @@ internal static class MdblistFeedStub
 		http.RespondForUrl(Url(identifier), _ => throw new LaneRefusedException("MDBList is down."));
 
 	internal static void PartialThenUnavailable(HttpStub http, string identifier, IReadOnlyList<FeedItemSpec> items) =>
-		http.RespondForUrl(
-			Url(identifier),
-			request =>
+		http.RespondForUrl(Url(identifier), request =>
+		{
+			if (Offset(request) > 0)
 			{
-				if (Offset(request) > 0)
-				{
-					throw new LaneRefusedException("MDBList is down.");
-				}
-
-				var response = new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(Build(items), Encoding.UTF8, "application/json") };
-				response.Headers.TryAddWithoutValidation("X-Has-More", "true");
-				return response;
+				throw new LaneRefusedException("MDBList is down.");
 			}
-		);
+
+			var response = new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(Build(items), Encoding.UTF8, "application/json") };
+			response.Headers.TryAddWithoutValidation("X-Has-More", "true");
+			return response;
+		});
 
 	internal static void Paginated(HttpStub http, string identifier, IReadOnlyList<FeedPage> pages)
 	{
 		var byOffset = pages.ToDictionary(page => page.Offset);
-		http.RespondForUrl(
-			Url(identifier),
-			request =>
+		http.RespondForUrl(Url(identifier), request =>
+		{
+			var page = byOffset[Offset(request)];
+			var items = page.Titles.Select(title => new FeedItemSpec(title, MediaType.Movie, null, new Dictionary<MediaProvider, string>())).ToList();
+			var response = new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(Build(items), Encoding.UTF8, "application/json") };
+			if (page.HasMore)
 			{
-				var page = byOffset[Offset(request)];
-				var items = page.Titles.Select(title => new FeedItemSpec(title, MediaType.Movie, null, new Dictionary<MediaProvider, string>())).ToList();
-				var response = new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(Build(items), Encoding.UTF8, "application/json") };
-				if (page.HasMore)
-				{
-					response.Headers.TryAddWithoutValidation("X-Has-More", "true");
-				}
-
-				return response;
+				response.Headers.TryAddWithoutValidation("X-Has-More", "true");
 			}
-		);
+
+			return response;
+		});
 	}
 
 	internal static void Pages(HttpStub http, string identifier, IReadOnlyList<IReadOnlyList<FeedItemSpec>> pages)
 	{
-		http.RespondForUrl(
-			Url(identifier),
-			request =>
+		http.RespondForUrl(Url(identifier), request =>
+		{
+			var index = Offset(request) / 1000;
+			var response = new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(Build(pages[index]), Encoding.UTF8, "application/json") };
+			if (index < pages.Count - 1)
 			{
-				var index = Offset(request) / 1000;
-				var response = new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(Build(pages[index]), Encoding.UTF8, "application/json") };
-				if (index < pages.Count - 1)
-				{
-					response.Headers.TryAddWithoutValidation("X-Has-More", "true");
-				}
-
-				return response;
+				response.Headers.TryAddWithoutValidation("X-Has-More", "true");
 			}
-		);
+
+			return response;
+		});
 	}
 
 	private static string Url(string identifier) => MdblistLists.ItemsPath(identifier);

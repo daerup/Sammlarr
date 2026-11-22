@@ -31,9 +31,8 @@ internal sealed class GitHubReleaseFeed(HttpClient http, ILogger<GitHubReleaseFe
 
 	private static Optional<PublishedRelease> Published(LatestRelease release)
 	{
-		return Optional.When(
-			!string.IsNullOrWhiteSpace(release.TagName) && Uri.TryCreate(release.HtmlUrl, UriKind.Absolute, out _),
-			() => new PublishedRelease(release.TagName!, new Uri(release.HtmlUrl!))
+		return Optional.When(!string.IsNullOrWhiteSpace(release.TagName) && Uri.TryCreate(release.HtmlUrl, UriKind.Absolute, out _), () =>
+			new PublishedRelease(release.TagName!, new Uri(release.HtmlUrl!))
 		);
 	}
 

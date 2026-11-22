@@ -19,7 +19,7 @@
       "groupName": "test packages"
     },
     {
-      "description": "Aspire's packages and its AppHost SDK move together, with the MessagePack the AppHost pins above Aspire's own",
+      "description": "Aspire's packages move together, with the MessagePack the AppHost pins above Aspire's own",
       "matchPackageNames": ["/^aspire\\./i", "MessagePack"],
       "groupName": "Aspire"
     },

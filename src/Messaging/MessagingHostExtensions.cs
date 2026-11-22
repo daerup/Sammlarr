@@ -18,8 +18,7 @@ public static class MessagingHostExtensions
 	{
 		public IHostBuilder UseSammlarrMessaging(IConfiguration configuration)
 		{
-			var connectionString =
-				configuration.GetSection(SammlarOptions.SectionName)[nameof(SammlarOptions.ConnectionString)]
+			var connectionString = configuration.GetSection(SammlarOptions.SectionName)[nameof(SammlarOptions.ConnectionString)]
 				?? throw new InvalidOperationException("Sammlarr:ConnectionString is not configured.");
 
 			return host.UseWolverine(options => Configure(options, connectionString));

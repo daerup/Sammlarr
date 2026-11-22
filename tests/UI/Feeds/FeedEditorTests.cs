@@ -106,14 +106,12 @@ public class FeedEditorTests : BunitContext
 		var cut = RenderEditor();
 		WhileLoading(cut);
 
-		await ChangeAsync(
-			cut,
-			config =>
-				config with
-				{
-					Strategy = new FeedStrategy(new Mirror(3)),
-					Limit = new QueryLimit { Count = 10 },
-				}
+		await ChangeAsync(cut, config =>
+			config with
+			{
+				Strategy = new FeedStrategy(new Mirror(3)),
+				Limit = new QueryLimit { Count = 10 },
+			}
 		);
 		var saving = SaveAsync(cut);
 
@@ -180,9 +178,14 @@ public class FeedEditorTests : BunitContext
 	public async Task Save_ForANewMirrorFeedWhileThePreviewLoads_AsksNoMirrorQuestion()
 	{
 		var cut = RenderEditor(edit: false);
-		await ChangeAsync(
-			cut,
-			config => config with { Name = "Comedy", Provider = FeedProvider.Mdblist, Identifier = "hdlists/comedy", Strategy = new FeedStrategy(new Mirror(3)) }
+		await ChangeAsync(cut, config =>
+			config with
+			{
+				Name = "Comedy",
+				Provider = FeedProvider.Mdblist,
+				Identifier = "hdlists/comedy",
+				Strategy = new FeedStrategy(new Mirror(3)),
+			}
 		);
 		WhileLoading(cut);
 

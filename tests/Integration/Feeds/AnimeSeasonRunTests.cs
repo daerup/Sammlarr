@@ -177,23 +177,17 @@ public class AnimeSeasonRunTests(SammlarrTestHost host) : IAsyncDisposable
 	private Func<int> AnsweringAniList(string prequels)
 	{
 		var asked = 0;
-		host.HttpStub.RespondForUrlAsync(
-			TestUrls.AniList,
-			async request =>
+		host.HttpStub.RespondForUrlAsync(TestUrls.AniList, async request =>
+		{
+			var body = await request.Content!.ReadAsStringAsync();
+			var isPrequelAsk = body.Contains("idMal_in", StringComparison.Ordinal);
+			if (isPrequelAsk)
 			{
-				var body = await request.Content!.ReadAsStringAsync();
-				var isPrequelAsk = body.Contains("idMal_in", StringComparison.Ordinal);
-				if (isPrequelAsk)
-				{
-					Interlocked.Increment(ref asked);
-				}
-
-				return new HttpResponseMessage(HttpStatusCode.OK)
-				{
-					Content = new StringContent(isPrequelAsk ? prequels : NoTitles, Encoding.UTF8, "application/json"),
-				};
+				Interlocked.Increment(ref asked);
 			}
-		);
+
+			return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(isPrequelAsk ? prequels : NoTitles, Encoding.UTF8, "application/json") };
+		});
 		return () => asked;
 	}
 

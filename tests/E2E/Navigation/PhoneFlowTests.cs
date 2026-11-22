@@ -659,7 +659,7 @@ public class PhoneFlowTests(Device device) : E2ETests(device)
 	{
 		var page = await E2EApp.AdminAt(SettingsPage.Section("testing"));
 		var demo = page.Locator("section").Filter(new LocatorFilterOptions { HasText = "Fire a toast of the chosen kind" });
-		var toast = page.Locator(".toast-viewport [role=alert]");
+		var toast = page.Locator(".toast-viewport > [data-state]");
 		await demo.Combobox.DispatchEventAsync("click");
 		await page.Option("Warning").DispatchEventAsync("click");
 		await demo.Button("Show").DispatchEventAsync("click");

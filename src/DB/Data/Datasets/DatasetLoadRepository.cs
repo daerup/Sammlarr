@@ -16,8 +16,7 @@ internal sealed class DatasetLoadRepository(IDbContextFactory<SammlarrDbContext>
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var row = await ctx.DatasetLoads.SingleOrDefaultAsync(existing => existing.Name == load.Name, cancellationToken);
-		var recorded =
-			row
+		var recorded = row
 			?? ctx.DatasetLoads.Add(
 				new DatasetLoadRow
 				{

@@ -58,17 +58,11 @@ internal sealed class HttpStub : HttpMessageHandler
 		return held;
 	}
 
-	public void RequireQueryParam(string urlContains, string name, string value) =>
-		_credentialValidators.Add(
-			(
-				urlContains,
-				req =>
-				{
-					var query = HttpUtility.ParseQueryString(req.RequestUri?.Query ?? string.Empty);
-					return query[name] == value;
-				}
-			)
-		);
+	public void RequireQueryParam(string urlContains, string name, string value) => _credentialValidators.Add((urlContains, req =>
+			{
+				var query = HttpUtility.ParseQueryString(req.RequestUri?.Query ?? string.Empty);
+				return query[name] == value;
+			}));
 
 	public void RequireHeader(string urlContains, string name, string value) =>
 		_credentialValidators.Add((urlContains, req => req.Headers.TryGetValues(name, out var values) && values.Contains(value)));

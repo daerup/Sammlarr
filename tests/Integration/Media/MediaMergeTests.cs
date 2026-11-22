@@ -155,24 +155,18 @@ public class MediaMergeTests(SammlarrTestHost host) : IAsyncDisposable
 		var newer = await host.Movie(Spec("Annie", Ids.Imdb("tt0083564")))
 			.SeedWithDetailsAsync("Annie", Now.AddDays(-2), poster: "/annie.jpg", answeredBy: [RemoteService.Tmdb, RemoteService.Mdblist]);
 		await AgeAsync(older, newer);
-		await DetailedAsync(
-			older,
-			details =>
-			{
-				((MovieDetailsRow)details).Runtime = null;
-				details.Ratings[0].NormalizedValue = 6f;
-				details.PageLinks.Add(new MediaPageLinkRow { Site = MediaProvider.Letterboxd, Path = "/film/annie" });
-			}
-		);
-		await DetailedAsync(
-			newer,
-			details =>
-			{
-				details.Ratings.Add(new MediaRatingRow { Source = RatingSource.Imdb, NormalizedValue = 8f });
-				details.PageLinks.Add(new MediaPageLinkRow { Site = MediaProvider.Letterboxd, Path = "/film/annie-1999" });
-				details.PageLinks.Add(new MediaPageLinkRow { Site = MediaProvider.RottenTomatoes, Path = "/m/annie" });
-			}
-		);
+		await DetailedAsync(older, details =>
+		{
+			((MovieDetailsRow)details).Runtime = null;
+			details.Ratings[0].NormalizedValue = 6f;
+			details.PageLinks.Add(new MediaPageLinkRow { Site = MediaProvider.Letterboxd, Path = "/film/annie" });
+		});
+		await DetailedAsync(newer, details =>
+		{
+			details.Ratings.Add(new MediaRatingRow { Source = RatingSource.Imdb, NormalizedValue = 8f });
+			details.PageLinks.Add(new MediaPageLinkRow { Site = MediaProvider.Letterboxd, Path = "/film/annie-1999" });
+			details.PageLinks.Add(new MediaPageLinkRow { Site = MediaProvider.RottenTomatoes, Path = "/m/annie" });
+		});
 
 		await Testee.MergeAsync(older, newer);
 

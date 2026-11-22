@@ -13,8 +13,7 @@ internal sealed record ObservabilityContext(bool OtlpEnabled, string Environment
 	public static ObservabilityContext Resolve()
 	{
 		var otlpEnabled = ShouldUseOtlp(System.Environment.GetEnvironmentVariable(OtlpEndpointEnvVar));
-		var environment =
-			System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+		var environment = System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
 			?? System.Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
 			?? Environments.Development;
 		var version = typeof(ObservabilityContext).Assembly.GetName().Version?.ToString() ?? "0.0.0";

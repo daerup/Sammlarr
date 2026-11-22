@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Aspire.Hosting.Dotnet;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -47,7 +48,7 @@ internal static class StagingEnvironment
 			.WithEnvironment("FS_STORAGE_DIR", "/data");
 
 		var seed = builder
-			.AddProject<Projects.Web>("seed", launchProfileName: null)
+			.AddDotnetProject("seed", "../Web/Web.csproj", options => options.ExcludeLaunchProfile = true)
 			.WithArgs("seed-staging")
 			.WithEnvironment((SammlarOptions options) => options.ConnectionString, $"Data Source={layout.Database};Pooling=False")
 			.WithEnvironment("Sammlarr__DataProtection__KeyRingPath", layout.KeyRing)
@@ -145,8 +146,8 @@ internal static class StagingEnvironment
 		return builder.AddPersistentArr(app, port, layout.ConfigOf(app), layout.LibraryOf(app), layout.AnimeLibraryOf(app), layout.DownloadsOf(app));
 	}
 
-	private static IResourceBuilder<ProjectResource> WithArrEnvironment(
-		this IResourceBuilder<ProjectResource> seed,
+	private static IResourceBuilder<DotnetProjectResource> WithArrEnvironment(
+		this IResourceBuilder<DotnetProjectResource> seed,
 		ArrContainers.ArrContainer app,
 		IResourceBuilder<ContainerResource> container,
 		StagingLayout layout

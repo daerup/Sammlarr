@@ -10,10 +10,8 @@ internal static class MediaFieldsGen
 	private static readonly RatingSource[] Sources = Enum.GetValues<RatingSource>();
 
 	public static Gen<MediaFields> Fields { get; } =
-		Gen.Select(
-			Subsets(Details.Length),
-			Subsets(Sources.Length),
-			(details, sources) => new MediaFields(Pick(Details, details).Aggregate(MediaField.None, (all, field) => all | field), [.. Pick(Sources, sources)])
+		Gen.Select(Subsets(Details.Length), Subsets(Sources.Length), (details, sources) =>
+			new MediaFields(Pick(Details, details).Aggregate(MediaField.None, (all, field) => all | field), [.. Pick(Sources, sources)])
 		);
 
 	public static Gen<ValueSet<RatingSource>> RatingSources { get; } =

@@ -28,15 +28,11 @@ internal sealed class ProviderRateLimitReporter(IServiceScopeFactory scopeFactor
 	private bool StartsBurst(RemoteService remote, DateTimeOffset now, DateTimeOffset until)
 	{
 		var starting = true;
-		_limitedUntil.AddOrUpdate(
-			remote,
-			until,
-			(_, current) =>
-			{
-				starting = current <= now;
-				return until;
-			}
-		);
+		_limitedUntil.AddOrUpdate(remote, until, (_, current) =>
+		{
+			starting = current <= now;
+			return until;
+		});
 		return starting;
 	}
 }

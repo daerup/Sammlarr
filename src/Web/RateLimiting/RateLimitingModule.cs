@@ -20,23 +20,19 @@ internal sealed class RateLimitingModule : IServiceModule
 		services.AddRateLimiter(options =>
 		{
 			options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
-				RateLimitPartition.GetTokenBucketLimiter(
-					Caller(context),
-					_ => new TokenBucketRateLimiterOptions
-					{
-						TokenLimit = RequestBurst,
-						TokensPerPeriod = 50,
-						ReplenishmentPeriod = TimeSpan.FromSeconds(10),
-					}
-				)
+				RateLimitPartition.GetTokenBucketLimiter(Caller(context), _ => new TokenBucketRateLimiterOptions
+				{
+					TokenLimit = RequestBurst,
+					TokensPerPeriod = 50,
+					ReplenishmentPeriod = TimeSpan.FromSeconds(10),
+				})
 			);
-			options.AddPolicy(
-				SignInForms,
-				context =>
-					RateLimitPartition.GetFixedWindowLimiter(
-						Address(context),
-						_ => new FixedWindowRateLimiterOptions { PermitLimit = SignInFormsPerMinute, Window = TimeSpan.FromMinutes(1) }
-					)
+			options.AddPolicy(SignInForms, context =>
+				RateLimitPartition.GetFixedWindowLimiter(Address(context), _ => new FixedWindowRateLimiterOptions
+				{
+					PermitLimit = SignInFormsPerMinute,
+					Window = TimeSpan.FromMinutes(1),
+				})
 			);
 			options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 			options.OnRejected = async (context, cancellationToken) =>

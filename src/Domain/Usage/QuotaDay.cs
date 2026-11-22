@@ -76,9 +76,8 @@ public sealed record QuotaDay(IReadOnlyList<QuotaPoint> Points, IReadOnlyList<Qu
 		var since = reset + Hour * Math.Floor((now - reset) / Hour) - PaceSpan;
 		var paced = spent.Where(hour => hour.Hour >= since).Sum(hour => hour.Spent);
 		return Optional
-			.When(
-				allowance.Remaining > allowance.Reserve && paced > 0,
-				() => now + Hour * ((allowance.Remaining - allowance.Reserve) * ((now - since) / Hour) / paced)
+			.When(allowance.Remaining > allowance.Reserve && paced > 0, () =>
+				now + Hour * ((allowance.Remaining - allowance.Reserve) * ((now - since) / Hour) / paced)
 			)
 			.When(reached => reached < allowance.ResetAt);
 	}

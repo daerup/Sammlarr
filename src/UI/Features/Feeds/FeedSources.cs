@@ -28,10 +28,8 @@ internal static class FeedSources
 					"https://www.themoviedb.org/list/new",
 					"Make a list on TMDB"
 				),
-				PageOr(
-					"www.themoviedb.org",
-					["movie", "tv", "discover/", "keyword/", "company/", "network/"],
-					identifier => $"https://www.themoviedb.org/list/{identifier}"
+				PageOr("www.themoviedb.org", ["movie", "tv", "discover/", "keyword/", "company/", "network/"], identifier =>
+					$"https://www.themoviedb.org/list/{identifier}"
 				)
 			),
 			FeedProvider.AniList => new(

@@ -22,20 +22,17 @@ public class AsyncMirrorGenerator : IIncrementalGenerator
 			.Where(static item => item.Source is not null)
 			.Collect();
 
-		context.RegisterSourceOutput(
-			sources,
-			static (spc, items) =>
+		context.RegisterSourceOutput(sources, static (spc, items) =>
+		{
+			var emitted = new HashSet<string>();
+			foreach (var item in items)
 			{
-				var emitted = new HashSet<string>();
-				foreach (var item in items)
+				if (item.HintName is not null && emitted.Add(item.HintName))
 				{
-					if (item.HintName is not null && emitted.Add(item.HintName))
-					{
-						spc.AddSource(item.HintName, SourceText.From(item.Source!, Encoding.UTF8));
-					}
+					spc.AddSource(item.HintName, SourceText.From(item.Source!, Encoding.UTF8));
 				}
 			}
-		);
+		});
 	}
 
 	private static (string? HintName, string? Source) BuildSource(GeneratorAttributeSyntaxContext context)

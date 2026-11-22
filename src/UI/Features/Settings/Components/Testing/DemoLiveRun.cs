@@ -311,9 +311,8 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 			BlockedUntil = Optional.When(blocked > elapsed, () => now.AddMilliseconds(blocked - elapsed)),
 			EstimatedWait = TimeSpan.FromMilliseconds(Math.Max(0, blocked - elapsed) + queued.Count * PlexPerMs / PlexWindow),
 			Waiting = queued.Count + flying,
-			Paced = Optional.When(
-				blocked == 0 && flying == 0 && queued.Count > 0,
-				() => new LanePace(now.AddMilliseconds(queued.Min(call => call.Granted) - elapsed), PlexWindow, TimeSpan.FromMilliseconds(PlexPerMs))
+			Paced = Optional.When(blocked == 0 && flying == 0 && queued.Count > 0, () =>
+				new LanePace(now.AddMilliseconds(queued.Min(call => call.Granted) - elapsed), PlexWindow, TimeSpan.FromMilliseconds(PlexPerMs))
 			),
 		};
 		return LiveWire.Capacity(RemoteService.Plex, load, now, elapsed);

@@ -11,12 +11,8 @@ public class QueryProcessorProperties
 
 	private sealed record Title(Guid Id, bool Owned, int Order);
 
-	private static readonly Gen<Scenario> Scenarios = Gen.Select(
-		Gen.Guid,
-		Gen.Int[1, 8],
-		Gen.Select(Gen.Bool, Gen.Int).Array[0, 20],
-		(seed, count, titles) =>
-			new Scenario(seed, count, [.. titles.Select((title, index) => new Title(new Guid(index + 1, 0, 0, new byte[8]), title.Item1, title.Item2))])
+	private static readonly Gen<Scenario> Scenarios = Gen.Select(Gen.Guid, Gen.Int[1, 8], Gen.Select(Gen.Bool, Gen.Int).Array[0, 20], (seed, count, titles) =>
+		new Scenario(seed, count, [.. titles.Select((title, index) => new Title(new Guid(index + 1, 0, 0, new byte[8]), title.Item1, title.Item2))])
 	);
 
 	[Test]

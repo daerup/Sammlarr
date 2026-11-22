@@ -129,10 +129,10 @@ public class ImdbRatingsTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task GetDetailsAsync_BeforeAndAfterTheFirstLoad_RatesWithImdbsVotesOnlyOnceLoaded()
 	{
-		host.HttpStub.RespondForUrl(
-			$"{TestUrls.ImdbDatasets}/title.ratings.tsv.gz",
-			_ => new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(RatingsFile()) }
-		);
+		host.HttpStub.RespondForUrl($"{TestUrls.ImdbDatasets}/title.ratings.tsv.gz", _ => new HttpResponseMessage(HttpStatusCode.OK)
+		{
+			Content = new ByteArrayContent(RatingsFile()),
+		});
 		var fightClub = await host.SeedMediaAsync(ImdbId.From("tt0137523", MediaType.Movie));
 		var media = host.Resolve<IMediaService>();
 

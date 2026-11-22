@@ -179,16 +179,13 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 		var pressedAt = Three.AddSeconds(90);
 		await ClockReachesAsync(Three);
 		await CronFiresAsync(_documentaries);
-		var (anime, pressed) = await WhileTheNextJobRunsAsync(
-			host.HoldMdblistFeed(FeedRunSeeding.ListOf("Documentaries")),
-			async () =>
-			{
-				await ClockReachesAsync(Three.AddMinutes(1));
-				var queuedBeforeThePress = await CronFiresAsync(_anime);
-				await ClockReachesAsync(pressedAt);
-				return (queuedBeforeThePress, await EnqueueAsync(ManualSync));
-			}
-		);
+		var (anime, pressed) = await WhileTheNextJobRunsAsync(host.HoldMdblistFeed(FeedRunSeeding.ListOf("Documentaries")), async () =>
+		{
+			await ClockReachesAsync(Three.AddMinutes(1));
+			var queuedBeforeThePress = await CronFiresAsync(_anime);
+			await ClockReachesAsync(pressedAt);
+			return (queuedBeforeThePress, await EnqueueAsync(ManualSync));
+		});
 
 		await host.RunNextJobAsync();
 
@@ -204,15 +201,12 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await ClockReachesAsync(Three);
 		await CronFiresAsync(_documentaries);
-		var (pressed, anime) = await WhileTheNextJobRunsAsync(
-			host.HoldMdblistFeed(FeedRunSeeding.ListOf("Documentaries")),
-			async () =>
-			{
-				var pressedSync = await EnqueueAsync(ManualSync);
-				await ClockReachesAsync(Three.AddMinutes(1));
-				return (pressedSync, await CronFiresAsync(_anime));
-			}
-		);
+		var (pressed, anime) = await WhileTheNextJobRunsAsync(host.HoldMdblistFeed(FeedRunSeeding.ListOf("Documentaries")), async () =>
+		{
+			var pressedSync = await EnqueueAsync(ManualSync);
+			await ClockReachesAsync(Three.AddMinutes(1));
+			return (pressedSync, await CronFiresAsync(_anime));
+		});
 
 		await host.RunNextJobAsync();
 

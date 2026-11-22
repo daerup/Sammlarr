@@ -70,15 +70,14 @@ internal sealed class TraktFeedService(TraktClient client, IMediaService media, 
 		var pages = 1;
 		for (var page = 1; page <= pages; page++)
 		{
-			using var response = await SourcePages.ReadAsync(
-				count.Read + 1,
-				() => client.GetAsync(TraktPages.Request(identifier, page), clientId, cancellationToken)
+			using var response = await SourcePages.ReadAsync(count.Read + 1, () =>
+				client.GetAsync(TraktPages.Request(identifier, page), clientId, cancellationToken)
 			);
 			Ensure(identifier, response);
 			var total = Header(response, "X-Pagination-Page-Count");
 			pages = total.GetValueOr(1);
-			var entries =
-				await response.Content.ReadFromJsonAsync<List<TraktTypes.Item>>(cancellationToken) ?? throw new InvalidDataException("Trakt answered an empty page.");
+			var entries = await response.Content.ReadFromJsonAsync<List<TraktTypes.Item>>(cancellationToken)
+				?? throw new InvalidDataException("Trakt answered an empty page.");
 			count.Read++;
 			FeedRunSpans.SourcePage(count.Read, total.When(_ => !TraktPages.IsChart(identifier)));
 			foreach (var entry in entries)
