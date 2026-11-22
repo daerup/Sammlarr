@@ -1,8 +1,10 @@
 namespace Domain.Providers;
 
-public readonly union Answer<T>(Found<T>, NoMatch, Unavailable, Faulted) where T : notnull;
+public readonly union Answer<T>(Found<T>, NoMatch, Unavailable, Faulted)
+	where T : notnull;
 
-public sealed record Found<T>(T Value) where T : notnull;
+public sealed record Found<T>(T Value)
+	where T : notnull;
 
 public sealed record NoMatch(RemoteService Remote);
 

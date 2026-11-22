@@ -25,7 +25,14 @@ public sealed record TraceSnapshot(
 	public RunProgress Progress { get; init; } = RunProgress.None;
 }
 
-public sealed record TraceBatch(TraceCursor Cursor, int ElapsedMs, IReadOnlyList<TraceStep> Steps, FateTally Fates, Optional<int> Requests, Optional<FeedRunEnd> Ended)
+public sealed record TraceBatch(
+	TraceCursor Cursor,
+	int ElapsedMs,
+	IReadOnlyList<TraceStep> Steps,
+	FateTally Fates,
+	Optional<int> Requests,
+	Optional<FeedRunEnd> Ended
+)
 {
 	public RunProgress Progress { get; init; } = RunProgress.None;
 }
@@ -59,17 +66,18 @@ public readonly record struct TitleInFlight(
 	Optional<RemoteService> LastDetails
 );
 
-public readonly record struct NodeTally(
-	HopPlace Node,
-	int Answered,
-	int AfterRateLimit,
-	int GaveUp,
-	int Failed,
-	int Waiting,
-	int MeanMs
-);
+public readonly record struct NodeTally(HopPlace Node, int Answered, int AfterRateLimit, int GaveUp, int Failed, int Waiting, int MeanMs);
 
-public readonly record struct FateTally(int Started, int Known, int Earlier, int Matched, int CouldNotLookUp, int NotFound, int ListedWithoutIds, int Conflicted)
+public readonly record struct FateTally(
+	int Started,
+	int Known,
+	int Earlier,
+	int Matched,
+	int CouldNotLookUp,
+	int NotFound,
+	int ListedWithoutIds,
+	int Conflicted
+)
 {
 	public static FateTally None => new(0, 0, 0, 0, 0, 0, 0, 0);
 
