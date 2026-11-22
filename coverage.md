@@ -3,7 +3,7 @@
 
 |||
 |:---|:---|
-| Generated on: | 11/22/2026 - 18:13:40 |
+| Generated on: | 11/22/2026 - 20:30:08 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
 | Classes: | 1600 |
@@ -544,8 +544,8 @@
 |Core.Processing.QueryProcessor.RuleChecks<T>|100%|100%|
 |Core.Processing.QueryProcessor.SlotLine<T>|100%||
 |Core.Processing.QueryProcessor.SlotLine<T>|100%|100%|
-|Core.Processing.QueryProcessor<T>|100%|92.3%|
 |Core.Processing.QueryProcessor<T>|100%|96.8%|
+|Core.Processing.QueryProcessor<T>|100%|92.3%|
 |Core.Processing.ShuffleRank|100%||
 |Core.Providers.ProviderRateLimitReporter|100%|100%|
 |Core.Providers.ProvidersModule|100%||
