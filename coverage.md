@@ -3,18 +3,18 @@
 
 |||
 |:---|:---|
-| Generated on: | 11/22/2026 - 13:10:08 |
+| Generated on: | 11/22/2026 - 13:52:53 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
 | Classes: | 1601 |
 | Files: | 1130 |
-| **Line coverage:** | 88.3% (44268 of 50112) |
-| Covered lines: | 44268 |
-| Uncovered lines: | 5844 |
+| **Line coverage:** | 88.3% (44257 of 50112) |
+| Covered lines: | 44257 |
+| Uncovered lines: | 5855 |
 | Coverable lines: | 50112 |
 | Total lines: | 73948 |
-| **Branch coverage:** | 80.8% (16785 of 20753) |
-| Covered branches: | 16785 |
+| **Branch coverage:** | 80.8% (16784 of 20753) |
+| Covered branches: | 16784 |
 | Total branches: | 20753 |
 | **Method coverage:** | [Feature is only available for sponsors](https://reportgenerator.io/pro) |
 
@@ -399,11 +399,11 @@
 |Contracts.Wantlist.WantlistAdded|100%||
 
 </details>
-<details><summary>Core - 96.9%</summary>
+<details><summary>Core - 96.8%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Core**|**96.9%**|**88.1%**|
+|**Core**|**96.8%**|**88.1%**|
 |Core.Announcing.Announcer|100%||
 |Core.Announcing.AnnouncingModule|100%||
 |Core.Announcing.EventPublisher|100%|100%|
@@ -563,7 +563,7 @@
 |Core.TickerFunctions.DatasetTicker|0%||
 |Core.TickerFunctions.FeedRunTicker|0%||
 |Core.TickerFunctions.HousekeepingTicker|0%||
-|Core.TickerQInstanceFactoryExtensions|54.2%|100%|
+|Core.TickerQInstanceFactoryExtensions|34.2%|100%|
 |Core.Usage.FeedRunUsage|100%|100%|
 |Core.Usage.FeedRunUsage.Running|100%|100%|
 |Core.Usage.Medians|100%|100%|
@@ -1263,7 +1263,7 @@
 |UI.Features.Settings.Components.About.ThirdPartyNotices|100%|100%|
 |UI.Features.Settings.Components.About.VersionCard|100%|100%|
 |UI.Features.Settings.Components.ComponentsModule|0%||
-|UI.Features.Settings.Components.Diagnostics.DiagnosticsSection|61.8%|51.5%|
+|UI.Features.Settings.Components.Diagnostics.DiagnosticsSection|60.2%|50.5%|
 |UI.Features.Settings.Components.Diagnostics.DiagnosticsSection.LogDetail|100%||
 |UI.Features.Settings.Components.Housekeeping.DatasetLook|100%||
 |UI.Features.Settings.Components.Housekeeping.FilePart|100%||
