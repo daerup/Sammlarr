@@ -3,18 +3,18 @@
 
 |||
 |:---|:---|
-| Generated on: | 11/22/2026 - 12:56:41 |
+| Generated on: | 11/22/2026 - 13:10:08 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
 | Classes: | 1601 |
 | Files: | 1130 |
-| **Line coverage:** | 88.3% (44272 of 50112) |
-| Covered lines: | 44272 |
-| Uncovered lines: | 5840 |
+| **Line coverage:** | 88.3% (44268 of 50112) |
+| Covered lines: | 44268 |
+| Uncovered lines: | 5844 |
 | Coverable lines: | 50112 |
 | Total lines: | 73948 |
-| **Branch coverage:** | 80.8% (16784 of 20753) |
-| Covered branches: | 16784 |
+| **Branch coverage:** | 80.8% (16785 of 20753) |
+| Covered branches: | 16785 |
 | Total branches: | 20753 |
 | **Method coverage:** | [Feature is only available for sponsors](https://reportgenerator.io/pro) |
 
@@ -399,11 +399,11 @@
 |Contracts.Wantlist.WantlistAdded|100%||
 
 </details>
-<details><summary>Core - 97%</summary>
+<details><summary>Core - 96.9%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Core**|**97%**|**88.1%**|
+|**Core**|**96.9%**|**88.1%**|
 |Core.Announcing.Announcer|100%||
 |Core.Announcing.AnnouncingModule|100%||
 |Core.Announcing.EventPublisher|100%|100%|
@@ -433,7 +433,7 @@
 |Core.Datasets.DatasetRequest|100%||
 |Core.Datasets.DatasetSchedule|80%|83.3%|
 |Core.Datasets.DatasetsModule|100%||
-|Core.Datasets.DatasetTicker|90.9%|100%|
+|Core.Datasets.DatasetTicker|81.8%|100%|
 |Core.DI.DiModule|100%||
 |Core.DI.KeyedServiceIndex<TKey, TService>|100%||
 |Core.DI.KeyedServiceSet<TKey, TService>|100%||
@@ -480,8 +480,8 @@
 |Core.Jobs.FeedRunJobHandler|100%|100%|
 |Core.Jobs.JobAlarm|90.2%|83.3%|
 |Core.Jobs.JobQueue|98.4%|88.8%|
-|Core.Jobs.JobRunner|79.5%|83.3%|
-|Core.Jobs.JobRunner<TRequest>|79.5%|83.3%|
+|Core.Jobs.JobRunner|76.1%|83.3%|
+|Core.Jobs.JobRunner<TRequest>|76.1%|83.3%|
 |Core.Jobs.JobRunnerStatus|100%||
 |Core.Jobs.JobRunnerStatus.Session|100%||
 |Core.Jobs.JobSignal|100%||
@@ -1263,7 +1263,7 @@
 |UI.Features.Settings.Components.About.ThirdPartyNotices|100%|100%|
 |UI.Features.Settings.Components.About.VersionCard|100%|100%|
 |UI.Features.Settings.Components.ComponentsModule|0%||
-|UI.Features.Settings.Components.Diagnostics.DiagnosticsSection|60.2%|50.5%|
+|UI.Features.Settings.Components.Diagnostics.DiagnosticsSection|61.8%|51.5%|
 |UI.Features.Settings.Components.Diagnostics.DiagnosticsSection.LogDetail|100%||
 |UI.Features.Settings.Components.Housekeeping.DatasetLook|100%||
 |UI.Features.Settings.Components.Housekeeping.FilePart|100%||
