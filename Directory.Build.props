@@ -9,6 +9,7 @@
 		<LangVersion Condition="'$(MSBuildProjectName)' != 'Roslyn' and '$(MSBuildProjectName)' != 'Roslyn.Tests'">preview</LangVersion>
 		<NoWarn>$(NoWarn);CS1591</NoWarn>
 		<WarningsAsErrors>$(WarningsAsErrors);CS8509</WarningsAsErrors>
+		<MSBuildWarningsNotAsErrors>$(MSBuildWarningsNotAsErrors);NU1608</MSBuildWarningsNotAsErrors>
 		<Verify_SponsorshipExemption>OpenSource</Verify_SponsorshipExemption>
 		<Verify_SponsorshipExemptionUntil>2027-09</Verify_SponsorshipExemptionUntil>
 	</PropertyGroup>

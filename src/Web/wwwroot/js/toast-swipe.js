@@ -20,7 +20,7 @@
     };
 
     document.addEventListener("pointerdown", event => {
-        const alert = phone.matches ? event.target.closest?.(".toast-viewport [role=alert]") : null;
+        const alert = phone.matches ? event.target.closest?.(".toast-viewport > [data-state]") : null;
         if (!alert || event.target.closest("button")) return;
         toast = alert;
         start = { x: event.clientX, y: event.clientY };

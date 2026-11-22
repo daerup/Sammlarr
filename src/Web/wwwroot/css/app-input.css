@@ -51,7 +51,7 @@
     padding: 8px 12px !important;
   }
 
-  .toast-viewport [role="alert"] {
+  .toast-viewport > [data-state] {
     padding: 10px 32px 10px 12px !important;
     touch-action: none;
   }
