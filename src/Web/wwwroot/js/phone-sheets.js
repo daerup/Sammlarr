@@ -22,6 +22,7 @@
     const top = () => open.findLast(sheet => sheet.entry);
     const current = () => open.find(sheet => sheet.entry && sheet.id === history.state?.sheet);
     const closing = sheet => sheet.portal.style.pointerEvents === "none";
+    const sheetId = () => crypto.getRandomValues(new Uint32Array(2)).join("-");
 
     const mark = sheet => {
         push({ ...(history.state ?? {}), sheet: sheet.id }, "", location.href);
@@ -108,7 +109,7 @@
     };
 
     const opened = portal => {
-        const sheet = { portal, id: crypto.randomUUID(), entry: false, dialog: isDialog(portal) };
+        const sheet = { portal, id: sheetId(), entry: false, dialog: isDialog(portal) };
         if (restyles(portal)) restyle(sheet);
         const handle = portal.querySelector("[data-sheet-handle]");
         if (handle) drag(sheet, handle);
