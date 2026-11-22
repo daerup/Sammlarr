@@ -150,22 +150,18 @@ public class StagingSeedTests : IAsyncDisposable
 	{
 		await StagingSeed.SeedAsync(_services, StagingScenario.Configured, Settings, CancellationToken.None);
 
-		await AsAsync(
-			Admin,
-			AdminPassword,
-			async services =>
-			{
-				await Assert.That((await services.GetRequiredService<IProviderConfigService>().GetAsync()).Sink).IsEqualTo(SinkKind.Arr);
-				var arr = await services.GetRequiredService<IArrSinkConfigService>().GetAsync();
-				await Assert.That(arr.Radarr.Url).IsSome().And.IsEqualTo("http://radarr:7878");
-				await Assert.That(arr.Sonarr.Url).IsSome().And.IsEqualTo("http://sonarr:8989");
-				await Assert.That(arr.Sonarr.AnimeRootFolderPath).IsSome().And.IsEqualTo("/anime");
-				await Assert.That((await services.GetRequiredService<IWantlistService>().GetAsync()).Ids).Count().IsEqualTo(2);
-				var queue = await services.GetRequiredService<IJobQueueView>().GetAsync();
-				await Assert.That(queue.Jobs.Count(job => job.Request is SyncWantlist)).IsEqualTo(1);
-				await Assert.That(await services.GetRequiredService<IOnboardingService>().IsCompleteAsync()).IsTrue();
-			}
-		);
+		await AsAsync(Admin, AdminPassword, async services =>
+		{
+			await Assert.That((await services.GetRequiredService<IProviderConfigService>().GetAsync()).Sink).IsEqualTo(SinkKind.Arr);
+			var arr = await services.GetRequiredService<IArrSinkConfigService>().GetAsync();
+			await Assert.That(arr.Radarr.Url).IsSome().And.IsEqualTo("http://radarr:7878");
+			await Assert.That(arr.Sonarr.Url).IsSome().And.IsEqualTo("http://sonarr:8989");
+			await Assert.That(arr.Sonarr.AnimeRootFolderPath).IsSome().And.IsEqualTo("/anime");
+			await Assert.That((await services.GetRequiredService<IWantlistService>().GetAsync()).Ids).Count().IsEqualTo(2);
+			var queue = await services.GetRequiredService<IJobQueueView>().GetAsync();
+			await Assert.That(queue.Jobs.Count(job => job.Request is SyncWantlist)).IsEqualTo(1);
+			await Assert.That(await services.GetRequiredService<IOnboardingService>().IsCompleteAsync()).IsTrue();
+		});
 	}
 
 	[Test]
@@ -175,18 +171,14 @@ public class StagingSeedTests : IAsyncDisposable
 	{
 		await StagingSeed.SeedAsync(_services, StagingScenario.Configured, Settings, CancellationToken.None);
 
-		await AsAsync(
-			username,
-			password,
-			async services =>
+		await AsAsync(username, password, async services =>
+		{
+			var keys = services.GetRequiredService<IApiKeyService>();
+			foreach (var slot in new[] { ApiKeyProvider.Tmdb, ApiKeyProvider.Mdblist, ApiKeyProvider.Mal, ApiKeyProvider.Trakt })
 			{
-				var keys = services.GetRequiredService<IApiKeyService>();
-				foreach (var slot in new[] { ApiKeyProvider.Tmdb, ApiKeyProvider.Mdblist, ApiKeyProvider.Mal, ApiKeyProvider.Trakt })
-				{
-					await Assert.That(await keys.IsStoredAsync(slot)).IsTrue();
-				}
+				await Assert.That(await keys.IsStoredAsync(slot)).IsTrue();
 			}
-		);
+		});
 	}
 
 	[Test]
@@ -194,19 +186,15 @@ public class StagingSeedTests : IAsyncDisposable
 	{
 		await StagingSeed.SeedAsync(_services, StagingScenario.Configured, Settings, CancellationToken.None);
 
-		await AsAsync(
-			Admin,
-			AdminPassword,
-			async services =>
-			{
-				var targets = await services.GetRequiredService<INotificationTargetRepository>().GetAllAsync();
-				await Assert.That(targets.Count(target => target.Config is WebhookConfig webhook && webhook.Url.Reveal() == $"{Catcher}/webhook")).IsEqualTo(1);
-				await Assert.That(targets.Count(target => target.Config is PushoverConfig)).IsEqualTo(1);
-				var feeds = (await services.GetRequiredService<IFeedService>().GetAsync()).Feeds;
-				await Assert.That(feeds.Select(feed => feed.Feed.Provider).Distinct()).IsEquivalentTo(Enum.GetValues<FeedProvider>());
-				await Assert.That(feeds.Select(feed => feed.Feed.Enabled)).IsEquivalentTo([true, true, true, true, true, true]);
-			}
-		);
+		await AsAsync(Admin, AdminPassword, async services =>
+		{
+			var targets = await services.GetRequiredService<INotificationTargetRepository>().GetAllAsync();
+			await Assert.That(targets.Count(target => target.Config is WebhookConfig webhook && webhook.Url.Reveal() == $"{Catcher}/webhook")).IsEqualTo(1);
+			await Assert.That(targets.Count(target => target.Config is PushoverConfig)).IsEqualTo(1);
+			var feeds = (await services.GetRequiredService<IFeedService>().GetAsync()).Feeds;
+			await Assert.That(feeds.Select(feed => feed.Feed.Provider).Distinct()).IsEquivalentTo(Enum.GetValues<FeedProvider>());
+			await Assert.That(feeds.Select(feed => feed.Feed.Enabled)).IsEquivalentTo([true, true, true, true, true, true]);
+		});
 	}
 
 	[Test]
@@ -214,21 +202,17 @@ public class StagingSeedTests : IAsyncDisposable
 	{
 		await StagingSeed.SeedAsync(_services, StagingScenario.Configured, Settings, CancellationToken.None);
 
-		await AsAsync(
-			Admin,
-			AdminPassword,
-			async services =>
+		await AsAsync(Admin, AdminPassword, async services =>
+		{
+			var subscriptions = services.GetRequiredService<INotificationSubscriptionRepository>();
+			var targets = await services.GetRequiredService<INotificationTargetRepository>().GetAllAsync();
+			foreach (var target in targets.Where(target => target.Config is WebhookConfig or PushoverConfig))
 			{
-				var subscriptions = services.GetRequiredService<INotificationSubscriptionRepository>();
-				var targets = await services.GetRequiredService<INotificationTargetRepository>().GetAllAsync();
-				foreach (var target in targets.Where(target => target.Config is WebhookConfig or PushoverConfig))
-				{
-					var subscription = (await subscriptions.GetForTargetAsync(target.Id)).Single();
-					await Assert.That(subscription.EventTypes).IsEquivalentTo(Enum.GetValues<NotificationEventType>());
-					await Assert.That(subscription.Template.Message).IsSome().And.IsEqualTo("{{ summary }}");
-				}
+				var subscription = (await subscriptions.GetForTargetAsync(target.Id)).Single();
+				await Assert.That(subscription.EventTypes).IsEquivalentTo(Enum.GetValues<NotificationEventType>());
+				await Assert.That(subscription.Template.Message).IsSome().And.IsEqualTo("{{ summary }}");
 			}
-		);
+		});
 	}
 
 	[Test]
@@ -246,15 +230,11 @@ public class StagingSeedTests : IAsyncDisposable
 			CancellationToken.None
 		);
 
-		await AsAsync(
-			Admin,
-			AdminPassword,
-			async services =>
-			{
-				var feeds = (await services.GetRequiredService<IFeedService>().GetAsync()).Feeds;
-				await Assert.That(feeds.Where(feed => feed.Feed.Enabled).Select(feed => feed.Feed.Provider)).IsEquivalentTo([FeedProvider.Tmdb, FeedProvider.AniList]);
-			}
-		);
+		await AsAsync(Admin, AdminPassword, async services =>
+		{
+			var feeds = (await services.GetRequiredService<IFeedService>().GetAsync()).Feeds;
+			await Assert.That(feeds.Where(feed => feed.Feed.Enabled).Select(feed => feed.Feed.Provider)).IsEquivalentTo([FeedProvider.Tmdb, FeedProvider.AniList]);
+		});
 	}
 
 	[Test]

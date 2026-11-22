@@ -141,18 +141,15 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 			.Select(key => new { Owner = EF.Property<Guid>(key, UserOwnedConfigurationExtensions.UserIdColumn), key.Provider })
 			.ToListAsync(cancellationToken);
 		var owners = await ctx.Users.AsNoTracking().Select(user => user.Id).ToListAsync(cancellationToken);
-		return owners.ToDictionary(
-			UserId.From,
-			owner => new PersonHoldings(
-				feeds.GetValueOrDefault(owner),
-				wanted.GetValueOrDefault(owner),
-				blocked.GetValueOrDefault(owner),
-				[
-					.. credentials.Where(credential => credential.Owner == owner).SelectMany(credential => credential.Provider.Service.Remotes),
-					.. keys.Where(key => key.Owner == owner).Select(key => key.Provider.Remote),
-				]
-			)
-		);
+		return owners.ToDictionary(UserId.From, owner => new PersonHoldings(
+			feeds.GetValueOrDefault(owner),
+			wanted.GetValueOrDefault(owner),
+			blocked.GetValueOrDefault(owner),
+			[
+				.. credentials.Where(credential => credential.Owner == owner).SelectMany(credential => credential.Provider.Service.Remotes),
+				.. keys.Where(key => key.Owner == owner).Select(key => key.Provider.Remote),
+			]
+		));
 	}
 
 	public async Task RefreshAsync(UserId id, string displayName, string avatarUrl, CancellationToken cancellationToken = default)

@@ -64,9 +64,8 @@ public class MdblistBatchingTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await ConnectAsync();
 		await host.WithTmdbAccount(SammlarrTestHost.TmdbApiKey);
-		host.HttpStub.RespondForUrl(
-			$"{TestUrls.TmdbApi}/movie",
-			request => Json(TmdbDetail(int.Parse(request.RequestUri!.Segments[^1], CultureInfo.InvariantCulture)))
+		host.HttpStub.RespondForUrl($"{TestUrls.TmdbApi}/movie", request =>
+			Json(TmdbDetail(int.Parse(request.RequestUri!.Segments[^1], CultureInfo.InvariantCulture)))
 		);
 		host.HttpStub.RespondWithJsonForUrl(TitleBatches, $"[{string.Join(",", Enumerable.Range(0, 1000).Select(MdblistTitle))}]");
 		host.MdblistFeedContains("new-list", [.. Titles(0, 1000)]);

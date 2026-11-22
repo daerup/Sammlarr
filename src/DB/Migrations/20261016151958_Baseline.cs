@@ -420,15 +420,12 @@ public partial class _20261016151958_Baseline : Migration
 			},
 			constraints: table =>
 			{
-				table.PrimaryKey(
-					"PK_AspNetUserTokens",
-					x => new
-					{
-						x.UserId,
-						x.LoginProvider,
-						x.Name,
-					}
-				);
+				table.PrimaryKey("PK_AspNetUserTokens", x => new
+				{
+					x.UserId,
+					x.LoginProvider,
+					x.Name,
+				});
 				table.ForeignKey(
 					name: "FK_AspNetUserTokens_AspNetUsers_UserId",
 					column: x => x.UserId,
@@ -693,15 +690,12 @@ public partial class _20261016151958_Baseline : Migration
 			},
 			constraints: table =>
 			{
-				table.PrimaryKey(
-					"PK_ExternalMediaIds",
-					x => new
-					{
-						x.Source,
-						x.MediaType,
-						x.Id,
-					}
-				);
+				table.PrimaryKey("PK_ExternalMediaIds", x => new
+				{
+					x.Source,
+					x.MediaType,
+					x.Id,
+				});
 				table.ForeignKey(
 					name: "FK_ExternalMediaIds_Media_MediaId",
 					column: x => x.MediaId,
@@ -807,15 +801,12 @@ public partial class _20261016151958_Baseline : Migration
 			},
 			constraints: table =>
 			{
-				table.PrimaryKey(
-					"PK_WantlistOutbox",
-					x => new
-					{
-						x.UserId,
-						x.MediaId,
-						x.Sink,
-					}
-				);
+				table.PrimaryKey("PK_WantlistOutbox", x => new
+				{
+					x.UserId,
+					x.MediaId,
+					x.Sink,
+				});
 				table.ForeignKey(
 					name: "FK_WantlistOutbox_AspNetUsers_UserId",
 					column: x => x.UserId,

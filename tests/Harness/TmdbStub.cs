@@ -30,15 +30,14 @@ internal static class TmdbStub
 		}
 	}
 
-	public static string TrendingJson(IReadOnlyList<ResolvedVersion> items, int page) =>
-		$$"""
-			{
-			  "page": {{page}},
-			  "results": [{{string.Join(",", items.Select(TrendingItemJson))}}],
-			  "total_pages": {{page}},
-			  "total_results": {{items.Count}}
-			}
-			""";
+	public static string TrendingJson(IReadOnlyList<ResolvedVersion> items, int page) => $$"""
+		{
+		  "page": {{page}},
+		  "results": [{{string.Join(",", items.Select(TrendingItemJson))}}],
+		  "total_pages": {{page}},
+		  "total_results": {{items.Count}}
+		}
+		""";
 
 	private static string TrendingItemJson(ResolvedVersion v)
 	{

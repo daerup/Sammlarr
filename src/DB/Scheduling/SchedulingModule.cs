@@ -18,8 +18,7 @@ internal sealed class SchedulingModule : IServiceModule
 
 	internal SchedulingModule(IConfiguration configuration)
 	{
-		var connectionString =
-			configuration.GetSection(SammlarOptions.SectionName)[nameof(SammlarOptions.ConnectionString)]
+		var connectionString = configuration.GetSection(SammlarOptions.SectionName)[nameof(SammlarOptions.ConnectionString)]
 			?? throw new InvalidOperationException("Sammlarr:ConnectionString is not configured.");
 		_store = options => Configure(options.UseSqlite(connectionString));
 	}

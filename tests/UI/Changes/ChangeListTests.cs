@@ -486,15 +486,11 @@ public class ChangeListTests : BunitContext
 
 	private static ChangeFold Fold(int count, Action? unfolding = null)
 	{
-		return new ChangeFold(
-			ChangeKind.Unchanged,
-			count,
-			() =>
-			{
-				unfolding?.Invoke();
-				return Task.CompletedTask;
-			}
-		);
+		return new ChangeFold(ChangeKind.Unchanged, count, () =>
+		{
+			unfolding?.Invoke();
+			return Task.CompletedTask;
+		});
 	}
 
 	private static ChangeChip Chip(string icon, int count, ChangeKind? filters = null) =>

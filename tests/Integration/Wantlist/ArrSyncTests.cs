@@ -52,9 +52,8 @@ public class ArrSyncTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Resolve<IProviderConfigService>().StoreAsync(config with { Sink = SinkKind.Arr });
 		host.HttpStub.RespondWithJsonForUrl($"{Radarr}/api/v3/movie/lookup", """[{"title":"Inception","tmdbId":27205}]""");
 		host.HttpStub.RespondForUrl($"{Radarr}/api/v3/movie", Movies);
-		host.HttpStub.RespondForUrl(
-			$"{Radarr}/api/v3/tag",
-			request => Json(request.Method == HttpMethod.Post ? """{"id":1,"label":"sammlarr-u-test-user"}""" : """[{"id":1,"label":"sammlarr-u-test-user"}]""")
+		host.HttpStub.RespondForUrl($"{Radarr}/api/v3/tag", request =>
+			Json(request.Method == HttpMethod.Post ? """{"id":1,"label":"sammlarr-u-test-user"}""" : """[{"id":1,"label":"sammlarr-u-test-user"}]""")
 		);
 	}
 

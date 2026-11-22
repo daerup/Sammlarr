@@ -35,14 +35,11 @@ public class DatasetTickerTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.Resolve<IDatasetLoads>().RecordAsync(new DatasetLoad(DatasetNames.ImdbRatings, DateTimeOffset.UnixEpoch, Some.Of("\"last\""), 2));
 		var asked = new List<HttpRequestMessage>();
-		host.HttpStub.RespondForUrl(
-			$"{TestUrls.ImdbDatasets}/title.ratings.tsv.gz",
-			request =>
-			{
-				asked.Add(request);
-				return new HttpResponseMessage(HttpStatusCode.NotModified);
-			}
-		);
+		host.HttpStub.RespondForUrl($"{TestUrls.ImdbDatasets}/title.ratings.tsv.gz", request =>
+		{
+			asked.Add(request);
+			return new HttpResponseMessage(HttpStatusCode.NotModified);
+		});
 
 		await Testee.LoadAsync(DatasetNames.ImdbRatings, DatasetRead.Always);
 

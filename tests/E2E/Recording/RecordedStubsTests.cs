@@ -90,15 +90,14 @@ public class RecordedStubsTests
 		await Assert.That(mapping["request"]!["queryParameters"]!["api_key"]).IsNull();
 	}
 
-	private static string Snapshot(int status, string body, string url = "/tmdb/movie/1?api_key=secret") =>
-		$$"""
-			{
-			  "mappings": [
-			    {
-			      "request": { "method": "GET", "url": "{{url}}" },
-			      "response": { "status": {{status}}, "headers": { "Content-Type": "application/json" }, "body": {{JsonSerializer.Serialize(body)}} }
-			    }
-			  ]
-			}
-			""";
+	private static string Snapshot(int status, string body, string url = "/tmdb/movie/1?api_key=secret") => $$"""
+		{
+		  "mappings": [
+		    {
+		      "request": { "method": "GET", "url": "{{url}}" },
+		      "response": { "status": {{status}}, "headers": { "Content-Type": "application/json" }, "body": {{JsonSerializer.Serialize(body)}} }
+		    }
+		  ]
+		}
+		""";
 }

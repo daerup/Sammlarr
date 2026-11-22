@@ -81,8 +81,8 @@ internal sealed class TraktTitles(TraktClient client, IApiKeyService apiKeys, Ti
 
 	private static async Task<Optional<TraktTypes.Title>> SearchedAsync(HttpResponseMessage response, MediaType type, CancellationToken cancellationToken)
 	{
-		var entries =
-			await response.Content.ReadFromJsonAsync<List<TraktTypes.Item>>(cancellationToken) ?? throw new InvalidDataException("Trakt answered an empty search.");
+		var entries = await response.Content.ReadFromJsonAsync<List<TraktTypes.Item>>(cancellationToken)
+			?? throw new InvalidDataException("Trakt answered an empty search.");
 		return entries.Select(entry => Optional.Of(type is MediaType.Show ? entry.Show : entry.Movie)).WhereSome().FirstOrNone();
 	}
 }

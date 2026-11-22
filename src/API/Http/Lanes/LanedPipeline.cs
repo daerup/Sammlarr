@@ -17,10 +17,8 @@ internal static class LanedPipeline
 	public static void AddLanes<TOptions>(this IHttpClientBuilder builder, RemoteService remote)
 		where TOptions : class, IProviderHttpOptions
 	{
-		builder.AddResilienceHandler(
-			RetryPipeline,
-			(pipeline, context) =>
-				pipeline.AddRetry(Retry(remote, context.ServiceProvider.GetRequiredService<TOptions>().Http, context.ServiceProvider.GetRequiredService<Lanes>()))
+		builder.AddResilienceHandler(RetryPipeline, (pipeline, context) =>
+			pipeline.AddRetry(Retry(remote, context.ServiceProvider.GetRequiredService<TOptions>().Http, context.ServiceProvider.GetRequiredService<Lanes>()))
 		);
 		builder.AddHttpMessageHandler(services => new LaneHandler(
 			remote,
@@ -29,9 +27,8 @@ internal static class LanedPipeline
 			services.GetRequiredService<TimeProvider>(),
 			services.GetRequiredService<ILogger<LaneHandler>>()
 		));
-		builder.AddResilienceHandler(
-			"attempt",
-			(pipeline, context) => pipeline.AddTimeout(TimeSpan.FromSeconds(context.ServiceProvider.GetRequiredService<TOptions>().Http.AttemptTimeoutSeconds))
+		builder.AddResilienceHandler("attempt", (pipeline, context) =>
+			pipeline.AddTimeout(TimeSpan.FromSeconds(context.ServiceProvider.GetRequiredService<TOptions>().Http.AttemptTimeoutSeconds))
 		);
 	}
 

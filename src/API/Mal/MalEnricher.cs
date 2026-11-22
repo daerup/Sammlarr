@@ -56,8 +56,8 @@ internal sealed class MalEnricher(MalClient client, IApiKeyService apiKeys) : ID
 			return response.StatusCode.Unanswered(RemoteService.Mal, $"MyAnimeList answered {(int)response.StatusCode} for anime {number}.");
 		}
 
-		var anime =
-			await response.Content.ReadFromJsonAsync<MalTypes.Anime>(cancellationToken) ?? throw new InvalidDataException("MyAnimeList answered an empty anime.");
+		var anime = await response.Content.ReadFromJsonAsync<MalTypes.Anime>(cancellationToken)
+			?? throw new InvalidDataException("MyAnimeList answered an empty anime.");
 		var type = id.Type is MediaType.Unknown ? MalAnime.TypeOf(anime) : id.Type;
 		return Success.Of(new FoundMedia([MalAnime.Id(anime, type)], MalAnime.Details(anime, type)));
 	}

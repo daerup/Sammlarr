@@ -132,8 +132,7 @@ internal sealed class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaServi
 		var offset = (page - 1) * PlexClient.ContainerSize;
 		var response = await plexClient.SendAsync(HttpMethod.Get, urls.Watchlist, null, cancellationToken, (containerStartHeader, offset.ToString()));
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-		var result =
-			await JsonSerializer.DeserializeAsync<PlexTypes.Watchlist.Root>(stream, cancellationToken: cancellationToken)
+		var result = await JsonSerializer.DeserializeAsync<PlexTypes.Watchlist.Root>(stream, cancellationToken: cancellationToken)
 			?? throw new InvalidOperationException("Plex watchlist response was empty.");
 
 		var items = (result.MediaContainer.Items ?? []).Select(Item).ToList();

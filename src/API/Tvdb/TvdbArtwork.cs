@@ -10,9 +10,8 @@ internal sealed class TvdbArtwork : IArtworkResizer
 
 	public Optional<string> Resize(string url, ArtworkSize size)
 	{
-		return Optional.When(
-			url.StartsWith(Banners, StringComparison.Ordinal) && Path.HasExtension(url),
-			() => size.Width <= ThumbnailWidth ? Thumbnail(url) : url
+		return Optional.When(url.StartsWith(Banners, StringComparison.Ordinal) && Path.HasExtension(url), () =>
+			size.Width <= ThumbnailWidth ? Thumbnail(url) : url
 		);
 	}
 

@@ -154,13 +154,11 @@ internal static partial class TmdbPages
 			.FirstOrNone()
 			.Map(preset => $"Sammlarr cannot follow TMDB's {preset} preset, since the API has no list for it. Paste the discover link its filters give.")
 			.Or(!known, () => $"Sammlarr cannot follow TMDB's {page.Path} page. Paste a list, a movie or TV page, or a discover link.")
-			.Or(
-				page.Values("with_watch_providers").Count > 0 && page.Values("watch_region").Count == 0,
-				() => "TMDB counts streaming services within one country only, so a link with with_watch_providers needs its watch_region."
+			.Or(page.Values("with_watch_providers").Count > 0 && page.Values("watch_region").Count == 0, () =>
+				"TMDB counts streaming services within one country only, so a link with with_watch_providers needs its watch_region."
 			)
-			.Or(
-				page.Values("with_watch_monetization_types").Count > 0 && page.Values("watch_region").Count == 0,
-				() => "TMDB counts how a title streams within one country only, so a link with with_watch_monetization_types needs its watch_region."
+			.Or(page.Values("with_watch_monetization_types").Count > 0 && page.Values("watch_region").Count == 0, () =>
+				"TMDB counts how a title streams within one country only, so a link with with_watch_monetization_types needs its watch_region."
 			)
 			.Or(
 				page.Query.Any(pair => pair.Key.StartsWith("certification", StringComparison.Ordinal) && pair.Key != "certification_country")

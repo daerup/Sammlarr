@@ -185,14 +185,11 @@ public class RecentAnswersTests
 		await leaving.CancelAsync();
 
 		var fresh = await testee
-			.AskAsync(
-				"dune",
-				_ =>
-				{
-					asked++;
-					return Task.FromResult<Result<string>>(Success.Of("Dune"));
-				}
-			)
+			.AskAsync("dune", _ =>
+			{
+				asked++;
+				return Task.FromResult<Result<string>>(Success.Of("Dune"));
+			})
 			.WaitAsync(TimeSpan.FromSeconds(5));
 
 		await Assert.That(fresh).IsSuccess().And.IsEqualTo("Dune");

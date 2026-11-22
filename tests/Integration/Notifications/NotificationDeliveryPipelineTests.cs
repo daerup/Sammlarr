@@ -25,23 +25,20 @@ public class NotificationDeliveryPipelineTests
 	public async Task Publish_ThroughTheMessagePublisherSeam_Delivers()
 	{
 		var channel = new RecordingChannel();
-		await WithHostAsync(
-			channel,
-			async host =>
+		await WithHostAsync(channel, async host =>
+		{
+			Func<IMessageContext, Task> publish = async _ =>
 			{
-				Func<IMessageContext, Task> publish = async _ =>
-				{
-					using var scope = host.Services.CreateScope();
-					await scope
-						.ServiceProvider.GetRequiredService<IMessagePublisher>()
-						.PublishAsync(new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [], [], [], [], []));
-				};
+				using var scope = host.Services.CreateScope();
+				await scope
+					.ServiceProvider.GetRequiredService<IMessagePublisher>()
+					.PublishAsync(new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [], [], [], [], []));
+			};
 
-				await host.TrackActivity().Timeout(TimeSpan.FromSeconds(30)).ExecuteAndWaitAsync(publish);
+			await host.TrackActivity().Timeout(TimeSpan.FromSeconds(30)).ExecuteAndWaitAsync(publish);
 
-				await Assert.That(channel.Sent).Count().IsEqualTo(1);
-			}
-		);
+			await Assert.That(channel.Sent).Count().IsEqualTo(1);
+		});
 	}
 
 	[Test]
@@ -59,18 +56,15 @@ public class NotificationDeliveryPipelineTests
 		);
 		var message = new DeliverNotification(context, Guid.NewGuid(), User, template);
 
-		await WithHostAsync(
-			new RecordingChannel(),
-			async host =>
-			{
-				var serializer = host.Services.GetRequiredService<IWolverineRuntime>().Options.DefaultSerializer;
+		await WithHostAsync(new RecordingChannel(), async host =>
+		{
+			var serializer = host.Services.GetRequiredService<IWolverineRuntime>().Options.DefaultSerializer;
 
-				var read = (DeliverNotification)serializer.ReadFromData(typeof(DeliverNotification), new Envelope { Data = serializer.WriteMessage(message) });
+			var read = (DeliverNotification)serializer.ReadFromData(typeof(DeliverNotification), new Envelope { Data = serializer.WriteMessage(message) });
 
-				await Assert.That(read.Template).IsEqualTo(template);
-				await Assert.That(read.Context.Data.Reason).IsEqualTo("HTTP 404");
-			}
-		);
+			await Assert.That(read.Template).IsEqualTo(template);
+			await Assert.That(read.Context.Data.Reason).IsEqualTo("HTTP 404");
+		});
 	}
 
 	private static async Task WithHostAsync(RecordingChannel channel, Func<IHost, Task> body)
@@ -91,21 +85,18 @@ public class NotificationDeliveryPipelineTests
 
 		var clock = new FakeTimeProvider(DateTimeOffset.UnixEpoch);
 
-		await MessagingHost.WithHostAsync(
-			body,
-			services =>
-			{
-				services.AddModule<MessagingModule>();
-				services.AddSingleton(subscriptions.Object);
-				services.AddSingleton(targets.Object);
-				services.AddSingleton(MessagingHost.PassingUserScope().Object);
-				services.AddSingleton(Contracts.Media.IMediaRepository.Mock().Object);
-				services.AddSingleton(Contracts.Feed.IFeedRepository.Mock().Object);
-				services.AddSingleton<IKeyedServiceIndex<NotificationChannel, INotificationChannel>>(index);
-				services.AddSingleton<INotificationDeliveryOutcomeRepository>(new NoopOutcomes());
-				services.AddSingleton<TimeProvider>(clock);
-			}
-		);
+		await MessagingHost.WithHostAsync(body, services =>
+		{
+			services.AddModule<MessagingModule>();
+			services.AddSingleton(subscriptions.Object);
+			services.AddSingleton(targets.Object);
+			services.AddSingleton(MessagingHost.PassingUserScope().Object);
+			services.AddSingleton(Contracts.Media.IMediaRepository.Mock().Object);
+			services.AddSingleton(Contracts.Feed.IFeedRepository.Mock().Object);
+			services.AddSingleton<IKeyedServiceIndex<NotificationChannel, INotificationChannel>>(index);
+			services.AddSingleton<INotificationDeliveryOutcomeRepository>(new NoopOutcomes());
+			services.AddSingleton<TimeProvider>(clock);
+		});
 	}
 
 	private sealed class RecordingChannel : INotificationChannel
