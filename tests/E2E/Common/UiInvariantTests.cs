@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System.Threading.Channels;
 using E2E.Tests.Settings;
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
@@ -19,6 +20,13 @@ public class UiInvariantTests
 			probe.remove();
 			return [getComputedStyle(document.getElementById('components-reconnect-modal')).backgroundColor, theme];
 		}
+		""";
+
+	private const string VisibleTooltips = """
+		() => [...document.querySelectorAll('[data-bb-portal]')]
+			.filter(portal => portal.querySelector('[role=tooltip]'))
+			.filter(portal => getComputedStyle(portal).visibility === 'visible' && getComputedStyle(portal).opacity !== '0')
+			.length
 		""";
 
 	private static readonly Regex Circuit = new("/_blazor(/|\\?|$)");
@@ -54,27 +62,24 @@ public class UiInvariantTests
 	}
 
 	[Test]
-	public async Task Tooltip_WhenItsCloseWasAbandoned_Hides()
+	public async Task Tooltip_WhenItsRendersArriveLate_EndsHidden()
 	{
-		var page = await E2EApp.AdminAt(SettingsPage.Section("ratings"));
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		await DelayServerFramesAsync(page, TimeSpan.FromMilliseconds(400));
+		await page.VisitAsync(SettingsPage.Section("ratings"));
 		var trigger = page.Locator(NameTooltipTrigger).First;
 		await Expect(trigger).ToBeVisibleAsync(Wait.Settle);
-		await trigger.HoverAsync();
-		var portal = page.Locator($"[data-bb-portal]:has({OpenTooltip})");
-		await Expect(portal).ToBeVisibleAsync(Wait.Settle);
+		await page.WaitForTimeoutAsync(2000);
 
-		await portal.EvaluateAsync(
-			"""
-			portal => {
-				portal.style.setProperty('pointer-events', 'none', 'important');
-				portal.style.setProperty('visibility', 'visible', 'important');
-				portal.dataset.state = 'closed';
-			}
-			"""
-		);
-		await Expect(page.Locator(OpenTooltip)).ToHaveCountAsync(1);
+		for (var attempt = 0; attempt < 4; attempt++)
+		{
+			await trigger.HoverAsync();
+			await page.WaitForTimeoutAsync(800);
+			await page.Mouse.MoveAsync(1, 1);
+			await page.WaitForTimeoutAsync(2500);
+		}
 
-		await Expect(portal).ToBeHiddenAsync(1500);
+		await Assert.That(await page.EvaluateAsync<int>(VisibleTooltips)).IsEqualTo(0);
 	}
 
 	[Test]
@@ -259,6 +264,34 @@ public class UiInvariantTests
 		}
 
 		return page.Locator("#components-reconnect-modal");
+	}
+
+	private static async Task DelayServerFramesAsync(IPage page, TimeSpan delay)
+	{
+		var frames = Channel.CreateUnbounded<(long Received, IWebSocketFrame Frame, IWebSocketRoute Socket)>();
+		_ = Task.Run(async () =>
+		{
+			await foreach (var (received, frame, socket) in frames.Reader.ReadAllAsync())
+			{
+				var wait = delay - TimeProvider.System.GetElapsedTime(received);
+				if (wait > TimeSpan.Zero)
+				{
+					await Task.Delay(wait);
+				}
+
+				if (frame.Binary is { } binary)
+				{
+					socket.Send(binary);
+				}
+				else if (frame.Text is { } text)
+				{
+					socket.Send(text);
+				}
+			}
+		});
+		await page.RouteWebSocketAsync(Circuit, socket =>
+			socket.ConnectToServer().OnMessage(frame => frames.Writer.TryWrite((TimeProvider.System.GetTimestamp(), frame, socket)))
+		);
 	}
 
 	private static async Task ShouldBeDarkAsync(IPage page)

@@ -24,24 +24,30 @@ public sealed record Error
 	}
 }
 
-public record Success<T>(T Value) where T : notnull
+public record Success<T>(T Value)
+	where T : notnull
 {
 	public static implicit operator Success<T>(T value) => new(value);
 }
 
 public static class Success
 {
-	public static Success<T> Of<T>(T value) where T : notnull => new(value);
+	public static Success<T> Of<T>(T value)
+		where T : notnull => new(value);
 }
 
 public static class Result
 {
-	private static Result<T> WhenNotNull<T>(T? value, Error error) where T : class => value is not null ? Success.Of(value) : error;
+	private static Result<T> WhenNotNull<T>(T? value, Error error)
+		where T : class => value is not null ? Success.Of(value) : error;
 
-	public static Result<T> WhenNotNull<T>(T? value, string reason) where T : class => WhenNotNull(value, Error.From(reason));
+	public static Result<T> WhenNotNull<T>(T? value, string reason)
+		where T : class => WhenNotNull(value, Error.From(reason));
 
 	[SuppressArchTest]
-	public static async Task<Result<T>> WhenNotNull<T>(Task<T?> value, string reason) where T : class => WhenNotNull(await value, reason);
+	public static async Task<Result<T>> WhenNotNull<T>(Task<T?> value, string reason)
+		where T : class => WhenNotNull(await value, reason);
 }
 
-public readonly union Result<T>(Success<T>, Error) where T : notnull;
+public readonly union Result<T>(Success<T>, Error)
+	where T : notnull;
