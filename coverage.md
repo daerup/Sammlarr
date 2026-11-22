@@ -3,19 +3,19 @@
 
 |||
 |:---|:---|
-| Generated on: | 11/09/2026 - 03:27:24 |
+| Generated on: | 11/22/2026 - 12:56:41 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
 | Classes: | 1601 |
 | Files: | 1130 |
-| **Line coverage:** | 88.3% (44305 of 50173) |
-| Covered lines: | 44305 |
-| Uncovered lines: | 5868 |
-| Coverable lines: | 50173 |
-| Total lines: | 74001 |
-| **Branch coverage:** | 80.8% (16779 of 20745) |
-| Covered branches: | 16779 |
-| Total branches: | 20745 |
+| **Line coverage:** | 88.3% (44272 of 50112) |
+| Covered lines: | 44272 |
+| Uncovered lines: | 5840 |
+| Coverable lines: | 50112 |
+| Total lines: | 73948 |
+| **Branch coverage:** | 80.8% (16784 of 20753) |
+| Covered branches: | 16784 |
+| Total branches: | 20753 |
 | **Method coverage:** | [Feature is only available for sponsors](https://reportgenerator.io/pro) |
 
 </details>
@@ -191,7 +191,7 @@
 |API.Mdblist.MdblistRequestsLeft|100%||
 |API.Mdblist.MdblistService|100%|90.9%|
 |API.Mdblist.MdblistService.FeedItemResolution|100%||
-|API.Mdblist.MdblistTitles|94.1%|95.3%|
+|API.Mdblist.MdblistTitles|97.7%|96.8%|
 |API.Mdblist.MdblistTitles.Asked|100%||
 |API.Mdblist.Types.MdblistTypes.ListItems.Ids|100%||
 |API.Mdblist.Types.MdblistTypes.ListItems.Movie|100%||
@@ -203,7 +203,7 @@
 |API.Mdblist.Types.MdblistTypes.Titles.Title|100%||
 |API.Mdblist.Types.RootConverter|88%|90.6%|
 |API.MediaTypeExtensions|100%|100%|
-|API.Notifications.FluidTemplateRenderer|94.2%|95%|
+|API.Notifications.FluidTemplateRenderer|93.3%|90.6%|
 |API.Notifications.NotificationsApiModule|100%||
 |API.Notifications.Pushover.PushoverChannel|100%|100%|
 |API.Notifications.Pushover.PushoverClient|86.6%|68.1%|
@@ -225,7 +225,7 @@
 |API.Plex.PlexIdConverter|96.5%|75%|
 |API.Plex.PlexModule|100%|75%|
 |API.Plex.PlexOAuthProvider|91.1%|67.6%|
-|API.Plex.PlexSink|86.1%|80.5%|
+|API.Plex.PlexSink|86%|80.5%|
 |API.Plex.PlexUrls|100%||
 |API.Plex.Types.PlexTypes.Auth.Root|100%||
 |API.Plex.Types.PlexTypes.ById.Genre|100%||
@@ -309,7 +309,7 @@
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Contracts**|**99.1%**|**82.3%**|
+|**Contracts**|**99.1%**|**76.4%**|
 |Contracts.Auth.AccountLinkPreview|100%||
 |Contracts.Auth.ExternalLogin|100%||
 |Contracts.Auth.OAuthTokenGrant|100%||
@@ -368,7 +368,7 @@
 |Contracts.Notifications.NotificationMedia|100%||
 |Contracts.Notifications.RenderedNotification|100%||
 |Contracts.PagedResult<T>|100%||
-|Contracts.Processing.MediaQueryRow|93.5%|76.9%|
+|Contracts.Processing.MediaQueryRow|93.5%|69.2%|
 |Contracts.Providers.LanePriority|100%|100%|
 |Contracts.Providers.LanePriority.Restore|100%||
 |Contracts.Settings.ArrInstanceChoices|100%||
@@ -399,11 +399,11 @@
 |Contracts.Wantlist.WantlistAdded|100%||
 
 </details>
-<details><summary>Core - 96.8%</summary>
+<details><summary>Core - 97%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Core**|**96.8%**|**88.1%**|
+|**Core**|**97%**|**88.1%**|
 |Core.Announcing.Announcer|100%||
 |Core.Announcing.AnnouncingModule|100%||
 |Core.Announcing.EventPublisher|100%|100%|
@@ -433,7 +433,7 @@
 |Core.Datasets.DatasetRequest|100%||
 |Core.Datasets.DatasetSchedule|80%|83.3%|
 |Core.Datasets.DatasetsModule|100%||
-|Core.Datasets.DatasetTicker|81.8%|100%|
+|Core.Datasets.DatasetTicker|90.9%|100%|
 |Core.DI.DiModule|100%||
 |Core.DI.KeyedServiceIndex<TKey, TService>|100%||
 |Core.DI.KeyedServiceSet<TKey, TService>|100%||
@@ -480,8 +480,8 @@
 |Core.Jobs.FeedRunJobHandler|100%|100%|
 |Core.Jobs.JobAlarm|90.2%|83.3%|
 |Core.Jobs.JobQueue|98.4%|88.8%|
-|Core.Jobs.JobRunner|76.1%|83.3%|
-|Core.Jobs.JobRunner<TRequest>|76.1%|83.3%|
+|Core.Jobs.JobRunner|79.5%|83.3%|
+|Core.Jobs.JobRunner<TRequest>|79.5%|83.3%|
 |Core.Jobs.JobRunnerStatus|100%||
 |Core.Jobs.JobRunnerStatus.Session|100%||
 |Core.Jobs.JobSignal|100%||
@@ -519,7 +519,7 @@
 |Core.Media.MediaIdResolver|100%|98.2%|
 |Core.Media.MediaIdResolver.AnswerKey|100%|83.3%|
 |Core.Media.MediaModule|100%||
-|Core.Media.MediaSearchService|95.9%|72.2%|
+|Core.Media.MediaSearchService|95.8%|72.2%|
 |Core.Media.MediaService|97%|79.1%|
 |Core.Media.MediaService<TMedia>|97%|79.1%|
 |Core.Media.MergeLog|100%||
@@ -563,7 +563,7 @@
 |Core.TickerFunctions.DatasetTicker|0%||
 |Core.TickerFunctions.FeedRunTicker|0%||
 |Core.TickerFunctions.HousekeepingTicker|0%||
-|Core.TickerQInstanceFactoryExtensions|34.2%|100%|
+|Core.TickerQInstanceFactoryExtensions|54.2%|100%|
 |Core.Usage.FeedRunUsage|100%|100%|
 |Core.Usage.FeedRunUsage.Running|100%|100%|
 |Core.Usage.Medians|100%|100%|
@@ -660,8 +660,8 @@
 |DB.Data.Identity.IdentityExtensions<T>|91.3%|83.3%|
 |DB.Data.Identity.LocalAccountRepository|100%|96%|
 |DB.Data.Identity.Members|100%||
-|DB.Data.Identity.UserRepository|99.4%|96.6%|
-|DB.Data.Identity.UserRepository<T>|99.4%|96.6%|
+|DB.Data.Identity.UserRepository|99.4%|96.4%|
+|DB.Data.Identity.UserRepository<T>|99.4%|96.4%|
 |DB.Data.Jobs.JobModule|100%||
 |DB.Data.Jobs.JobQueueView|100%||
 |DB.Data.Jobs.JobRepository|92.1%|83.3%|
@@ -927,11 +927,11 @@
 |System.Text.RegularExpressions.Generated.RunnerFactory.Runner|||
 
 </details>
-<details><summary>Messaging - 83.1%</summary>
+<details><summary>Messaging - 83%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Messaging**|**83.1%**|**70.6%**|
+|**Messaging**|**83%**|**70.6%**|
 |Internal.Generated.WolverineHandlers.AotRoots|100%||
 |Internal.Generated.WolverineHandlers.DeliverNotificationHandler636651780|100%|50%|
 |Internal.Generated.WolverineHandlers.FeedRunCompletedNotificationHandler361<br/>384655|100%|50%|
@@ -984,7 +984,7 @@
 |Observability.Metrics.UsageExporter|100%|100%|
 |Observability.Metrics.UsageExporter<TEnum>|100%|100%|
 |Observability.Metrics.UsageFlush|0%||
-|Observability.ObservabilityContext|35.2%|8.3%|
+|Observability.ObservabilityContext|37.5%|8.3%|
 |Observability.ObservabilityModule|0%||
 |Observability.Tracing.ActivityLogProcessor|100%|100%|
 |Observability.Tracing.Instrumentation|100%||
@@ -1008,7 +1008,7 @@
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
 |**Roslyn**|**87%**|**78.7%**|
-|Roslyn.AsyncMirror.AsyncMirrorGenerator|93.8%|85%|
+|Roslyn.AsyncMirror.AsyncMirrorGenerator|93.7%|85%|
 |Roslyn.AsyncMirror.AsyncMirrorGenerator.MethodInfo|100%||
 |Roslyn.Monads.MonadBranchAnalyzer|90.3%|81.6%|
 |Roslyn.Monads.MonadBranchAnalyzer.Read|93.9%|86.6%|
@@ -1343,7 +1343,7 @@
 |UI.Features.Settings.Components.Testing.DemoFeeds|100%||
 |UI.Features.Settings.Components.Testing.DemoGrid|88%|100%|
 |UI.Features.Settings.Components.Testing.DemoGroup|100%||
-|UI.Features.Settings.Components.Testing.DemoLiveRun|70.7%|50%|
+|UI.Features.Settings.Components.Testing.DemoLiveRun|70.9%|50%|
 |UI.Features.Settings.Components.Testing.DemoLiveRun.Script|76.6%|50%|
 |UI.Features.Settings.Components.Testing.DemoLiveRun.Writer|100%|100%|
 |UI.Features.Settings.Components.Testing.DemoMedia|100%||
@@ -1651,16 +1651,16 @@
 |UI.UiModule|0%||
 
 </details>
-<details><summary>Web - 61.5%</summary>
+<details><summary>Web - 61.4%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Web**|**61.5%**|**57.6%**|
+|**Web**|**61.4%**|**57.6%**|
 |JasperFx.Generated.DiscoveredEventModels|0%||
 |Program|0%|0%|
 |Web.Auth.AdminSwapClaim|50%||
 |Web.Auth.AuthCookie|100%|100%|
-|Web.Auth.AuthEndpoints|44.4%|35.4%|
+|Web.Auth.AuthEndpoints|42.7%|35.4%|
 |Web.Auth.AuthenticationModule|95.2%|100%|
 |Web.Auth.OAuthState|100%|75%|
 |Web.Auth.PendingAdminCookie|100%|100%|
