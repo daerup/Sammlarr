@@ -157,7 +157,6 @@
             @if (_filteredResults.Count > 0)
             {
                 <div class="preview-main-results transition-opacity @DimClass">
-                <VirtualizeGuard>
                     <Virtualize @key="(_filteredResults.Count, IsPhone)" Items="_filteredResults" Context="result" ItemSize="@RowHeight" OverscanCount="6">
                         <ItemContent>
                         @{
@@ -207,14 +206,12 @@
                         }
                         </ItemContent>
                     </Virtualize>
-                </VirtualizeGuard>
                 </div>
             }
             @if (_filteredGoneResults.Count > 0)
             {
                 <div class="mt-4 preview-gone-results transition-opacity @DimClass">
                     <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 pb-2">@PreviewCopy.GoneHeading</p>
-                    <VirtualizeGuard>
                         <Virtualize @key="(_filteredGoneResults.Count, IsPhone)" Items="_filteredGoneResults" Context="gone" ItemSize="@RowHeight" OverscanCount="6">
                             <ItemContent>
                         @{
@@ -249,7 +246,6 @@
                         }
                             </ItemContent>
                         </Virtualize>
-                    </VirtualizeGuard>
                     @if (_goneShortfall > 0)
                     {
                         <p class="text-xs text-muted-foreground px-1 pt-1">+@_goneShortfall more the provider could not describe</p>
@@ -260,7 +256,6 @@
             {
                 <div class="mt-4 transition-opacity @DimClass">
                     <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 pb-2">Not found in provider</p>
-                    <VirtualizeGuard>
                         <Virtualize @key="(_filteredUnmatchedResults.Count, IsPhone)" Items="_filteredUnmatchedResults" Context="item" ItemSize="@RowHeight" OverscanCount="6">
                             <ItemContent>
                         @{
@@ -283,7 +278,6 @@
                         }
                             </ItemContent>
                         </Virtualize>
-                    </VirtualizeGuard>
                 </div>
             }
             @if (IsLoading && _reloading is null)
